@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import BedSpecsForm from './BedSpecsForm'
+import BedGridForm from './BedGridForm';
+import BedSpecsForm from './BedSpecsForm';
 
 function App() {
   return (
     <>
+      <BedGridForm />
       <BedSpecsForm />
     </>
   )

@@ -1,0 +1,21 @@
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: 2rem;
+}
+
+td {
+    height: 10px;
+    width: 10px;
+    border: 1px solid black;
+}
+
+.hover {
+    border: 1px solid blue;
+}
+
+.selected {
+    border: 1px solid blue;
+    background-color: lightblue;
+}
+
