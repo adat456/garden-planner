@@ -1,21 +1,64 @@
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+.bed-grid-container {
     margin: 2rem;
 }
 
+.walkway-markers-container.top {
+    box-sizing: border-box;
+    display: flex;
+    margin-left: 13.2px;
+    padding: 5px 7px;
+    justify-content: space-between;
+}
+.arrow-down {
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid black;
+}
+.arrow-down:hover {
+    border-top-color: red;
+}
+
+.walkway-markers-container.left {
+    box-sizing: border-box;
+    padding: 7px 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.walkway-markers-container.left .arrow-down {
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid black;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+.walkway-markers-container.left .arrow-down:hover {
+    border-left-color: red;
+}
+
+.table-flex-container {
+    display: flex
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
 td {
     height: 10px;
     width: 10px;
     border: 1px solid black;
 }
-
-.hover {
-    border: 1px solid blue;
+/* needs to be a class so that it can be disabled when the whole grid is the bed */
+td.hover {
+    border: 1px solid lightblue;
 }
-
-.selected {
+td.selected {
     border: 1px solid blue;
     background-color: lightblue;
 }
+
+
 
