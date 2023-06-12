@@ -50,7 +50,7 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
                 };
             };
         });
-        // then toggle the classes (they need to be separate even though they have the same style, otherwise adding a horizontal walkway could interfere with a vertical walkway that was already placed, or vice versa)
+        // then toggle the classes (need to be separate even though they have the same style, otherwise adding a horizontal walkway could interfere with a vertical walkway that was already placed)
         if (direction === "vertical") {
             lineCells.forEach(cell => cell.classList.toggle("vertical-walkway"));
         };
@@ -74,7 +74,6 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
         allMarkers.forEach(marker => marker.classList.remove("clicked"));
     };
 
-    // this currently only works if the walkways are removed and re-added when the template changes sizes
     function createBedGrid() {
         let tableInnards = [];
         let counter = 0;
@@ -86,22 +85,22 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
                 // first two conditions generate walkway markers
                 if (j === 0 && i >= 1) {
                     const width = widthCounter;
-                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${widthCounter}`} onClick={() => toggleWalkwayPlacement(width, "vertical")}>
-                        <div key={i} className="arrow arrow-down hidden" onClick={(e) => toggleWalkwayMarkerStyle(e)} />
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" onClick={() => toggleWalkwayPlacement(width, "vertical")}>
+                        <div key={i} className={createWalkway ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => toggleWalkwayMarkerStyle(e)} />
                     </td>);
                     widthCounter++;
                 } else if (j >= 1 && i === 0) {
                     const length = lengthCounter;
-                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${lengthCounter}`} onClick={() => toggleWalkwayPlacement(length, "horizontal")}>
-                        <div key={i} className="arrow arrow-right hidden" onClick={(e) => toggleWalkwayMarkerStyle(e)} />
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" onClick={() => toggleWalkwayPlacement(length, "horizontal")}>
+                        <div key={i} className={createWalkway ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => toggleWalkwayMarkerStyle(e)} />
                     </td>);
                     lengthCounter++;
                 // renders the very first cell w/ invisible borders
                 } else if (j === 0 && i === 0) {
-                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${j}${i}`} />);
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" />);
                 // renders all other cells
                 } else {
-                    row.push(<td key={`${j}${i}`} className="cell grid-cell" id={`cell-${counter}`}  />);
+                    row.push(<td key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`}  />);
                     counter++;
                 };
             };
@@ -126,14 +125,14 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
 
     useEffect(() => {
         if (whole === true) {
-            const allCells = [...document.querySelectorAll(".cell")];
+            const allCells = [...document.querySelectorAll(".grid-cell")];
             allCells.forEach(cell => {
                 cell.removeEventListener("pointerenter", handleHover);
                 cell.removeEventListener("pointerleave", handleHover);
                 cell.removeEventListener("click", adjustCoordsArr);
             });
         } else {
-            const allCells = [...document.querySelectorAll(".cell")];
+            const allCells = [...document.querySelectorAll(".grid-cell")];
             allCells.forEach(cell => {
                 cell.addEventListener("pointerenter", handleHover);
                 cell.addEventListener("pointerleave", handleHover);
