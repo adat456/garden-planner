@@ -10,9 +10,6 @@ interface BedGridInterface {
 };
 
 const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coords, setCoords, createWalkway}) {
-    const [tableWidthPx, setTableWidthPx] = useState<number | null>(null);
-    const [tableLengthPx, setTableLengthPx] = useState<number | null>(null);
-
     function handleHover(e: React.PointerEvent) {
         const plot = e.target as HTMLTableCellElement;
         plot.classList.toggle("hover");
@@ -35,10 +32,25 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
 
     function createBedGrid() {
         let tableInnards = [];
-        for (let j = 0; j < length; j++) {
+        for (let j = 0; j <= length; j++) {
             let row = []
-            for (let i = 0; i < width; i++) {
-                row.push(<td key={`${j}${i}`} className="cell" id={`cell-${j}${i}`}  />);
+            for (let i = 0; i <= width; i++) {
+                // first two conditions generate walkway markers
+                if (j === 0 && i >= 1) {
+                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`}>
+                        <div key={i} className="arrow-down hidden" />
+                    </td>);
+                } else if (j >= 1 && i === 0) {
+                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`}>
+                        <div key={i} className="arrow-right hidden" />
+                    </td>);
+                // renders the very first cell w/ invisible borders
+                } else if (j === 0 && i === 0) {
+                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`} />);
+                // renders all other cells
+                } else {
+                    row.push(<td key={`${j}${i}`} className="cell" id={`cell-${j}${i}`}  />);
+                };
             };
             tableInnards.push(
                 <tr key={`row-${j}`}>
@@ -49,21 +61,15 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
         return tableInnards;
     };
 
-    function generateWalkwayMarkers(dimension: string) {
-        let walkwayMarkers = [];
-        if (dimension === "width") {
-            for (let i = 0; i < width - 1; i++) {
-                walkwayMarkers.push(<div key={i} className="arrow-down" />);
-            };
-        } else if (dimension === "length") {
-            for (let i = 0; i < length - 1; i++) {
-                walkwayMarkers.push(<div key={i} className="arrow-down" />);
-            };
+    // toggles walkway marker visibility
+    useEffect(() => {
+        const arrows = [...document.querySelectorAll(".arrow-cell div")];
+        if (createWalkway === true) {
+            arrows.forEach(arrow => arrow.classList.remove("hidden"));
+        } else {
+            arrows.forEach(arrow => arrow.classList.add("hidden"));
         };
-        return walkwayMarkers;
-    };
-
-    useEffect(() => console.log(coords), [coords]);
+    }, [createWalkway]);
 
     useEffect(() => {
         if (whole === true) {
@@ -83,38 +89,10 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
         };
     }, [whole]);
 
-    // obtaining table dimensions to provide walkway markers container with the appropriate dimensions
-    useEffect(() => {
-        const table = document.querySelector("table") as HTMLTableElement;
-        const tableStyle = window.getComputedStyle(table);
-        const tableWidth = tableStyle.getPropertyValue("width");
-        setTableWidthPx(Number(tableWidth.slice(0, -2)));
-    }, [createWalkway, width]);
-    useEffect(() => {
-        const table = document.querySelector("table") as HTMLTableElement;
-        const tableStyle = window.getComputedStyle(table);
-        const tableLength = tableStyle.getPropertyValue("height");
-        setTableLengthPx(Number(tableLength.slice(0, -2)));
-    }, [createWalkway, length]);
-    
     return (
-        <div className="bed-grid-container">
-            {createWalkway ? 
-                <div className="walkway-markers-container top" style={{maxWidth: `${tableWidthPx}px`}}>
-                    {generateWalkwayMarkers("width")}
-                </div> : null
-            }
-            <div className="table-flex-container">
-                {createWalkway ? 
-                    <div className="walkway-markers-container left"  style={{maxWidth: `${tableLengthPx}px`}}>
-                        {generateWalkwayMarkers("length")}
-                    </div> : null
-                }
-                <table>
-                    {createBedGrid()}
-                </table>
-            </div>
-        </div>
+        <table>
+            {createBedGrid()}
+        </table>
     );
 };
 

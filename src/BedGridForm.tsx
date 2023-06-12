@@ -82,7 +82,7 @@ const BedGridForm: React.FC = function() {
             }
             <BedGrid length={length} width={width} whole={whole} coords={coords} setCoords={setCoords} createWalkway={createWalkway} />
             <button type="button" onClick={() => setCreateWalkway
-            (!createWalkway)}>Add a walkway</button>
+            (!createWalkway)}>{createWalkway ? "Remove walkway markers" : "Show walkway markers"}</button>
         </>
     );
 };
