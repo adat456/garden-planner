@@ -1,39 +1,17 @@
-
-.arrow-down { 
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid black;
-}
-.arrow-down:hover {
-    border-top-color: red;
-}
-
-.arrow-right {
-    border-left: 5px solid black;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-}
-.arrow-right:hover {
-    border-left-color: red;
-}
-
 .hidden {
     display: none;
 }
-
 
 table {
     margin: 2rem;
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 td {
     height: 10px;
     width: 10px;
     border: 1px solid black;
-}
-.arrow-cell, .arrow-cell.hover {
-    border: none;
 }
 /* needs to be a class so that it can be disabled when the whole grid is the bed */
 td.hover {
@@ -43,6 +21,33 @@ td.selected {
     border: 1px solid blue;
     background-color: lightblue;
 }
+td.vertical-walkway, td.horizontal-walkway {
+    border: 1px solid gray;
+    background-color: gray;
+}
 
-
-
+.arrow-cell, .arrow-cell.hover {
+    border: none;
+}
+.arrow-down { 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid black;
+}
+.arrow-down.clicked {
+    border-top-color: blue;
+}
+.arrow-down:hover {
+    border-top-color: red;
+}
+.arrow-right {
+    border-left: 5px solid black;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+.arrow-right.clicked {
+    border-left-color: blue;
+}
+.arrow-right:hover {
+    border-left-color: red;
+}

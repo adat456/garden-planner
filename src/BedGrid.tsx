@@ -9,7 +9,9 @@ interface BedGridInterface {
     createWalkway: boolean,
 };
 
-const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coords, setCoords, createWalkway}) {
+const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coords, setCoords}) {
+    const [createWalkway, setCreateWalkway] = useState(false);
+
     function handleHover(e: React.PointerEvent) {
         const plot = e.target as HTMLTableCellElement;
         plot.classList.toggle("hover");
@@ -30,26 +32,77 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
         };
     };
 
+    function toggleWalkwayPlacement(line: number, direction: string) {
+        // grab all the grid cells in an array
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        // find the cells within the row or column by...
+        const lineCells = allCells.filter(cell => {
+            // ...pulling each grid cell's number and performing operations to determine which cells qualify
+            const cellId = Number(cell.getAttribute("id")?.slice(5));
+            if (direction === "vertical") {
+                if ((cellId - line) % width === 0) {
+                    return cell;
+                };
+            };
+            if (direction === "horizontal") {
+                if (cellId >= (line * width) && cellId < ((line + 1) * width)) {
+                    return cell;
+                };
+            };
+        });
+        // then toggle the classes (they need to be separate even though they have the same style, otherwise adding a horizontal walkway could interfere with a vertical walkway that was already placed, or vice versa)
+        if (direction === "vertical") {
+            lineCells.forEach(cell => cell.classList.toggle("vertical-walkway"));
+        };
+        if (direction === "horizontal") {
+            lineCells.forEach(cell => cell.classList.toggle("horizontal-walkway"));
+        };
+    };
+
+    function toggleWalkwayMarkerStyle(e: React.MouseEvent) {
+        const arrowCell = e.target as HTMLTableCellElement;
+        arrowCell.classList.toggle("clicked");
+    };
+
+    function clearAllWalkways() {
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        allCells.forEach(cell => {
+            cell.classList.remove("horizontal-walkway");
+            cell.classList.remove("vertical-walkway");
+        });
+        const allMarkers = [...document.querySelectorAll(".arrow")];
+        allMarkers.forEach(marker => marker.classList.remove("clicked"));
+    };
+
+    // this currently only works if the walkways are removed and re-added when the template changes sizes
     function createBedGrid() {
         let tableInnards = [];
+        let counter = 0;
+        let lengthCounter = 0;
+        let widthCounter = 0;
         for (let j = 0; j <= length; j++) {
             let row = []
             for (let i = 0; i <= width; i++) {
                 // first two conditions generate walkway markers
                 if (j === 0 && i >= 1) {
-                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`}>
-                        <div key={i} className="arrow-down hidden" />
+                    const width = widthCounter;
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${widthCounter}`} onClick={() => toggleWalkwayPlacement(width, "vertical")}>
+                        <div key={i} className="arrow arrow-down hidden" onClick={(e) => toggleWalkwayMarkerStyle(e)} />
                     </td>);
+                    widthCounter++;
                 } else if (j >= 1 && i === 0) {
-                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`}>
-                        <div key={i} className="arrow-right hidden" />
+                    const length = lengthCounter;
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${lengthCounter}`} onClick={() => toggleWalkwayPlacement(length, "horizontal")}>
+                        <div key={i} className="arrow arrow-right hidden" onClick={(e) => toggleWalkwayMarkerStyle(e)} />
                     </td>);
+                    lengthCounter++;
                 // renders the very first cell w/ invisible borders
                 } else if (j === 0 && i === 0) {
-                    row.push(<td key={`${j}${i}`} className="cell arrow-cell" id={`cell-${j}${i}`} />);
+                    row.push(<td key={`${j}${i}`} className="arrow-cell" id={`marker-cell-${j}${i}`} />);
                 // renders all other cells
                 } else {
-                    row.push(<td key={`${j}${i}`} className="cell" id={`cell-${j}${i}`}  />);
+                    row.push(<td key={`${j}${i}`} className="cell grid-cell" id={`cell-${counter}`}  />);
+                    counter++;
                 };
             };
             tableInnards.push(
@@ -90,9 +143,14 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole, coor
     }, [whole]);
 
     return (
-        <table>
+        <div>
+            <table>
             {createBedGrid()}
-        </table>
+            </table>
+            <button type="button" onClick={() => setCreateWalkway
+            (!createWalkway)}>{createWalkway ? "Remove walkway markers" : "Show walkway markers"}</button>
+            <button type="button" onClick={clearAllWalkways}>Clear all walkways</button>
+        </div>
     );
 };
 

@@ -7,7 +7,6 @@ const BedGridForm: React.FC = function() {
     const [coords, setCoords] = useState<string[] | []>([]);
     const [maintainSquare, setMaintainSquare] = useState(false);
     const [whole, setWhole] = useState(true);
-    const [createWalkway, setCreateWalkway] = useState(false);
 
     function handleDimChange(e: React.ChangeEvent) {
         const input = e.target as HTMLInputElement;
@@ -80,9 +79,7 @@ const BedGridForm: React.FC = function() {
                 <button type="button" disabled>Clear all</button> :
                 <button type="button" onClick={handleClearAll}>Clear all</button>
             }
-            <BedGrid length={length} width={width} whole={whole} coords={coords} setCoords={setCoords} createWalkway={createWalkway} />
-            <button type="button" onClick={() => setCreateWalkway
-            (!createWalkway)}>{createWalkway ? "Remove walkway markers" : "Show walkway markers"}</button>
+            <BedGrid length={length} width={width} whole={whole} coords={coords} setCoords={setCoords} />
         </>
     );
 };
