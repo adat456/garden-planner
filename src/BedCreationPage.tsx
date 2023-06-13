@@ -1,0 +1,76 @@
+import { useState } from "react";
+
+import BedGridForm from './BedGridForm';
+import BedSpecsForm from './BedSpecsForm';
+
+interface cellDescInterface {
+    num: string | undefined,
+    selected: boolean,
+    walkway: boolean,
+};
+
+const BedCreationPage: React.FC = function() {
+    const [length, setLength] = useState(10);
+    const [width, setWidth] = useState(10);
+    const [whole, setWhole] = useState(true);
+    // first value will always be 0
+    const [hardiness, setHardiness] = useState([0, 5]);
+    const [sunlight, setSunlight] = useState("");
+    const [soil, setSoil] = useState<string[]>([]);
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        let gridMap: cellDescInterface[] = [];
+        if (whole) {
+            gridMap = allCells.map(cell => {
+                const cellDesc: cellDescInterface = {
+                    num: cell.getAttribute("id")?.slice(5),
+                    selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
+                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway")),
+                };
+                return cellDesc;
+            });
+        } else if (!whole) {
+            gridMap = allCells.map(cell => {
+                const cellDesc: cellDescInterface = {
+                    num: cell.getAttribute("id")?.slice(5),
+                    selected: cell.classList.contains("selected"),
+                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway")),
+                };
+                return cellDesc;
+            });
+        };
+
+        const reqOptions: RequestInit = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                hardiness: hardiness[1], 
+                sunlight, soil,
+                length, width, gridMap
+            }),
+        };
+
+        try {
+            const req = await fetch("http://localhost:3000/create-bed", reqOptions);
+            const message = await req.json();
+            if (req.ok) {
+                console.log(message);
+            };
+        } catch(err) {
+            console.log(err.message);
+        };
+    };
+    
+    return (
+        <form method="post" onSubmit={handleSubmit}>
+            <BedGridForm length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} />
+            <BedSpecsForm hardiness={hardiness} setHardiness={setHardiness} sunlight={sunlight} setSunlight={setSunlight} soil={soil} setSoil={setSoil} />
+            <button type="submit">Create bed</button>
+        </form>
+    )
+};
+
+export default BedCreationPage;

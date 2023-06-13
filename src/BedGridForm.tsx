@@ -1,12 +1,17 @@
 import { useState } from "react";
 import BedGrid from "./BedGrid";
 
-const BedGridForm: React.FC = function() {
-    const [length, setLength] = useState(10);
-    const [width, setWidth] = useState(10);
-    const [coords, setCoords] = useState<string[] | []>([]);
+interface BedGridFormInterface {
+    length: number;
+    setLength: React.Dispatch<React.SetStateAction<number>>,
+    width: number,
+    setWidth: React.Dispatch<React.SetStateAction<number>>,
+    whole: boolean,
+    setWhole: React.Dispatch<React.SetStateAction<boolean>>,
+};
+
+const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength, width, setWidth, whole, setWhole }) {
     const [maintainSquare, setMaintainSquare] = useState(false);
-    const [whole, setWhole] = useState(true);
 
     function handleDimChange(e: React.ChangeEvent) {
         const input = e.target as HTMLInputElement;
@@ -40,46 +45,38 @@ const BedGridForm: React.FC = function() {
         };
     };
 
-    function handleWalkway() {
-
-    };
-
-    function handleClearAll() {
-        setCoords([]);
-        const allCells = [...document.querySelectorAll(".cell")];
-        allCells.forEach(cell => {
-            cell.classList.remove("selected");
-        });
-    };
-
     return (
         <>
-            <form>
+            <section>
                 <div>
                     <input type="checkbox" name="whole" id="whole" onChange={() => setWhole(!whole)} defaultChecked />
                     <label htmlFor="square">Treat grid as whole bed</label>
                 </div>
-                <input type="checkbox" name="square" id="square" onChange={handleMaintainSquare}/>
-                <label htmlFor="square">Maintain equal dimensions</label> 
-                <label htmlFor="length">Length</label>
-                <input type="number" id="length" name="length" value={length} onChange={handleDimChange} />
-                <label htmlFor="width">Width</label>
-                <input type="number" id="width" name="width" value={width} onChange={handleDimChange} />
-                <label htmlFor="templates">Or select a template:</label>
-                <select name="templates" id="templates" onChange={handleTemplateChange}>
-                    <option value="None">None</option>
-                    <option value="4x4">4' x 4'</option>
-                    <option value="4x8">4' x 8'</option>
-                    <option value="10x10">10' x 10'</option>
-                    <option value="12x24">12' x 24'</option>
-                </select>
-            </form>
+                <div>
+                    <input type="checkbox" name="square" id="square" onChange={handleMaintainSquare}/>
+                    <label htmlFor="square">Maintain equal dimensions</label> 
+                </div>
+                <div>
+                    <label htmlFor="length">Length</label>
+                    <input type="number" id="length" name="length" value={length} onChange={handleDimChange} />
+                </div>
+                <div>
+                    <label htmlFor="width">Width</label>
+                    <input type="number" id="width" name="width" value={width} onChange={handleDimChange} />
+                </div>
+                <div>
+                    <label htmlFor="templates">Or select a template:</label>
+                    <select name="templates" id="templates" onChange={handleTemplateChange}>
+                        <option value="None">None</option>
+                        <option value="4x4">4' x 4'</option>
+                        <option value="4x8">4' x 8'</option>
+                        <option value="10x10">10' x 10'</option>
+                        <option value="12x24">12' x 24'</option>
+                    </select>
+                </div>
+            </section>
             <hr />
-            {whole ?
-                <button type="button" disabled>Clear all</button> :
-                <button type="button" onClick={handleClearAll}>Clear all</button>
-            }
-            <BedGrid length={length} width={width} whole={whole} coords={coords} setCoords={setCoords} />
+            <BedGrid length={length} width={width} whole={whole} />
         </>
     );
 };
