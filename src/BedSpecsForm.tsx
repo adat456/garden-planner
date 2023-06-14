@@ -1,3 +1,4 @@
+// import { useEffect } from "react";
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 
@@ -24,6 +25,10 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
             setSoil([...soil, input.value]);
         };
     };
+
+    // useEffect(() => {
+    //     document.documentElement.style.setProperty("--slider-number", `${hardiness[1]}`);
+    // }, [hardiness])
 
     return (
         <section>

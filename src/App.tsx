@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import BedCreationPage from './BedCreationPage';
 
 function App() {

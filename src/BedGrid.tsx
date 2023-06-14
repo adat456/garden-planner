@@ -96,6 +96,45 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
         });
     };
 
+    // function createBedGrid() {
+    //     let tableInnards = [];
+    //     let counter = 1;
+    //     let lengthCounter = 0;
+    //     let widthCounter = 1;
+    //     for (let j = 0; j <= length; j++) {
+    //         let row = []
+    //         for (let i = 0; i <= width; i++) {
+    //             // first two conditions generate walkway markers
+    //             if (j === 0 && i >= 1) {
+    //                 const width = widthCounter;
+    //                 row.push(<div key={`${j}${i}`} className="arrow-cell">
+    //                     <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(width, "vertical");}} />
+    //                 </div>);
+    //                 widthCounter++;
+    //             } else if (j >= 1 && i === 0) {
+    //                 const length = lengthCounter;
+    //                 row.push(<div key={`${j}${i}`} className="arrow-cell">
+    //                     <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(length, "horizontal");}} />
+    //                 </div>);
+    //                 lengthCounter++;
+    //             // renders the very first cell w/ invisible borders
+    //             } else if (j === 0 && i === 0) {
+    //                 row.push(<div key={`${j}${i}`} className="arrow-cell" />);
+    //             // renders all other cells
+    //             } else {
+    //                 row.push(<div key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
+    //                 counter++;
+    //             };
+    //         };
+    //         tableInnards.push(
+    //             <tr key={`row-${j}`}>
+    //                 {row}
+    //             </tr>
+    //         );
+    //     };
+    //     return tableInnards;
+    // };
+
     function createBedGrid() {
         let tableInnards = [];
         let counter = 1;
@@ -107,29 +146,29 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                 // first two conditions generate walkway markers
                 if (j === 0 && i >= 1) {
                     const width = widthCounter;
-                    row.push(<td key={`${j}${i}`} className="arrow-cell">
+                    row.push(<div key={`${j}${i}`} className="arrow-cell">
                         <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(width, "vertical");}} />
-                    </td>);
+                    </div>);
                     widthCounter++;
                 } else if (j >= 1 && i === 0) {
                     const length = lengthCounter;
-                    row.push(<td key={`${j}${i}`} className="arrow-cell">
+                    row.push(<div key={`${j}${i}`} className="arrow-cell">
                         <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(length, "horizontal");}} />
-                    </td>);
+                    </div>);
                     lengthCounter++;
                 // renders the very first cell w/ invisible borders
                 } else if (j === 0 && i === 0) {
-                    row.push(<td key={`${j}${i}`} className="arrow-cell" />);
+                    row.push(<div key={`${j}${i}`} className="arrow-cell" />);
                 // renders all other cells
                 } else {
-                    row.push(<td key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
+                    row.push(<div key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
                     counter++;
                 };
             };
             tableInnards.push(
-                <tr key={`row-${j}`}>
+                <div key={`row-${j}`} className="row">
                     {row}
-                </tr>
+                </div>
             );
         };
         return tableInnards;
@@ -158,11 +197,14 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                     <button type="button" onClick={clearAllSelectedPlots}>Clear all selected plots</button>
                 </div>  
             }
-            <table>
+            {/* <table>
                 <tbody>
                     {createBedGrid()}
                 </tbody>
-            </table>
+            </table> */}
+            <div className="bed">
+                {createBedGrid()}
+            </div>
             <button type="button" onClick={() => setArrowVis
             (!arrowVis)}>{arrowVis ? "Remove walkway markers" : "Show walkway markers"}</button>
             <button type="button" onClick={clearAllWalkways}>Clear all walkways</button>
