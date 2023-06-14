@@ -22,21 +22,20 @@ td {
     width: 10px;
     border: 1px solid black;
 }
-/* needs to be a class so that it can be disabled when the whole grid is the bed */
-td.hover {
+td:hover {
     border: 1px solid lightblue;
 }
 td.selected {
     border: 1px solid blue;
     background-color: lightblue;
 }
-td.vertical-walkway, td.horizontal-walkway {
+td.vertical-walkway, td.horizontal-walkway, td.custom-walkway {
     border: 1px solid gray;
     background-color: gray;
 }
 
 /* all walkway marker/arrow styles */
-.arrow-cell, .arrow-cell.hover {
+.arrow-cell, .arrow-cell:hover {
     border: none;
 }
 .arrow-down { 

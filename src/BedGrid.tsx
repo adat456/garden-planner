@@ -8,25 +8,33 @@ interface BedGridInterface {
 
 const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
     const [arrowVis, setArrowVis] = useState(false);
+    const [addPlot, setAddPlot] = useState(true);
 
-    function handleHover(e: React.PointerEvent) {
+    // different classes for bed cells/plots: all should have .grid-cell; may also have .selected, .custom-walkway, .vertical-walkway, and .horizontal-walkway
+
+    function toggleSelectedPlots(e: React.MouseEvent) {
         const plot = e.target as HTMLTableCellElement;
-        plot.classList.toggle("hover");
+        if (addPlot) {
+            if (plot.classList.contains("selected")) {
+                plot.className = "grid-cell";
+            } else {
+                plot.className = "selected grid-cell";
+            };
+        } else {
+            if (plot.classList.contains("custom-walkway")) {
+                plot.className = "grid-cell";
+            } else {
+                plot.className = "custom-walkway grid-cell";
+            };
+        };
     };
 
-    function adjustCoordsArr(e: React.MouseEvent) {
-        const plot = e.target as HTMLTableCellElement;
-        plot.classList.toggle("selected");
+    function toggleWalkwayMarkerStyle(e: React.MouseEvent) {
+        const arrowCell = e.target as HTMLTableCellElement;
+        arrowCell.classList.toggle("clicked");
     };
 
-    function handleClearAll() {
-        const allCells = [...document.querySelectorAll(".grid-cell")];
-        allCells.forEach(cell => {
-            cell.classList.remove("selected");
-        });
-    };
-
-    function toggleWalkwayPlacement(line: number, direction: string) {
+    function toggleWalkwayRowPlacement(line: number, direction: string) {
         // grab all the grid cells in an array
         const allCells = [...document.querySelectorAll(".grid-cell")];
         // find the cells within the row or column by...
@@ -47,31 +55,45 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
         // then toggle the classes (need to be separate even though they have the same style, otherwise adding a horizontal walkway could interfere with a vertical walkway that was already placed)
         if (direction === "vertical") {
             lineCells.forEach(cell => {
-                cell.classList.toggle("vertical-walkway");
-                cell.classList.remove("selected");
+                if (cell.classList.contains("vertical-walkway")) {
+                    cell.className = "grid-cell";
+                } else {
+                    cell.className = "vertical-walkway grid-cell";
+                };
             });
         };
         if (direction === "horizontal") {
             lineCells.forEach(cell => {
-                cell.classList.toggle("horizontal-walkway");
-                cell.classList.remove("selected");
+                if (cell.classList.contains("horizontal-walkway")) {
+                    cell.className = "grid-cell";
+                } else {
+                    cell.className = "horizontal-walkway grid-cell";
+                };
             });
         };
-    };
-
-    function toggleWalkwayMarkerStyle(e: React.MouseEvent) {
-        const arrowCell = e.target as HTMLTableCellElement;
-        arrowCell.classList.toggle("clicked");
     };
 
     function clearAllWalkways() {
         const allCells = [...document.querySelectorAll(".grid-cell")];
         allCells.forEach(cell => {
-            cell.classList.remove("horizontal-walkway");
-            cell.classList.remove("vertical-walkway");
+            cell.classList.remove("horizontal-walkway", "vertical-walkway", "custom-walkway");
         });
         const allMarkers = [...document.querySelectorAll(".arrow")];
         allMarkers.forEach(marker => marker.classList.remove("clicked"));
+    };
+
+    function clearAllSelectedPlots() {
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        allCells.forEach(cell => {
+            cell.classList.remove("selected");
+        });
+    };
+
+    function clearAll() {
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        allCells.forEach(cell => {
+            cell.className = "grid-cell";
+        });
     };
 
     function createBedGrid() {
@@ -86,13 +108,13 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                 if (j === 0 && i >= 1) {
                     const width = widthCounter;
                     row.push(<td key={`${j}${i}`} className="arrow-cell">
-                        <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayPlacement(width, "vertical");}} />
+                        <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(width, "vertical");}} />
                     </td>);
                     widthCounter++;
                 } else if (j >= 1 && i === 0) {
                     const length = lengthCounter;
                     row.push(<td key={`${j}${i}`} className="arrow-cell">
-                        <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayPlacement(length, "horizontal");}} />
+                        <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(length, "horizontal");}} />
                     </td>);
                     lengthCounter++;
                 // renders the very first cell w/ invisible borders
@@ -100,7 +122,7 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                     row.push(<td key={`${j}${i}`} className="arrow-cell" />);
                 // renders all other cells
                 } else {
-                    row.push(<td key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`}  />);
+                    row.push(<td key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
                     counter++;
                 };
             };
@@ -115,26 +137,26 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
 
     useEffect(() => {
         const allCells = [...document.querySelectorAll(".grid-cell")];
-        if (whole === true) {
-            allCells.forEach(cell => {
-                cell.removeEventListener("pointerenter", handleHover);
-                cell.removeEventListener("pointerleave", handleHover);
-                cell.removeEventListener("click", adjustCoordsArr);
-            });
+        if (whole) {
+            allCells.forEach(cell => cell.setAttribute("inert", "true"));
         } else {
-            allCells.forEach(cell => {
-                cell.addEventListener("pointerenter", handleHover);
-                cell.addEventListener("pointerleave", handleHover);
-                cell.addEventListener("click", adjustCoordsArr);
-            });
+            allCells.forEach(cell => cell.removeAttribute("inert"));
         };
     }, [whole]);
 
     return (
         <div>
             {whole ?
-                <button type="button" disabled>Clear all</button> :
-                <button type="button" onClick={handleClearAll}>Clear all</button>
+                <div>
+                    <button type="button" disabled>Clear all</button>
+                    <button type="button" disabled>Add bed cells</button>
+                    <button type="button" disabled>Clear all selected plots</button>
+                </div> :
+                <div>
+                    <button type="button" onClick={clearAll}>Clear all</button>
+                    <button type="button" onClick={() => setAddPlot(!addPlot)}>{addPlot ? "Add bed cells" : "Add walkway cells"}</button>
+                    <button type="button" onClick={clearAllSelectedPlots}>Clear all selected plots</button>
+                </div>  
             }
             <table>
                 <tbody>
