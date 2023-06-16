@@ -13,6 +13,11 @@ li, ul {
     padding: 0;
 }
 
+h1, h2, h3, h4 {
+    margin: 0;
+    padding: 0;
+}
+
 /* END OF BASIC STYLES */
 
 /* plant grid styles */
@@ -34,7 +39,7 @@ div.row {
     border: 1px solid blue;
     background-color: lightblue;
 }
-.grid-cell.vertical-walkway, .grid-cell.horizontal-walkway, .grid-cell.custom-walkway {
+.grid-cell.vertical-walkway, .grid-cell.horizontal-walkway, .grid-cell.custom-walkway, .grid-cell.walkway {
     border: 1px solid gray;
     background-color: gray;
 }
@@ -83,3 +88,24 @@ div.row {
     z-index: 2;
     font-size: 2rem;
 } */
+
+.filter-sort-results-container {
+    margin-top: 2rem;
+}
+.filter-sort-form {
+    display: flex;
+}
+.final-search-results-container li.final-search-result {
+    border: 1px solid grey;
+    margin: 1rem;
+    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+.final-search-results-container li .button-cluster {
+    display: flex;
+    column-gap: 1rem;
+}
+.final-search-results-container li .expanded-result {
+    grid-column: 1 / 3;
+}

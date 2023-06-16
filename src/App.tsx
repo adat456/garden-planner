@@ -1,9 +1,12 @@
 import BedCreationPage from './BedCreationPage';
+import BedPlantingGrid from './BedPlantingGrid';
+import PlantPicker from './PlantPicker';
 
 function App() {
   return (
     <main>
-      <BedCreationPage />
+      <BedPlantingGrid />
+      <PlantPicker />
     </main>
   )
 }
