@@ -15,6 +15,7 @@ const PlantPicker: React.FC = function() {
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
         setSearchTerm(input.value);
+        
         if (input.value === "") {
             setLiveSearchResults([]);
         } else {
@@ -61,6 +62,8 @@ const PlantPicker: React.FC = function() {
             setFinalSearchResults("Unable to complete your search.");
             setLiveSearchResults([]);
         };
+
+        setExtraResults(0);
     };
 
     function generateLiveResultsArr() {
