@@ -38,3 +38,4 @@ export interface finalSearchResultInterface {
 
 
 // filter by: hardiness, lifecycle, water, light, planting season
+// sort by: name, daystomaturity, heightin, spacingin,

@@ -6,7 +6,7 @@ const PlantSearchResult: React.FC<{result: finalSearchResultInterface}> = functi
 
     return (
         <li key={result.id} id={`final-search-result-${result.id}`} className="final-search-result">
-            <h3>{result.name}</h3>
+            <h4>{result.name}</h4>
             <div className="button-cluster">
                 <button type="button" onClick={() => setExpanded(!expanded)}>{expanded ? "Collapse" : "Expand"}</button>
                 <button type="button">Add to garden</button>

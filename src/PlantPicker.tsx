@@ -8,6 +8,7 @@ const PlantPicker: React.FC = function() {
     // const [ liveSearchResults, setLiveSearchResults ] = useState([]);
     // const [ loadingSearchResults, setLoadingSearchResults ] = useState(true);
     const [ finalSearchResults, setFinalSearchResults ] = useState<finalSearchResultInterface[] | string>("Awaiting search results.");
+    const [ sortFiltOn, setSortFiltOn ] = useState(false);
     const [ filtSortSearchResults, setFiltSortSearchResults ] = useState<finalSearchResultInterface[]>([])
 
     function handleSearchTermChange(e: React.FormEvent) {
@@ -35,13 +36,8 @@ const PlantPicker: React.FC = function() {
         };
     };
 
-    function generateFinalResultsArr() {
-        let resultsArr;
-        if (filtSortSearchResults.length > 0) {
-            resultsArr = filtSortSearchResults.map(result => <PlantSearchResult key={result.id} result={result} />);
-        } else if (filtSortSearchResults.length === 0) {
-            resultsArr = finalSearchResults.map(result => <PlantSearchResult key={result.id} result={result} />);
-        };
+    function generateFinalResultsArr(arr: finalSearchResultInterface[]) {
+        let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} />);
         return resultsArr;
     };
 
@@ -54,13 +50,23 @@ const PlantPicker: React.FC = function() {
                 <button type="submit">Search</button>
             </form>
             <div className="filter-sort-results-container">
-                <PlantSortFilter finalSearchResults={finalSearchResults}  filtSortSearchResults={filtSortSearchResults} setFiltSortSearchResults={setFiltSortSearchResults} />
+                <PlantSortFilter finalSearchResults={finalSearchResults} setSortFiltOn={setSortFiltOn} setFiltSortSearchResults={setFiltSortSearchResults} />
                 {typeof finalSearchResults === "string" ?
                     // display the string if something's gone wrong
                     <p>{finalSearchResults}</p> : 
-                    <ul className="final-search-results-container">
-                        {generateFinalResultsArr()}
-                    </ul> 
+                    sortFiltOn ?
+                        <>
+                            <h3>{`Results (${filtSortSearchResults.length})`}</h3>
+                            <ul className="final-search-results-container">
+                                {generateFinalResultsArr(filtSortSearchResults)}
+                            </ul>
+                        </> :
+                        <>
+                            <h3>{`Results (${finalSearchResults.length})`}</h3>
+                            <ul className="final-search-results-container">
+                                {generateFinalResultsArr(finalSearchResults)}
+                            </ul>
+                        </>
                 }
             </div>
         </section>
