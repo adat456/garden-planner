@@ -5,15 +5,39 @@ import { finalSearchResultInterface } from "./interfaces";
 
 const PlantPicker: React.FC = function() {
     const [ searchTerm, setSearchTerm ] = useState("");
-    // const [ liveSearchResults, setLiveSearchResults ] = useState([]);
-    // const [ loadingSearchResults, setLoadingSearchResults ] = useState(true);
+    const [ liveSearchResults, setLiveSearchResults ] = useState<finalSearchResultInterface[] | string>([]);
+    const [ extraResults, setExtraResults ] = useState<number>(0);
     const [ finalSearchResults, setFinalSearchResults ] = useState<finalSearchResultInterface[] | string>("Awaiting search results.");
+    // used to determine whether the original or the sorted and filtered array should be displayed
     const [ sortFiltOn, setSortFiltOn ] = useState(false);
     const [ filtSortSearchResults, setFiltSortSearchResults ] = useState<finalSearchResultInterface[]>([])
 
-    function handleSearchTermChange(e: React.FormEvent) {
+    async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
         setSearchTerm(input.value);
+        if (input.value === "") {
+            setLiveSearchResults([]);
+        } else {
+            const hyphenatedSearchTerm = input.value.trim().replace(/ /g, "-");
+            try {
+                const req = await fetch(`http://localhost:3000/search/live/${hyphenatedSearchTerm}`);
+                const res = await req.json();
+                if (req.ok) {
+                    if (res.length > 0) {
+                        if (res.length > 5) {
+                            setExtraResults(res.length - 5);
+                        } else {
+                            setExtraResults(0);
+                        };
+                        setLiveSearchResults(res.slice(0, 5));
+                    } else {
+                        setLiveSearchResults("No matches found.");
+                    };
+                };
+            } catch(err) {
+                console.log(err.message);
+            };
+        };
     };
 
     async function handleFinalSearch(e: React.FormEvent) {
@@ -26,14 +50,32 @@ const PlantPicker: React.FC = function() {
             if (req.ok) {
                 if (res.length > 0) {
                     setFinalSearchResults(res);
+                    setLiveSearchResults([]);
                 } else {
                     setFinalSearchResults("No matches found.");
+                    setLiveSearchResults([]);
                 };
             };
         } catch(err) {
             console.log(err.message);
             setFinalSearchResults("Unable to complete your search.");
+            setLiveSearchResults([]);
         };
+    };
+
+    function generateLiveResultsArr() {
+        let liveResultsArr;
+        if (typeof liveSearchResults !== "string") {
+            liveResultsArr = liveSearchResults.map(result => {
+                return (
+                    <li key={result.id}>
+                        <h4>{result.name}</h4>
+                        <button type="button">+</button>
+                    </li>
+                );
+            });
+        };
+        return liveResultsArr;
     };
 
     function generateFinalResultsArr(arr: finalSearchResultInterface[]) {
@@ -50,7 +92,21 @@ const PlantPicker: React.FC = function() {
                 <button type="submit">Search</button>
             </form>
             <div className="filter-sort-results-container">
-                <PlantSortFilter finalSearchResults={finalSearchResults} setSortFiltOn={setSortFiltOn} setFiltSortSearchResults={setFiltSortSearchResults} />
+                {typeof liveSearchResults === "string" ?
+                    <p>{liveSearchResults}</p> :
+                    extraResults ?
+                        <ul className="live-search-results-container">
+                            {generateLiveResultsArr()}
+                            <p>{`${extraResults} more results.`}</p>
+                        </ul> :
+                        <ul className="live-search-results-container">
+                            {generateLiveResultsArr()}
+                        </ul>
+                }
+                {typeof finalSearchResults !== "string" ?
+                    <PlantSortFilter finalSearchResults={finalSearchResults} setSortFiltOn={setSortFiltOn} setFiltSortSearchResults={setFiltSortSearchResults} /> :
+                    null
+                }
                 {typeof finalSearchResults === "string" ?
                     // display the string if something's gone wrong
                     <p>{finalSearchResults}</p> : 

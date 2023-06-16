@@ -13,7 +13,9 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     const [ waterFilter, setWaterFilter ] = useState("");
     const [ lightFilter, setLightFilter ] = useState("");
     const [ plantingSznFilter, setPlantingSznFilter ] = useState("");
+    // may be name, days to maturation, or height in inches
     const [ sorter, setSorter ] = useState("");
+    // either ascending or descending
     const [ ascending, setAscending ] = useState(true);
 
     function generateHardinessButtons() {
