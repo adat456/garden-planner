@@ -13,6 +13,7 @@ export interface bedDataInterface {
     length: number,
     width: number,
     gridmap: gridMapInterface[],
+    id: number,
 };
 
 export interface plantDataInterface {

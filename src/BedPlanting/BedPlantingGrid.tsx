@@ -78,7 +78,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                 } else {
                     // if they don't match, keep the planted class but replace the cell data with updated plant ID and name
                     let gridMapCopy = bedData?.gridmap;
-                    if (gridMapCopy) {
+                    if (gridMapCopy && curPlantPick) {
                         let cellCopy = gridMapCopy[cellNum - 1];
                         gridMapCopy?.splice((cellNum - 1), 1, {
                             num: cellCopy.num,
@@ -97,7 +97,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                 // if the cell has not yet been planted, just replace the cell with plant ID and name data included
                 cell.classList.add("planted");
                 let gridMapCopy = bedData?.gridmap;
-                if (gridMapCopy) {
+                if (gridMapCopy && curPlantPick) {
                     let cellCopy = gridMapCopy[cellNum - 1];
                     gridMapCopy?.splice((cellNum - 1), 1, {
                         num: cellCopy.num,
@@ -116,7 +116,24 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     };
 
     async function updateBedData() {
+        const reqOptions: RequestInit = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                gridMap: bedData,
+                bedId: bedData?.id,
+            }),
+        };
 
+        try {
+            const req = await fetch("http://localhost:3000/save-bed", reqOptions);
+            const message = await req.json();
+            if (req.ok) {
+                console.log(message);
+            };
+        } catch(err) {
+            console.log(err.message);
+        };
     };
 
     return (
