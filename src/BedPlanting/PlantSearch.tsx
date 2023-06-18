@@ -1,16 +1,21 @@
 import { useState } from "react";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
-import { finalSearchResultInterface } from "./interfaces";
+import { plantDataInterface } from "../interfaces";
 
-const PlantPicker: React.FC = function() {
+interface plantSearchInterface {
+    plantPicks: plantDataInterface[],
+    setPlantPicks: React.Dispatch<React.SetStateAction<plantDataInterface[]>>
+};
+
+const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks }) {
     const [ searchTerm, setSearchTerm ] = useState("");
-    const [ liveSearchResults, setLiveSearchResults ] = useState<finalSearchResultInterface[] | string>([]);
+    const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
     const [ extraResults, setExtraResults ] = useState<number>(0);
-    const [ finalSearchResults, setFinalSearchResults ] = useState<finalSearchResultInterface[] | string>("Awaiting search results.");
+    const [ finalSearchResults, setFinalSearchResults ] = useState<plantDataInterface[] | string>("Awaiting search results.");
     // used to determine whether the original or the sorted and filtered array should be displayed
     const [ sortFiltOn, setSortFiltOn ] = useState(false);
-    const [ filtSortSearchResults, setFiltSortSearchResults ] = useState<finalSearchResultInterface[]>([])
+    const [ filtSortSearchResults, setFiltSortSearchResults ] = useState<plantDataInterface[]>([])
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
@@ -73,7 +78,10 @@ const PlantPicker: React.FC = function() {
                 return (
                     <li key={result.id}>
                         <h4>{result.name}</h4>
-                        <button type="button">+</button>
+                        {plantPicks.find(plant => plant.id === result.id) ?
+                            <button type="button" disabled>+</button> :
+                            <button type="button" onClick={() => addPlantPick(result)}>+</button>
+                        }
                     </li>
                 );
             });
@@ -81,8 +89,12 @@ const PlantPicker: React.FC = function() {
         return liveResultsArr;
     };
 
-    function generateFinalResultsArr(arr: finalSearchResultInterface[]) {
-        let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} />);
+    function addPlantPick(result: plantDataInterface) {
+        setPlantPicks([...plantPicks, result]);
+    };
+
+    function generateFinalResultsArr(arr: plantDataInterface[]) {
+        let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} />);
         return resultsArr;
     };
 
@@ -132,4 +144,4 @@ const PlantPicker: React.FC = function() {
     );
 };
 
-export default PlantPicker;
+export default PlantSearch;

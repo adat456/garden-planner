@@ -42,6 +42,14 @@ div.row {
     border: 1px solid gray;
     background-color: gray;
 }
+.planting-bed .grid-cell.selected {
+    border: 1px solid gray;
+    background-color: white;
+}
+.planting-bed .grid-cell.planted {
+    border: 1px solid greenyellow;
+    background-color: greenyellow
+}
 
 /* all walkway marker/arrow styles */
 .arrow-cell, .arrow-cell:hover {

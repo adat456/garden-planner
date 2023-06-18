@@ -1,13 +1,7 @@
 import { useState } from "react";
-
+import { gridMapInterface } from "../interfaces";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
-
-interface cellDescInterface {
-    num: string | undefined,
-    selected: boolean,
-    walkway: boolean,
-};
 
 const BedCreationPage: React.FC = function() {
     const [length, setLength] = useState(10);
@@ -22,22 +16,26 @@ const BedCreationPage: React.FC = function() {
         e.preventDefault();
 
         const allCells = [...document.querySelectorAll(".grid-cell")];
-        let gridMap: cellDescInterface[] = [];
+        let gridMap: gridMapInterface[] = [];
         if (whole) {
             gridMap = allCells.map(cell => {
-                const cellDesc: cellDescInterface = {
+                const cellDesc: gridMapInterface = {
                     num: cell.getAttribute("id")?.slice(5),
                     selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
-                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway")),
+                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
+                    plantId: 0,
+                    plantName: "",
                 };
                 return cellDesc;
             });
         } else if (!whole) {
             gridMap = allCells.map(cell => {
-                const cellDesc: cellDescInterface = {
+                const cellDesc: gridMapInterface = {
                     num: cell.getAttribute("id")?.slice(5),
                     selected: cell.classList.contains("selected"),
-                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway")),
+                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
+                    plantId: 0,
+                    plantName: "",
                 };
                 return cellDesc;
             });

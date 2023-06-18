@@ -1,12 +1,11 @@
-import BedCreationPage from './BedCreationPage';
-import BedPlantingGrid from './BedPlantingGrid';
-import PlantPicker from './PlantPicker';
+import BedCreationPage from './BedCreation/BedCreationPage';
+import BedPlantingPage from './BedPlanting/BedPlantingPage';
 
 function App() {
   return (
     <main>
-      <BedPlantingGrid />
-      <PlantPicker />
+      {/* <BedCreationPage /> */}
+      <BedPlantingPage />
     </main>
   )
 }

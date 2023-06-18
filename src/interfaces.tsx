@@ -2,6 +2,8 @@ export interface gridMapInterface {
     num: string,
     selected: boolean,
     walkway: boolean,
+    plantId: number,
+    plantName: string
 };
 
 export interface bedDataInterface {
@@ -13,7 +15,7 @@ export interface bedDataInterface {
     gridmap: gridMapInterface[],
 };
 
-export interface finalSearchResultInterface {
+export interface plantDataInterface {
     color: string,
     daystomaturity: string[],
     depth: string,

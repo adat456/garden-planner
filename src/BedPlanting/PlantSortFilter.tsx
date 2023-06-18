@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { finalSearchResultInterface } from "./interfaces";
+import { plantDataInterface } from "../interfaces";
 
 interface PlantSortFilterInterface {
-    finalSearchResults: finalSearchResultInterface[] | string,
-    setFiltSortSearchResults: React.Dispatch<React.SetStateAction<finalSearchResultInterface[]>>,
+    finalSearchResults: plantDataInterface[] | string,
+    setFiltSortSearchResults: React.Dispatch<React.SetStateAction<plantDataInterface[]>>,
     setSortFiltOn: React.Dispatch<React.SetStateAction<boolean>>
 };
 
@@ -38,7 +38,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     };
 
     useEffect(() => {
-        let finalSearchResultsCopy = finalSearchResults as finalSearchResultInterface[];
+        let finalSearchResultsCopy = finalSearchResults as plantDataInterface[];
 
         if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && !sorter) {
             setSortFiltOn(false);
