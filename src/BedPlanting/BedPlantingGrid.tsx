@@ -12,7 +12,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     useEffect(() => {
         async function pullBedData() {
             try {
-                const req = await fetch("http://localhost:3000/retrieve-bed/4");
+                const req = await fetch("http://localhost:3000/retrieve-bed/5");
                 const res = await req.json();
                 if (req.ok) {
                     setBedData(res[0]);
@@ -36,7 +36,9 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     const gridData = bedData?.gridmap[counter - 1];
                     if (gridData.selected) classes += "selected ";
                     if (gridData.walkway) classes += "walkway ";
+                    if (!gridData.selected && !gridData.walkway) classes += "hidden";
                     if (gridData.plantId) classes += "planted";
+                    
                     row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridData.plantName} style={{backgroundColor: gridData.gridColor}} onClick={togglePlant} onMouseOver={() => console.log(gridData.plantName)} />);       
                     counter++;
                 };

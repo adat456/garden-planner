@@ -40,6 +40,11 @@ export interface plantDataInterface {
     water: string,
 };
 
+// requirements: water, light, hardiness, growconditions
+// planting: plantingseason, sowingmethod, growthhabit, depth, spacingin,  
+// yield: daystomaturity, heightin, fruitsize
+// additional: lifecycle, plantcharac
+
 export interface plantPickDataInterface extends plantDataInterface {
     gridcolor: string,
 };

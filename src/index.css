@@ -13,7 +13,7 @@ li, ul {
     margin: 0;
     padding: 0;
 }
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, p {
     margin: 0;
     padding: 0;
 }
@@ -38,17 +38,21 @@ div.row {
     border: 1px solid blue;
     background-color: lightblue;
 }
+.grid-cell.planted {
+    border: 1px solid greenyellow;
+    background-color: greenyellow;
+}
 .grid-cell.vertical-walkway, .grid-cell.horizontal-walkway, .grid-cell.custom-walkway, .grid-cell.walkway {
     border: 1px solid gray;
     background-color: gray;
 }
+
 .planting-bed .grid-cell.selected {
     border: 1px solid gray;
     background-color: white;
 }
-.planting-bed .grid-cell.planted {
-    border: 1px solid greenyellow;
-    background-color: greenyellow
+.planting-bed .grid-cell.selected:hover {
+    border-width: 2px;
 }
 
 /* all walkway marker/arrow styles */
@@ -96,7 +100,7 @@ div.row {
     font-size: 2rem;
 } */
 
-/* view, sort, and filter results styles*/
+/* sort, and filter results styles*/
 .filter-sort-results-container {
     margin-top: 2rem;
 }
@@ -108,10 +112,12 @@ div.row {
     margin-top: 1rem;
     grid-column: 1 / 3;
 }
-.final-search-results-container li.final-search-result {
+
+/* results styles */
+.final-search-results-container .final-search-result {
     border: 1px solid grey;
     margin: 1rem;
-    padding: 0.5rem;
+    padding: 1rem;
     display: grid;
     grid-template-columns: 2fr 1fr;
 }
@@ -119,6 +125,52 @@ div.row {
     display: flex;
     column-gap: 1rem;
 }
-.final-search-results-container li .expanded-result {
+/* expanded results styles*/
+.expanded-result {
     grid-column: 1 / 3;
+}
+.expanded-result .desc {
+    list-style-type: disc;
+    border: none;
+    margin-left: 2rem;
+}
+.expanded-result section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem 0;
+}
+.expanded-result section hr {
+    width: 85%;
+    margin-top: 1.5rem;
+}
+.icons-more-info {
+    margin: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 4rem;
+    row-gap: 2rem;
+}
+.icons-more-info li {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+.icons-more-info .detail-title {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+.icons-more-info svg {
+    height: 4rem;
+    width: auto;
+    stroke: darkslategrey;
+    stroke-width: 0.2rem;
+    margin-bottom: 2rem;
+}
+svg.fruit-size {
+    stroke-width: 0.4rem;
+}
+svg.shovel {
+    stroke-width: 0.05rem;
+    fill: darkslategrey;
 }
