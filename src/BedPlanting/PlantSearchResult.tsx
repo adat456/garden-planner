@@ -1,17 +1,21 @@
 import { useState } from "react";
-import { plantDataInterface } from "../interfaces";
+import { plantDataInterface, plantPickDataInterface } from "../interfaces";
+import randomColor from "random-color";
 
 interface plantSearchResultsInterface {
     result: plantDataInterface,
-    plantPicks: plantDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantDataInterface[]>>
+    plantPicks: plantPickDataInterface[],
+    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>
 };
 
 const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ result, plantPicks, setPlantPicks }) {
     const [ expanded, setExpanded ] = useState(false);
 
     function addPlantPick() {
-        setPlantPicks([...plantPicks, result]);
+        setPlantPicks([...plantPicks, {
+           ...result,
+           gridcolor: randomColor().hexString(),
+        }]);
     };
 
     return (

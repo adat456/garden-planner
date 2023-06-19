@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { bedDataInterface, plantDataInterface } from "../interfaces";
+import { bedDataInterface, plantPickDataInterface } from "../interfaces";
 
 interface bedPlantingGridInterface {
-    curPlantPick: plantDataInterface | null,
+    curPlantPick: plantPickDataInterface | null,
 };
 
 const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantPick }) {
@@ -12,7 +12,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     useEffect(() => {
         async function pullBedData() {
             try {
-                const req = await fetch("http://localhost:3000/retrieve-bed/3");
+                const req = await fetch("http://localhost:3000/retrieve-bed/4");
                 const res = await req.json();
                 if (req.ok) {
                     setBedData(res[0]);
@@ -36,7 +36,8 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     const gridData = bedData?.gridmap[counter - 1];
                     if (gridData.selected) classes += "selected ";
                     if (gridData.walkway) classes += "walkway ";
-                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridData.plantName} onClick={togglePlant} />);       
+                    if (gridData.plantId) classes += "planted";
+                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridData.plantName} style={{backgroundColor: gridData.gridColor}} onClick={togglePlant} onMouseOver={() => console.log(gridData.plantName)} />);       
                     counter++;
                 };
                 bedInnards.push(
@@ -68,7 +69,8 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             selected: cellCopy.selected,
                             walkway: cellCopy.walkway,
                             plantId: 0,
-                            plantName: ""
+                            plantName: "",
+                            gridColor: "",
                         });
                         setBedData({
                             ...bedData,
@@ -85,7 +87,8 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             selected: cellCopy.selected,
                             walkway: cellCopy.walkway,
                             plantId: curPlantPick.id,
-                            plantName: curPlantPick.name
+                            plantName: curPlantPick.name,
+                            gridColor: curPlantPick.gridcolor,
                         });
                         setBedData({
                             ...bedData,
@@ -104,7 +107,8 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                         selected: cellCopy.selected,
                         walkway: cellCopy.walkway,
                         plantId: curPlantPick.id,
-                        plantName: curPlantPick.name
+                        plantName: curPlantPick.name,
+                        gridColor: curPlantPick.gridcolor
                     });
                     setBedData({
                         ...bedData,
@@ -115,12 +119,29 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
         };
     };
 
+    function clearAll() {
+        const clearedGridMap = bedData?.gridmap.map(grid => {
+            return ({
+                num: grid.num,
+                selected: grid.selected,
+                walkway: grid.walkway,
+                plantId: 0,
+                plantName: "",
+                gridColor: ""
+            });
+        });
+        setBedData({
+            ...bedData,
+            gridmap: clearedGridMap
+        })
+    };
+
     async function updateBedData() {
         const reqOptions: RequestInit = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                gridMap: bedData,
+                gridMap: bedData?.gridmap,
                 bedId: bedData?.id,
             }),
         };
@@ -139,7 +160,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     return (
         <>
             {curPlantPick ?
-                <p>{curPlantPick.name}</p> : null
+                <p style={{backgroundColor: curPlantPick.gridcolor}}>{curPlantPick.name}</p> : null
             }
             <div className="bed planting-bed">
                 {loading ? 
@@ -147,6 +168,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     createBedGrid()
                 }
             </div>
+            <button type="button" onClick={clearAll}>Clear all</button>
             <button type="button" onClick={updateBedData}>Save</button>
         </>
     );

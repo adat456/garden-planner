@@ -3,7 +3,8 @@ export interface gridMapInterface {
     selected: boolean,
     walkway: boolean,
     plantId: number,
-    plantName: string
+    plantName: string,
+    gridColor: string
 };
 
 export interface bedDataInterface {
@@ -39,6 +40,9 @@ export interface plantDataInterface {
     water: string,
 };
 
+export interface plantPickDataInterface extends plantDataInterface {
+    gridcolor: string,
+};
 
 // filter by: hardiness, lifecycle, water, light, planting season
 // sort by: name, daystomaturity, heightin, spacingin,

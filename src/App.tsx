@@ -4,7 +4,7 @@ import BedPlantingPage from './BedPlanting/BedPlantingPage';
 function App() {
   return (
     <main>
-      {/* <BedCreationPage /> */}
+      <BedCreationPage />
       <BedPlantingPage />
     </main>
   )

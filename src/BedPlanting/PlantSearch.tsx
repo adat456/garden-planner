@@ -1,11 +1,12 @@
 import { useState } from "react";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
-import { plantDataInterface } from "../interfaces";
+import { plantDataInterface, plantPickDataInterface } from "../interfaces";
+import randomColor from "random-color";
 
 interface plantSearchInterface {
-    plantPicks: plantDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantDataInterface[]>>
+    plantPicks: plantPickDataInterface[],
+    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>
 };
 
 const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks }) {
@@ -90,7 +91,10 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     };
 
     function addPlantPick(result: plantDataInterface) {
-        setPlantPicks([...plantPicks, result]);
+        setPlantPicks([...plantPicks, {
+            ...result,
+            gridcolor: randomColor().hexString(),
+        }]);
     };
 
     function generateFinalResultsArr(arr: plantDataInterface[]) {

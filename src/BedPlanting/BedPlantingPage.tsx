@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { plantDataInterface } from "../interfaces";
+import { plantPickDataInterface } from "../interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPicks from "./PlantPicks";
 import PlantSearch from './PlantSearch';
 
 const BedPlantingPage: React.FC = function() {
-    const [ plantPicks, setPlantPicks ] = useState<plantDataInterface[]>([]);
-    const [ curPlantPick, setCurPlantPick ] = useState<plantDataInterface | null>(null);
+    const [ plantPicks, setPlantPicks ] = useState<plantPickDataInterface[]>([]);
+    const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
 
     return (
         <>

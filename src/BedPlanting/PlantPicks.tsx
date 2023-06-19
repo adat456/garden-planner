@@ -1,16 +1,17 @@
-import { plantDataInterface } from "../interfaces";
+import { plantPickDataInterface } from "../interfaces";
 
 interface plantPicksInterface {
-    plantPicks: plantDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantDataInterface[]>>,
-    setCurPlantPick: React.Dispatch<React.SetStateAction<plantDataInterface | null>>
+    plantPicks: plantPickDataInterface[],
+    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
+    setCurPlantPick: React.Dispatch<React.SetStateAction<plantPickDataInterface | null>>
 };
 
 const PlantPicks: React.FC<plantPicksInterface> = function({ plantPicks, setPlantPicks, setCurPlantPick }) {
     function generatePlantPicks() {
+        console.log(plantPicks);
         const plantPicksArr = plantPicks.map(plant => 
             <li key={plant.id}>
-                <p>{plant.name}</p>
+                <p style={{color: plant.gridcolor}}>{plant.name}</p>
                 <button type="button" onClick={() => setCurPlantPick(plant)}>Plant in bed</button>
                 <button type="button" onClick={() => removePlantPick(plant.id)}>Remove from basket</button>
             </li>
