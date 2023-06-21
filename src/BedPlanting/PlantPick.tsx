@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
-import { plantPickDataInterface } from "../interfaces";
+import { plantPickDataInterface } from "../Shared/interfaces";
 
 interface plantPickInterface {
     plant: plantPickDataInterface,

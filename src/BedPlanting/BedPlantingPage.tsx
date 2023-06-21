@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { plantPickDataInterface } from "../interfaces";
+import { useState, useEffect } from "react";
+import { plantPickDataInterface } from "../Shared/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';
@@ -16,6 +16,30 @@ const BedPlantingPage: React.FC = function() {
         });
         return plantPicksArr;
     };
+
+    useEffect(() => {
+        async function updateSeedBasket() {
+            const reqOptions: RequestInit = {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ seedBasket: plantPicks, bedId: 31 }),
+                credentials: "include"
+            };
+
+            try {
+                const req = await fetch("http://localhost:3000/update-seed-basket", reqOptions);
+                const res = await req.json();
+                if (req.ok) {
+                    console.log(res);
+                } else {
+                    throw new Error(res);
+                };
+            } catch(err) {
+                console.log(err.message);
+            };
+        };
+        updateSeedBasket();
+    }, [plantPicks]);
 
     return (
         <>

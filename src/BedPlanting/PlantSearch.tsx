@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
-import { plantDataInterface, plantPickDataInterface } from "../interfaces";
+import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
 import randomColor from "random-color";
 
 interface plantSearchInterface {
@@ -11,6 +11,7 @@ interface plantSearchInterface {
 
 const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks }) {
     const [ searchTerm, setSearchTerm ] = useState("");
+    const [ include, setInclude ] = useState(false);
     const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
     const [ extraResults, setExtraResults ] = useState<number>(0);
     const [ finalSearchResults, setFinalSearchResults ] = useState<plantDataInterface[] | string>("Awaiting search results.");
@@ -24,10 +25,11 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         
         if (input.value === "") {
             setLiveSearchResults([]);
+            setExtraResults(0);
         } else {
             const hyphenatedSearchTerm = input.value.trim().replace(/ /g, "-");
             try {
-                const req = await fetch(`http://localhost:3000/search/live/${hyphenatedSearchTerm}`);
+                const req = await fetch(`http://localhost:3000/search/${include}/${hyphenatedSearchTerm}`, {credentials: "include"});
                 const res = await req.json();
                 if (req.ok) {
                     if (res.length > 0) {
@@ -52,7 +54,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         const hyphenatedSearchTerm = searchTerm.trim().replace(/ /g, "-");
 
         try {
-            const req = await fetch(`http://localhost:3000/search/final/${hyphenatedSearchTerm}`);
+            const req = await fetch(`http://localhost:3000/search/${include}/${hyphenatedSearchTerm}`, {credentials: "include"});
             const res = await req.json();
             if (req.ok) {
                 if (res.length > 0) {
@@ -90,7 +92,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         return liveResultsArr;
     };
 
-    function addPlantPick(result: plantDataInterface) {
+    async function addPlantPick(result: plantDataInterface) {
         setPlantPicks([...plantPicks, {
             ...result,
             gridcolor: randomColor().hexString(),
@@ -106,8 +108,14 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         <section>
             <h2>Plant Search, Filter, Sort + Pick</h2>
             <form method="GET" onSubmit={handleFinalSearch}>
-                <label htmlFor="search">Search for a vegetable or herb here:</label>
-                <input type="text" name="search" id="search" value={searchTerm} onChange={handleSearchTermChange} />
+                <div>
+                    <label htmlFor="search">Search for a vegetable or herb here:</label>
+                    <input type="text" name="search" id="search" value={searchTerm} onChange={handleSearchTermChange} />
+                </div>
+                <div>
+                    <input type="checkbox" name="include" id="include" checked={include} onChange={() => setInclude(!include)} />
+                    <label htmlFor="include">Include user contributions</label>
+                </div>
                 <button type="submit">Search</button>
             </form>
             <div className="filter-sort-results-container">

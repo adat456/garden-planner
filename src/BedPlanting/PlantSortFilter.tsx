@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { plantDataInterface } from "../interfaces";
+import { plantDataInterface } from "../Shared/interfaces";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,
@@ -22,7 +22,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
         let hardinessButtonsArr = [];
         for (let i = 1; i <= 12; i++) {
             hardinessButtonsArr.push(
-                <button type="button" key={i} className="hardiness-button" id={`hardiness-button-${i}`} onClick={() => toggleHardiness(i)}>{i}</button>
+                <button type="button" key={i} className="hardiness-button" id={`hardiness-filter-${i}`} onClick={() => toggleHardiness(i)}>{i}</button>
             );
         };
         return hardinessButtonsArr;
@@ -33,7 +33,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
         } else {
             setHardinessFilters([...hardinessFilters, number]);
         };
-        const hardinessButton = document.querySelector(`#hardiness-button-${number}`) as HTMLButtonElement;
+        const hardinessButton = document.querySelector(`#hardiness-filter-${number}`) as HTMLButtonElement;
         hardinessButton.classList.toggle("active-button");
     };
 

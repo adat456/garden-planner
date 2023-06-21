@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCred, handleVisToggle } from "../helpers";
+import { validateCred, handleVisToggle } from "../Shared/helpers";
 
 const LogIn: React.FC = function() {
     const [ username, setUsername ] = useState("");
@@ -36,12 +36,12 @@ const LogIn: React.FC = function() {
             const res = await req.json();
             if (req.ok) {
                 console.log(res);
-                navigate("/view-bed");
+                navigate("/create-bed");
             } else {
                 throw new Error(res);
             };
         } catch(err) {
-            console.log(err.message);
+            console.log(err);
         };
     };
 

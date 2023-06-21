@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCred, validateEmail, validateReqString, handleVisToggle } from "../helpers";
+import { validateCred, validateEmail, validateReqString, handleVisToggle } from "../Shared/helpers";
 
 const CreateAccount: React.FC = function() {
     const [ firstName, setFirstName ] = useState("");
@@ -72,11 +72,12 @@ const CreateAccount: React.FC = function() {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ firstName, lastName, email, username, password }),
+            credentials: "include"
         };
         try {
-            const res = await fetch("http://localhost:3000/users/create-account", reqOptions);
-            const message = await res.json();
-            if (res.ok) {
+            const req = await fetch("http://localhost:3000/users/create-account", reqOptions);
+            const message = await req.json();
+            if (req.ok) {
                 console.log(message);
                 navigate("/view-bed");
             } else {

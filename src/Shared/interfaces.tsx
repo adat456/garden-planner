@@ -21,7 +21,7 @@ export interface plantDataInterface {
     color: string,
     daystomaturity: string[],
     depth: string,
-    description: string[],
+    description: string[] | string,
     fruitsize: string,
     // refers to tolerances, e.g., cold tolerant
     growconditions: string[],
@@ -38,6 +38,7 @@ export interface plantDataInterface {
     sowingmethod: string[],
     spacingin: string[],
     water: string,
+    contributor?: string;
 };
 
 export interface plantPickDataInterface extends plantDataInterface {

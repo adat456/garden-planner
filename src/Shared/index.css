@@ -54,6 +54,9 @@ div.row {
 .planting-bed .grid-cell.selected:hover {
     border-width: 2px;
 }
+.planting-bed .grid-cell.away {
+    border: none;
+}
 
 /* all walkway marker/arrow styles */
 .arrow-cell, .arrow-cell:hover {

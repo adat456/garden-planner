@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { plantDataInterface, plantPickDataInterface } from "../interfaces";
+import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
 import randomColor from "random-color";
 
 interface plantSearchResultsInterface {
@@ -20,7 +20,7 @@ const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ resu
 
     return (
         <li key={result.id} id={`final-search-result-${result.id}`} className="final-search-result">
-            <h4>{result.name}</h4>
+            <h4>{result.contributor ? `${result.name} - Contributed by user ${result.contributor}` : `${result.name}`}</h4>
             <div className="button-cluster">
                 <button type="button" onClick={() => setExpanded(!expanded)}>{expanded ? "Collapse" : "Expand"}</button>
                 {plantPicks.find(plant => plant.id === result.id) ?
@@ -30,9 +30,12 @@ const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ resu
             </div>
             {expanded ?
                 <div className="expanded-result">
-                    <ul>
-                        {result.description.map((desc, index) => <li key={index} className="desc">{desc}</li>)}
-                    </ul>
+                    {typeof result.description === "string" ?
+                        <p>{result.description}</p> :
+                        <ul>
+                            {result.description.map((desc, index) => <li key={index} className="desc">{desc}</li>)}
+                        </ul>
+                    }
                     <section>
                         <h5>Requirements</h5>
                         <hr />

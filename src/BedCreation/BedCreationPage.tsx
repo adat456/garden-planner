@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { gridMapInterface } from "../interfaces";
+import { gridMapInterface } from "../Shared/interfaces";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 
@@ -49,6 +49,7 @@ const BedCreationPage: React.FC = function() {
                 sunlight, soil,
                 length, width, gridMap
             }),
+            credentials: "include"
         };
 
         try {
