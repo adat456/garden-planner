@@ -36,7 +36,7 @@ const LogIn: React.FC = function() {
             const res = await req.json();
             if (req.ok) {
                 console.log(res);
-                navigate("/create-bed");
+                navigate("/create");
             } else {
                 throw new Error(res);
             };

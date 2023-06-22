@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { plantPickDataInterface } from "../Shared/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';
 
-const BedPlantingPage: React.FC = function() {
+const BedPlantingGroup: React.FC = function() {
     const [ plantPicks, setPlantPicks ] = useState<plantPickDataInterface[]>([]);
     const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
+
+    const { bedId } = useParams();
 
     function generatePlantPicks() {
         const plantPicksArr = plantPicks.map(plant => {
@@ -22,7 +25,7 @@ const BedPlantingPage: React.FC = function() {
             const reqOptions: RequestInit = {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ seedBasket: plantPicks, bedId: 31 }),
+                body: JSON.stringify({ seedBasket: plantPicks, bedId }),
                 credentials: "include"
             };
 
@@ -55,4 +58,4 @@ const BedPlantingPage: React.FC = function() {
     );
 };
 
-export default BedPlantingPage;
+export default BedPlantingGroup;

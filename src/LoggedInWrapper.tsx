@@ -1,23 +1,22 @@
-import { Routes, Route, Link } from "react-router-dom";
-import BedCreationPage from './BedCreation/BedCreationPage';
-import BedPlantingPage from './BedPlanting/BedPlantingPage';
-import CreateVeg from "./Misc/CreateVeg";
+import { Outlet, Link } from "react-router-dom";
 
 const LoggedInWrapper: React.FC = function() {
     return (
         <>
             <header>
-                <p>header</p>
+                <nav>
+                    <Link to="/create/*">CREATE</Link>
+                    <Link to="/share">SHARE</Link>
+                    <Link to="/explore">EXPLORE</Link>
+                    <Link to="/profile">PROFILE</Link>
+                    <Link to="/sign-in">LOG OUT</Link>
+                </nav>
             </header>
             <main>
-                <Routes>
-                    <Route path="/create-bed" element={<BedCreationPage />} />
-                    <Route path="/view-bed" element={<BedPlantingPage />} />
-                </Routes>
+                <Outlet />
             </main>
             <footer>
                 <p>Footer</p>
-                <CreateVeg />
             </footer>
         </>
     );
