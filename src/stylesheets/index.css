@@ -281,6 +281,12 @@ main {
   padding: 0.5rem;
 }
 
+.pages-button-cluster {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
 .final-search-result {
   background-color: #FAEED1;
   border-radius: 0.5rem;
