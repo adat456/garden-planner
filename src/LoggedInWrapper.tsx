@@ -4,7 +4,7 @@ const LoggedInWrapper: React.FC = function() {
     return (
         <>
             <header>
-                <nav>
+                <nav className="main-nav">
                     <Link to="/create/*">CREATE</Link>
                     <Link to="/share">SHARE</Link>
                     <Link to="/explore">EXPLORE</Link>
@@ -15,9 +15,6 @@ const LoggedInWrapper: React.FC = function() {
             <main>
                 <Outlet />
             </main>
-            <footer>
-                <p>Footer</p>
-            </footer>
         </>
     );
 };

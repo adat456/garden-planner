@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap')
+
+$yellow-1: #FFF7E5
+$yellow-2: #FAEED1
+$yellow-3: #F7E1AE
+$yellow-4-acc: #F0CB75
+$green-1: #CDE5CD
+$green-2: #A4D0A4
+$border-rad: 0.5rem
+
+body
+    font-size: 10px
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, a, img, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, footer, header, hgroup, menu, nav, section, summary 
+    margin: 0
+    padding: 0
+    border: 0
+    font-size: 100%
+    font: inherit
+    vertical-align: baseline
+    box-sizing: border-box
+    font-family: 'JetBrains Mono', monospace
+
+a
+    text-decoration: none
+    color: grey
+
+li, ul 
+    list-style-type: none
+    margin: 0
+    padding: 0
+
+input, textarea 
+    border: transparent
+    background-color: $yellow-1
+    font-family: 'JetBrains Mono', monospace
+
+button
+    font-family: 'JetBrains Mono', monospace
+    background-color: transparent
+    border: none
+
+.hidden 
+    display: none
+
+// main styles
+main 
+    margin: 2rem
+    margin-top: 0
+    padding: 2rem
+    border-radius: $border-rad
+    background-color: $yellow-1
+
+.main-nav
+    display: flex
+    margin: 2rem 2rem 0 2rem
+
+    a
+        padding: 1.5rem 2rem
+        font-size: 1.3rem
+
+        &:hover, &:focus 
+            font-weight: bold
+            background-color: $yellow-1
+            border-top-left-radius: $border-rad
+            border-top-right-radius: $border-rad
+            

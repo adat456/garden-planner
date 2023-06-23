@@ -45,16 +45,17 @@ const BedPlantingGroup: React.FC = function() {
     }, [plantPicks]);
 
     return (
-        <>
+        <div className="bed-planting-group">
             <BedPlantingGrid curPlantPick={curPlantPick} />
-            <section>
+            <section className="seed-basket">
                 <h2>Seed Basket</h2>
+                <hr />
                 <ul>
                     {generatePlantPicks()}
                 </ul>
             </section>
             <PlantSearch plantPicks={plantPicks} setPlantPicks={setPlantPicks} />
-        </>
+        </div>
     );
 };
 

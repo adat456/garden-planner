@@ -163,19 +163,19 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     };
 
     return (
-        <>
-            {curPlantPick ?
-                <p style={{backgroundColor: curPlantPick.gridcolor}}>{curPlantPick.name}</p> : null
-            }
+        <div className="bed-planting-grid">
             <div className="bed planting-bed">
                 {loading ? 
                     <p>Loading garden bed details...</p> :
                     createBedGrid()
                 }
             </div>
-            <button type="button" onClick={clearAll}>Clear all</button>
-            <button type="button" onClick={updateBedData}>Save</button>
-        </>
+            <div className="button-cluster">
+                <button type="button">Undo</button>
+                <button type="button" onClick={clearAll}>CLEAR</button>
+                <button type="button" onClick={updateBedData}>SAVE</button>
+            </div>
+        </div>
     );
 };
 

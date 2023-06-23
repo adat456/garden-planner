@@ -30,14 +30,16 @@ const PlantPick: React.FC<plantPickInterface> = function({ plant, plantPicks, se
 
     return (
         <li>
-            <p style={{color: plant.gridcolor}}>{plant.name}</p>
-            <button type="button" onClick={() => setColorSliderVis(!colorSliderVis)}>{colorSliderVis ? "Hide color picker" : "Show color picker"}</button>
-            {colorSliderVis ?
-                <SliderPicker color={plant.gridcolor} onChangeComplete={changePlantPickColor} /> :
-                null
-            }
-            <button type="button" onClick={() => setCurPlantPick(plant)}>Plant in bed</button>
-            <button type="button" onClick={() => removePlantPick(plant.id)}>Remove from basket</button>
+            <button type="button" onClick={() => removePlantPick(plant.id)}>X</button>
+            <p>{plant.name}</p>
+            <div className="button-cluster">
+                <button type="button" onClick={() => setColorSliderVis(!colorSliderVis)} className="color-swatch" style={{backgroundColor: plant.gridcolor}} />
+                {colorSliderVis ?
+                    <SliderPicker color={plant.gridcolor} onChangeComplete={changePlantPickColor} /> :
+                    null
+                }
+                <button type="button" onClick={() => setCurPlantPick(plant)} />
+            </div>
         </li>
     );
 };

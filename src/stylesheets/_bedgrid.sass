@@ -1,0 +1,76 @@
+@use 'base'
+
+.range-slider .range-slider__thumb[data-lower="true"] 
+    width: 0
+
+.range-slider .range-slider__thumb[data-upper="true"] 
+    width: 20px
+    height: 20px
+
+// actual bed grid styles, for both creation and planting
+.bed 
+    margin: 2rem
+
+    .row 
+        display: grid
+        height: 1.5rem
+        grid-template-columns: repeat(250, 1.5rem)
+
+    .grid-cell 
+        border: 1px solid black
+
+        &:hover 
+            border: 1px solid lightblue
+        &.selected 
+            border: 1px solid blue
+            background-color: lightblue
+
+        .planted 
+            border: 1px solid greenyellow
+            background-color: greenyellow
+
+        &.vertical-walkway, &.horizontal-walkway, &.custom-walkway, &.walkway 
+            border: 1px solid gray
+            background-color: gray
+
+
+        &.selected 
+            border: 1px solid gray
+            background-color: white
+
+        &.selected:hover 
+            border-width: 2px
+
+        &.away 
+            border: none
+
+
+/* all walkway marker/arrow styles */
+.arrow-cell, .arrow-cell:hover 
+    width: 1.5rem
+    border: none
+    display: flex
+    align-items: center
+    justify-content: center
+
+.arrow-down  
+    border-left: 0.5rem solid transparent
+    border-right: 0.5rem solid transparent
+    border-top: 0.5rem solid black
+
+    &.clicked 
+        border-top-color: blue
+
+    &:hover 
+        border-top-color: red
+
+.arrow-right 
+    border-left: 0.5rem solid black
+    border-top: 0.5rem solid transparent
+    border-bottom: 0.5rem solid transparent
+
+    &.clicked 
+        border-left-color: blue
+
+    &:hover 
+        border-left-color: red

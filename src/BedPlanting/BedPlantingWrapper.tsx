@@ -25,13 +25,13 @@ const BedPlantingPage: React.FC = function() {
     };
 
     return (
-        <>
-            <nav>
+        <div className="bed-planting-wrapper">
+            <nav className="create-nav">
                 {generateBedLinks()}
-                <Link to="/create/new-bed">+ New Bed</Link>
+                <Link to="/create/new-bed" className="new-bed-link">+ New Bed</Link>
             </nav>
             <Outlet />
-        </>
+        </div>
     );
 };
 

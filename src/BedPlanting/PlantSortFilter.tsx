@@ -147,7 +147,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
         <form className="filter-sort-form">
             <fieldset className="filters-container">
                 <legend>Filter by: </legend>
-                <fieldset className="hardiness-filters-container">
+                <fieldset className="hardiness-container">
                     <legend>Hardiness zones</legend>
                     {generateHardinessButtons()}
                 </fieldset>
