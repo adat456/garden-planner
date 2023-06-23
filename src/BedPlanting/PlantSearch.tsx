@@ -80,11 +80,15 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
             liveResultsArr = liveSearchResults.map(result => {
                 return (
                     <li key={result.id}>
-                        <h4>{result.name}</h4>
                         {plantPicks.find(plant => plant.id === result.id) ?
-                            <button type="button" disabled>+</button> :
-                            <button type="button" onClick={() => addPlantPick(result)}>+</button>
+                            <button type="button" disabled>
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 4C12.5523 4 13 4.44772 13 5V11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H13V19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19V13H5C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11H11V5C11 4.44772 11.4477 4 12 4Z" /></svg>
+                            </button> :
+                            <button type="button" onClick={() => addPlantPick(result)}>
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 4C12.5523 4 13 4.44772 13 5V11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H13V19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19V13H5C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11H11V5C11 4.44772 11.4477 4 12 4Z" /></svg>
+                            </button>
                         }
+                        <p>{result.name}</p>
                     </li>
                 );
             });
@@ -123,7 +127,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                     extraResults ?
                         <ul className="live-search-results-container">
                             {generateLiveResultsArr()}
-                            <p>{`${extraResults} more results.`}</p>
+                            <p className="total-results">{`${extraResults} more results.`}</p>
                         </ul> :
                         <ul className="live-search-results-container">
                             {generateLiveResultsArr()}
@@ -138,13 +142,13 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                     <p>{finalSearchResults}</p> : 
                     sortFiltOn ?
                         <>
-                            <h3>{`Results (${filtSortSearchResults.length})`}</h3>
+                            <h3 className="total-results">{`${filtSortSearchResults.length} results`}</h3>
                             <ul className="final-search-results-container">
                                 {generateFinalResultsArr(filtSortSearchResults)}
                             </ul>
                         </> :
                         <>
-                            <h3>{`Results (${finalSearchResults.length})`}</h3>
+                            <h3 className="total-results">{`${finalSearchResults.length} results`}</h3>
                             <ul className="final-search-results-container">
                                 {generateFinalResultsArr(finalSearchResults)}
                             </ul>

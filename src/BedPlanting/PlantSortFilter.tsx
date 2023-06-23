@@ -8,6 +8,7 @@ interface PlantSortFilterInterface {
 };
 
 const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSearchResults, setFiltSortSearchResults, setSortFiltOn}) { 
+    const [ vis, setVis ] = useState("");
     const [ hardinessFilters, setHardinessFilters ] = useState<number[]>([]);
     const [ lifecycleFilter, setLifecycleFilter ] = useState<string>("");
     const [ waterFilter, setWaterFilter ] = useState("");
@@ -145,84 +146,108 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
 
     return (
         <form className="filter-sort-form">
-            <fieldset className="filters-container">
-                <legend>Filter by: </legend>
-                <fieldset className="hardiness-container">
-                    <legend>Hardiness zones</legend>
-                    {generateHardinessButtons()}
-                </fieldset>
-                <fieldset className="lifecycle-filter-container">
-                    <legend>Lifecycle</legend>
-                    <div>
-                        <input type="radio" name="lifecycle" id="annual" value="Annual" onChange={(e) => setLifecycleFilter(e.target.value)} />
-                        <label htmlFor="annual">Annual</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="lifecycle" id="biennial" value="Biennial" onChange={(e) => setLifecycleFilter(e.target.value)} />
-                        <label htmlFor="biennial">Biennial</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="lifecycle" id="perennial" value="Perennial" onChange={(e) => setLifecycleFilter(e.target.value)} />
-                        <label htmlFor="perennial">Perennial</label>
-                    </div>
-                </fieldset>
-                <fieldset className="water-filter-container">
-                    <legend>Water needs</legend>
-                    <div>
-                        <input type="radio" name="water" id="low" value="Low" onChange={(e) => setWaterFilter(e.target.value)} />
-                        <label htmlFor="low">Low</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="water" id="average" value="Average" onChange={(e) => setWaterFilter(e.target.value)} />
-                        <label htmlFor="average">Average</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="water" id="high" value="High" onChange={(e) => setWaterFilter(e.target.value)} />
-                        <label htmlFor="high">High</label>
-                    </div>
-                </fieldset>
-                <fieldset className="light-filter-container">
-                    <legend>Light needs</legend>
-                    <div>
-                        <input type="radio" name="light" id="full-shade" value="Full Shade" onChange={(e) => setLightFilter(e.target.value)} />
-                        <label htmlFor="full-shade">Full shade</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="light" id="partial-shade" value="Partial Shade" onChange={(e) => setLightFilter(e.target.value)} />
-                        <label htmlFor="partial-shade">Partial shade</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="light" id="full-sun" value="Full Sun" onChange={(e) => setLightFilter(e.target.value)} />
-                        <label htmlFor="full-sun">Full sun</label>
-                    </div>
-                </fieldset>
-                <fieldset className="planting-szn-filter-container">
-                    <legend>Planting season</legend>
-                    <div>
-                        <input type="radio" name="season" id="spring" value="Spring" onChange={(e) => setPlantingSznFilter(e.target.value)} />
-                        <label htmlFor="spring">Spring</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="season" id="summer" value="Summer" onChange={(e) => setPlantingSznFilter(e.target.value)} />
-                        <label htmlFor="summer">Summer</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="season" id="fall" value="Fall" onChange={(e) => setPlantingSznFilter(e.target.value)} />
-                        <label htmlFor="fall">Fall</label>
-                    </div>
-                </fieldset>
-            </fieldset>
-            <div className="sorters-container">
-                <label htmlFor="sorters">Sort by:</label>
-                <select name="sorters" id="sorters" onChange={(e) => setSorter(e.target.value)}>
-                    <option value=""></option>
-                    <option value="name">Name</option>
-                    <option value="dtm">Days to maturity</option>
-                    <option value="height">Height (in)</option>
-                </select>
-                <button type="button" onClick={() => setAscending(!ascending)}>{!ascending ? "Descending" : "Ascending"}</button>
+            <div className="button-cluster">
+                <button type="button" onClick={() => setVis("filters")} style={vis === "filters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : null}>+ FILTER</button>
+                <button type="button" onClick={() => setVis("sorters")} style={vis === "sorters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : null}>+ SORTER</button>
             </div>
-            <button type="reset" onClick={resetAll}>Reset all</button>
+            {vis === "filters" ?
+                <div className="filters-container">
+                    <div>
+                        <fieldset className="hardiness-container">
+                            <legend>Hardiness zones</legend>
+                            {generateHardinessButtons()}
+                        </fieldset>
+                        <div className="radio-button-filters">
+                            <fieldset className="lifecycle-filter-container">
+                                <legend>Lifecycle</legend>
+                                <div>
+                                    <input type="radio" name="lifecycle" id="annual" value="Annual" onChange={(e) => setLifecycleFilter(e.target.value)} />
+                                    <label htmlFor="annual">Annual</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="lifecycle" id="biennial" value="Biennial" onChange={(e) => setLifecycleFilter(e.target.value)} />
+                                    <label htmlFor="biennial">Biennial</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="lifecycle" id="perennial" value="Perennial" onChange={(e) => setLifecycleFilter(e.target.value)} />
+                                    <label htmlFor="perennial">Perennial</label>
+                                </div>
+                            </fieldset>
+                            <fieldset className="water-filter-container">
+                                <legend>Water</legend>
+                                <div>
+                                    <input type="radio" name="water" id="low" value="Low" onChange={(e) => setWaterFilter(e.target.value)} />
+                                    <label htmlFor="low">Low</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="water" id="average" value="Average" onChange={(e) => setWaterFilter(e.target.value)} />
+                                    <label htmlFor="average">Average</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="water" id="high" value="High" onChange={(e) => setWaterFilter(e.target.value)} />
+                                    <label htmlFor="high">High</label>
+                                </div>
+                            </fieldset>
+                            <fieldset className="light-filter-container">
+                                <legend>Light</legend>
+                                <div>
+                                    <input type="radio" name="light" id="full-shade" value="Full Shade" onChange={(e) => setLightFilter(e.target.value)} />
+                                    <label htmlFor="full-shade">Full shade</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="light" id="partial-shade" value="Partial Shade" onChange={(e) => setLightFilter(e.target.value)} />
+                                    <label htmlFor="partial-shade">Partial shade</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="light" id="full-sun" value="Full Sun" onChange={(e) => setLightFilter(e.target.value)} />
+                                    <label htmlFor="full-sun">Full sun</label>
+                                </div>
+                            </fieldset>
+                            <fieldset className="planting-szn-filter-container">
+                                <legend>Planting season</legend>
+                                <div>
+                                    <input type="radio" name="season" id="spring" value="Spring" onChange={(e) => setPlantingSznFilter(e.target.value)} />
+                                    <label htmlFor="spring">Spring</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="season" id="summer" value="Summer" onChange={(e) => setPlantingSznFilter(e.target.value)} />
+                                    <label htmlFor="summer">Summer</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="season" id="fall" value="Fall" onChange={(e) => setPlantingSznFilter(e.target.value)} />
+                                    <label htmlFor="fall">Fall</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div className="button-cluster">
+                        <button type="reset" onClick={resetAll}>Reset all</button> 
+                        <button type="button" onClick={() => setVis("")}>Close</button>
+                    </div>
+                </div> : null
+            }
+            { vis === "sorters" ?
+                <div className="sorters-container">
+                    <div>
+                        <select name="sorters" id="sorters" onChange={(e) => setSorter(e.target.value)}>
+                            <option value=""></option>
+                            <option value="name">Name</option>
+                            <option value="dtm">Days to maturity</option>
+                            <option value="height">Height (in)</option>
+                        </select>
+                        <button type="button" className="sort-order-button" onClick={() => setAscending(!ascending)}>
+                            {!ascending ? 
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 7L12 16" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 13L12 17L16 13" strokeLinecap="round" strokeLinejoin="round"/></svg> : 
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17L12 8" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 11L12 7L8 11" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            }
+                        </button>
+                    </div> 
+                    <div className="button-cluster">
+                        <button type="reset" onClick={resetAll}>Reset all</button>
+                        <button type="button" onClick={() => setVis("")}>Close</button>
+                    </div>
+                </div> : null
+            }
         </form>
     )
 };
