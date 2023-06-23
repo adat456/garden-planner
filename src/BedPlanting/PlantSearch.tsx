@@ -11,7 +11,6 @@ interface plantSearchInterface {
 
 const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks }) {
     const [ searchTerm, setSearchTerm ] = useState("");
-    const [ include, setInclude ] = useState(false);
     const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
     const [ extraResults, setExtraResults ] = useState<number>(0);
     const [ finalSearchResults, setFinalSearchResults ] = useState<plantDataInterface[] | string>("Awaiting search results.");
@@ -29,7 +28,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         } else {
             const hyphenatedSearchTerm = input.value.trim().replace(/ /g, "-");
             try {
-                const req = await fetch(`http://localhost:3000/search/${include}/${hyphenatedSearchTerm}`, {credentials: "include"});
+                const req = await fetch(`http://localhost:3000/search/${hyphenatedSearchTerm}`, {credentials: "include"});
                 const res = await req.json();
                 if (req.ok) {
                     if (res.length > 0) {
@@ -54,7 +53,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         const hyphenatedSearchTerm = searchTerm.trim().replace(/ /g, "-");
 
         try {
-            const req = await fetch(`http://localhost:3000/search/${include}/${hyphenatedSearchTerm}`, {credentials: "include"});
+            const req = await fetch(`http://localhost:3000/search/${hyphenatedSearchTerm}`, {credentials: "include"});
             const res = await req.json();
             if (req.ok) {
                 if (res.length > 0) {
@@ -113,10 +112,6 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
             <form method="GET" onSubmit={handleFinalSearch}>
                 <label htmlFor="search">Search seeds:</label>
                 <input type="text" name="search" id="search" value={searchTerm} onChange={handleSearchTermChange} />
-                {/* <div>
-                    <input type="checkbox" name="include" id="include" checked={include} onChange={() => setInclude(!include)} />
-                    <label htmlFor="include">Include user contributions</label>
-                </div> */}
                 <button type="submit">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Interface / Search_Magnifying_Glass"><path id="Vector" d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
                 </button>

@@ -14,6 +14,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     const [ waterFilter, setWaterFilter ] = useState("");
     const [ lightFilter, setLightFilter ] = useState("");
     const [ plantingSznFilter, setPlantingSznFilter ] = useState("");
+    const [ includeUserVeg, setIncludeUserVeg ] = useState(false);
     // may be name, days to maturation, or height in inches
     const [ sorter, setSorter ] = useState("");
     // either ascending or descending
@@ -41,10 +42,18 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     useEffect(() => {
         let finalSearchResultsCopy = finalSearchResults as plantDataInterface[];
 
-        if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && !sorter) {
+        if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && includeUserVeg && !sorter) {
             setSortFiltOn(false);
             setFiltSortSearchResults([]);
         } else {
+            // by default finalSearchResults will include BOTH formal and user added contributions, and by default user added contributions will be filtered out
+            // if this checkbox is checked, then this filtering process will be skipped and any other filtering/sorting ops will be performed on the entire result set
+            if (!includeUserVeg) {
+                finalSearchResultsCopy = finalSearchResultsCopy.filter(result => {
+                    if (!result.contributor) return result;
+                    if (result.contributor && result.contributor === "adat456") return result;
+                });
+            };
             if (hardinessFilters.length > 0) {
                 hardinessFilters.forEach(hardiness => {
                     finalSearchResultsCopy = finalSearchResultsCopy.filter(result => result.hardiness.includes(hardiness.toString()));
@@ -133,7 +142,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
             setSortFiltOn(true);
             setFiltSortSearchResults([...finalSearchResultsCopy]);
         };
-    }, [hardinessFilters, lifecycleFilter, waterFilter, lightFilter, plantingSznFilter, sorter, ascending, finalSearchResults]);
+    }, [hardinessFilters, lifecycleFilter, waterFilter, lightFilter, plantingSznFilter, includeUserVeg, sorter, ascending, finalSearchResults]);
 
     function resetAll() {
         setHardinessFilters([]);
@@ -141,6 +150,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
         setWaterFilter("");
         setLightFilter("");
         setPlantingSznFilter("");
+        setIncludeUserVeg(false);
         setSorter("");
     };
 
@@ -218,6 +228,10 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
                                     <label htmlFor="fall">Fall</label>
                                 </div>
                             </fieldset>
+                        </div>
+                        <div>
+                            <input type="checkbox" name="include" id="include" checked={includeUserVeg} onChange={() => setIncludeUserVeg(!includeUserVeg)} />
+                            <label htmlFor="include">Include contributions from other users</label>
                         </div>
                     </div>
                     <div className="button-cluster">
