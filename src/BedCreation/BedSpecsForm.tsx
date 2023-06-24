@@ -31,7 +31,8 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
     // }, [hardiness])
 
     return (
-        <section>
+        <section className="bed-specs">
+            <h2>SPECIFICATIONS</h2>
             <fieldset>
                 <legend>Sunlight:</legend>
                 <ul>
@@ -75,8 +76,8 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
                 </ul>    
             </fieldset>
             <div>
-                <label htmlFor="hardiness">Hardiness</label>
-                <RangeSlider className="single-thumb" value={hardiness} step={1} min={1} max={10} thumbsDisabled={[true, false]} onInput={setHardiness} />
+                <label htmlFor="hardiness">{`Hardiness: ${hardiness[1]}`}</label>
+                <RangeSlider className="single-thumb" value={hardiness} step={1} min={1} max={12} thumbsDisabled={[true, false]} onInput={setHardiness} />
             </div>
         </section>
     );

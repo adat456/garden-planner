@@ -110,6 +110,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     // pagination logic
     
     useEffect(() => {
+        console.log("change");
         // sets both the curPage at 1 and the total number of pages whenever either the filtered and sorted array or the final search results array changes
         // so, you'll only be sent to page 1 at the conclusion of every search AND whenever a filter or sort is changed, which makes sense
         function setInitialPagesState(arr: plantDataInterface[]) {
@@ -118,8 +119,11 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
             const dividend = arr.length / 10;
             if (remainder) {
                 const dividendStringArr = dividend.toString().split(".");
+                console.log(dividendStringArr);
                 const initialValue = Number(dividendStringArr[0]);
+                console.log(initialValue);
                 const finalValue = initialValue + 1;
+                console.log(finalValue);
                 setTotalPages(finalValue);
             } else {
                 setTotalPages(dividend);
@@ -129,10 +133,16 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
         if (sortFiltOn) {
             if (filtSortSearchResults.length > 10) {
                 setInitialPagesState(filtSortSearchResults);
+            } else {
+                setCurPage(0);
+                setTotalPages(1);
             };
         } else {
             if (typeof finalSearchResults !== "string" && finalSearchResults.length > 10) {
                 setInitialPagesState(finalSearchResults);
+            } else {
+                setCurPage(0);
+                setTotalPages(1);
             };
         };
 
@@ -147,7 +157,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
             // but if there are more than 10 results in the provided array, filter out a subset of that array where the indices belong on the current page
             // e.g., curPage = 3, all results from 31-40 inclusive
             const resultsPageArr = arr.filter((result, index) => {
-                if (index > ((curPage - 1) * 10) && index <= (curPage * 10)) {
+                if (index >= ((curPage - 1) * 10) && index < (curPage * 10)) {
                     return result;
                 };
             });

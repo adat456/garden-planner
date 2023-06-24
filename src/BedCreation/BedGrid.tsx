@@ -147,24 +147,40 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
 
     return (
         <div>
-            {whole ?
-                <div>
-                    <button type="button" disabled>Clear all</button>
-                    <button type="button" disabled>Add bed cells</button>
-                    <button type="button" disabled>Clear all selected plots</button>
-                </div> :
-                <div>
-                    <button type="button" onClick={clearAll}>Clear all</button>
-                    <button type="button" onClick={() => setAddPlot(!addPlot)}>{addPlot ? "Add bed cells" : "Add walkway cells"}</button>
-                    <button type="button" onClick={clearAllSelectedPlots}>Clear all selected plots</button>
-                </div>  
-            }
             <div className="bed">
                 {createBedGrid()}
             </div>
-            <button type="button" onClick={() => setArrowVis
-            (!arrowVis)}>{arrowVis ? "Remove walkway markers" : "Show walkway markers"}</button>
-            <button type="button" onClick={clearAllWalkways}>Clear all walkways</button>
+            <section className="bed-finetuning">
+                <h2>CUSTOMIZE</h2>
+                <div>
+                    <button type="button" className="arrow-toggle-button" onClick={() => setArrowVis(!arrowVis)}>{arrowVis ? "Remove" : "Show"}</button>
+                    <p>walkway markers</p>
+                </div>
+                {whole ?
+                    <div>
+                        <p>Add</p>
+                        <button type="button" disabled>{addPlot ? "bed" : "walkway"}</button>
+                        <p>cells</p>
+                    </div> :
+                    <div>
+                        <p>Add</p>
+                        <button type="button" onClick={() => setAddPlot(!addPlot)}>{addPlot ? "bed" : "walkway"}</button>
+                        <p>cells</p>
+                    </div>
+                }
+                <div>
+                    <p>Clear all:</p>
+                    <button type="button" onClick={clearAllWalkways}>walkway cells</button>
+                    {whole ?
+                        <button type="button" disabled>bed cells</button> :
+                        <button type="button" onClick={clearAllSelectedPlots}>bed cells</button>
+                    }
+                    {whole ?
+                        <button type="button" disabled>all cells</button> :
+                        <button type="button" onClick={clearAll}>all cells</button>
+                    }
+                </div>
+            </section>
         </div>
     );
 };

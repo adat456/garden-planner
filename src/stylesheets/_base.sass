@@ -6,16 +6,19 @@ $yellow-3: #F7E1AE
 $yellow-4-acc: #F0CB75
 $green-1: #CDE5CD
 $green-2: #A4D0A4
+$green-black: #023020
 $border-rad: 0.5rem
 
-body
-    font-size: 10px
+html
+    height: 100vh
+
+body, #root
+    min-height: 100%
 
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, a, img, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, footer, header, hgroup, menu, nav, section, summary 
     margin: 0
     padding: 0
     border: 0
-    font-size: 100%
     font: inherit
     vertical-align: baseline
     box-sizing: border-box
@@ -50,8 +53,7 @@ button
 
 // main styles
 main 
-    margin: 2rem
-    margin-top: 0
+    margin: 0 2rem 2rem 2rem
     padding: 2rem
     border-radius: $border-rad
     background-color: $yellow-1

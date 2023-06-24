@@ -47,24 +47,27 @@ const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength
 
     return (
         <>
-            <section>
-                <div>
-                    <input type="checkbox" name="whole" id="whole" onChange={() => setWhole(!whole)} defaultChecked />
-                    <label htmlFor="square">Treat grid as whole bed</label>
+            <h2>DIMENSIONS</h2>
+            <section className="dimensions-container">
+                <div className="length-width-container">
+                    <div>
+                        <label htmlFor="length">L:</label>
+                        <input type="number" id="length" name="length" value={length} onChange={handleDimChange} />
+                    </div>
+                    <div>
+                        <label htmlFor="width">W:</label>
+                        <input type="number" id="width" name="width" value={width} onChange={handleDimChange} />
+                    </div>
                 </div>
-                <div>
-                    <input type="checkbox" name="square" id="square" onChange={handleMaintainSquare}/>
-                    <label htmlFor="square">Maintain equal dimensions</label> 
-                </div>
-                <div>
-                    <label htmlFor="length">Length</label>
-                    <input type="number" id="length" name="length" value={length} onChange={handleDimChange} />
-                </div>
-                <div>
-                    <label htmlFor="width">Width</label>
-                    <input type="number" id="width" name="width" value={width} onChange={handleDimChange} />
-                </div>
-                <div>
+                {maintainSquare ?
+                    <button type="button" onClick={handleMaintainSquare}className="active-maintain-square">
+                        <svg viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg"><path d="M216,48V88a8,8,0,0,1-16,0V56H168a8,8,0,0,1,0-16h40A8.00008,8.00008,0,0,1,216,48ZM88,200H56V168a8,8,0,0,0-16,0v40a8.00039,8.00039,0,0,0,8,8H88a8,8,0,0,0,0-16Zm120-40a8.00039,8.00039,0,0,0-8,8v32H168a8,8,0,0,0,0,16h40a8.00039,8.00039,0,0,0,8-8V168A8.00039,8.00039,0,0,0,208,160ZM88,40H48a8.00008,8.00008,0,0,0-8,8V88a8,8,0,0,0,16,0V56H88a8,8,0,0,0,0-16Z"/></svg>
+                    </button> : 
+                    <button type="button" onClick={handleMaintainSquare}>
+                        <svg viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg"><path d="M216,48V88a8,8,0,0,1-16,0V56H168a8,8,0,0,1,0-16h40A8.00008,8.00008,0,0,1,216,48ZM88,200H56V168a8,8,0,0,0-16,0v40a8.00039,8.00039,0,0,0,8,8H88a8,8,0,0,0,0-16Zm120-40a8.00039,8.00039,0,0,0-8,8v32H168a8,8,0,0,0,0,16h40a8.00039,8.00039,0,0,0,8-8V168A8.00039,8.00039,0,0,0,208,160ZM88,40H48a8.00008,8.00008,0,0,0-8,8V88a8,8,0,0,0,16,0V56H88a8,8,0,0,0,0-16Z"/></svg>
+                    </button>
+                }
+                <div className="templates-container">
                     <label htmlFor="templates">Or select a template:</label>
                     <select name="templates" id="templates" onChange={handleTemplateChange}>
                         <option value="None">None</option>
@@ -75,7 +78,14 @@ const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength
                     </select>
                 </div>
             </section>
-            <hr />
+            <div className="whole-toggler-container">
+                <p>Use whole grid</p>
+                <button type="button" className="toggler" onClick={() => setWhole(!whole)}>
+                    <div id="circle" className={whole ? "whole" : "not-whole"}></div>
+                    <span className="sr-only"></span>
+                </button>
+                <p>Place individual cells</p>
+            </div>
             <BedGrid length={length} width={width} whole={whole} />
         </>
     );

@@ -1,45 +1,149 @@
 @use 'base'
 
+.bed-creation-form 
+    h2
+        text-align: center
+        margin: 1rem 0
+        font-weight: bold
+
+    button
+        font-size: 1rem
+        
+    button[type="submit"]
+        padding: 1rem 2rem
+        float: right
+        background-color: base.$green-2
+        border-radius: base.$border-rad
+
+// grid specs styles
+.dimensions-container, .whole-toggler-container
+    @include base.flexcentered
+    margin: 1.5rem 0
+    
+    div
+        display: flex
+        @include base.flexcentered
+        column-gap: 0.5rem
+
+        input
+            width: 2.5rem  
+
+    button
+        background-color: base.$green-1
+        height: fit-content
+        padding: 0.4rem
+        border-radius: base.$border-rad
+        @include base.flexcentered
+
+        svg
+            height: 1.25rem
+            width: auto
+
+        &.active-maintain-square
+            background-color: base.$green-2
+
+    .templates-container
+        margin-left: 2rem
+        padding-left: 2rem
+        border-left: 1px solid darkslategray
+
+.whole-toggler-container
+    .toggler
+        height: 1.5rem
+        width: 2.5rem
+        background-color: base.$green-1
+        border-radius: 1rem
+        position: relative
+        margin: 0 0.5rem
+
+        &:hover, &:focus
+            background-color: base.$green-2
+
+        #circle
+            width: 1.1rem
+            height: 1.1rem
+            border-radius: 50%
+            background-color: white
+            position: absolute
+            top: 0.18rem
+
+        .whole
+            left: 0.25rem
+
+        .not-whole
+            right: 0.25rem
+
+
+.bed-finetuning 
+    margin-top: 3rem
+
+    div
+        display: flex
+        align-items: center
+
+        button
+            background-color: base.$green-1
+            padding: 0.3rem 0.75rem
+            border-radius: base.$border-rad
+            margin: 0.5rem
+
+            &:hover, &:focus
+                background-color: base.$green-2
+            &:disabled
+                background-color: lightgray
+
+        .arrow-toggle-button
+            margin-left: 0
+
+// bed specs styles
+.bed-specs 
+    margin: 2rem 0
+
+    fieldset
+        margin: 1rem 0
+
+    legend
+        margin-bottom: 0.5rem
+
+    ul
+        display: grid
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+
+.range-slider
+    margin-top: 0.75rem
+
 .range-slider .range-slider__thumb[data-lower="true"] 
     width: 0
 
 .range-slider .range-slider__thumb[data-upper="true"] 
     width: 20px
     height: 20px
+    
 
 // actual bed grid styles, for both creation and planting
 .bed 
-    margin: 2rem
+    display: block
+    margin: 2rem 
 
     .row 
         display: grid
         height: 1.5rem
-        grid-template-columns: repeat(250, 1.5rem)
+        grid-template-columns: repeat(auto-fit, 1.5rem)
 
     .grid-cell 
-        border: 1px solid black
-
-        &:hover 
-            border: 1px solid lightblue
+        border: 1px solid #a2bca7
+        
         &.selected 
-            border: 1px solid blue
-            background-color: lightblue
-
-        .planted 
-            border: 1px solid greenyellow
-            background-color: greenyellow
-
+            border: 1px solid #b0c6b5
+            background-color: #b0c6b5
         &.vertical-walkway, &.horizontal-walkway, &.custom-walkway, &.walkway 
-            border: 1px solid gray
-            background-color: gray
+            border: 1px solid base.$green-black
+            background-color: base.$green-black
 
-
-        &.selected 
-            border: 1px solid gray
-            background-color: white
-
-        &.selected:hover 
-            border-width: 2px
+        &:hover, &.selected:hover 
+            border: 2px solid base.$green-black
+        &.vertical-walkway:hover, &.horizontal-walkway:hover, &.custom-walkway:hover, &.walkway:hover
+            border: 2px solid #b0c6b5
 
         &.away 
             border: none
@@ -56,21 +160,21 @@
 .arrow-down  
     border-left: 0.5rem solid transparent
     border-right: 0.5rem solid transparent
-    border-top: 0.5rem solid black
+    border-top: 0.5rem solid base.$yellow-4-acc
 
     &.clicked 
-        border-top-color: blue
+        border-top-color: base.$green-black
 
     &:hover 
-        border-top-color: red
+        border-top-color: orange
 
 .arrow-right 
-    border-left: 0.5rem solid black
+    border-left: 0.5rem solid base.$yellow-4-acc
     border-top: 0.5rem solid transparent
     border-bottom: 0.5rem solid transparent
 
     &.clicked 
-        border-left-color: blue
+        border-left-color: base.$green-black
 
     &:hover 
-        border-left-color: red
+        border-left-color: orange

@@ -64,7 +64,7 @@ const BedCreationPage: React.FC = function() {
     };
     
     return (
-        <form method="post" onSubmit={handleSubmit}>
+        <form method="post" className="bed-creation-form" onSubmit={handleSubmit}>
             <BedGridForm length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} />
             <BedSpecsForm hardiness={hardiness} setHardiness={setHardiness} sunlight={sunlight} setSunlight={setSunlight} soil={soil} setSoil={setSoil} />
             <button type="submit">Create bed</button>
