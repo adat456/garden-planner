@@ -4,6 +4,7 @@
 .bed-planting-wrapper 
     display: grid
     grid-template-columns: 25% minmax(0, 1fr)
+    column-gap: 1rem
 
 .bed-planting-group 
     display: grid
@@ -53,7 +54,7 @@
             background-color: base.$green-2
 
 // seed basket styles
-.seed-basket 
+.seed-basket, .abbr-seed-basket 
     text-align: center
 
     hr 
@@ -63,6 +64,7 @@
         display: flex
         justify-content: space-between
         align-items: center
+        column-gap: 1rem
         margin: 1.25rem 0
     
     .remove-pick-button svg
@@ -86,6 +88,39 @@
             width: 1.2rem
             height: auto
             fill: darkslategray
+
+.abbr-seed-basket 
+    position: fixed
+    bottom: 5.5rem
+    left: 4rem
+
+    div
+        display: flex
+        align-items: center
+        column-gap: 1rem
+
+        svg
+            height: 1.5rem
+            width: auto
+            fill: base.$yellow-4-acc
+
+.abbr-seed-basket ul
+        position: fixed
+        bottom: 8rem
+        left: 0
+        padding: 1rem 1rem 1rem 3rem
+        width: 25%
+        border-radius: 0 base.$border-rad base.$border-rad 0
+        border: 1px solid base.$yellow-4-acc
+
+        li
+            justify-content: flex-start
+            column-gap: 0.3rem
+            margin: 1rem 0
+            font-size: 0.9rem
+
+        .remove-pick-button svg
+            stroke-width: 0.1rem
 
 // plant search bar styles
 .plant-search 
@@ -215,8 +250,9 @@
 .final-search-result 
     background-color: base.$yellow-2
     border-radius: base.$border-rad
-    display: grid
-    grid-template-columns: 2fr 1fr
+    display: flex
+    justify-content: space-between
+    align-items: center
     column-gap: 1.5rem
     margin: 1rem 0
     padding: 1rem
