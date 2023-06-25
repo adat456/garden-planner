@@ -2,30 +2,33 @@ import { useEffect, useState } from "react";
 import { bedDataInterface, plantPickDataInterface } from "../Shared/interfaces";
 
 interface bedPlantingGridInterface {
+    bedData: bedDataInterface | null,
+    setBedData: React.Dispatch<React.SetStateAction<bedDataInterface | null>>,
+    loading: boolean,
     curPlantPick: plantPickDataInterface | null,
 };
 
-const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantPick }) {
-    const [loading, setLoading] = useState(true);
-    const [bedData, setBedData] = useState<bedDataInterface | null>(null);
+const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, setBedData, curPlantPick, loading }) {
+    // const [loading, setLoading] = useState(true);
+    // const [bedData, setBedData] = useState<bedDataInterface | null>(null);
 
-    useEffect(() => {
-        async function pullBedData() {
-            try {
-                const req = await fetch("http://localhost:3000/retrieve-bed/31", {credentials: "include"});
-                const res = await req.json();
-                if (req.ok) {
-                    setBedData(res[0]);
-                    setLoading(false);
-                } else {
-                    throw new Error(res);
-                };
-            } catch(err) {
-                console.log(err.message);
-            };
-        };
-        pullBedData();
-    }, []);
+    // useEffect(() => {
+    //     async function pullBedData() {
+    //         try {
+    //             const req = await fetch("http://localhost:3000/retrieve-bed/31", {credentials: "include"});
+    //             const res = await req.json();
+    //             if (req.ok) {
+    //                 setBedData(res[0]);
+    //                 setLoading(false);
+    //             } else {
+    //                 throw new Error(res);
+    //             };
+    //         } catch(err) {
+    //             console.log(err.message);
+    //         };
+    //     };
+    //     pullBedData();
+    // }, []);
 
     function createBedGrid() {
         let bedInnards = [];

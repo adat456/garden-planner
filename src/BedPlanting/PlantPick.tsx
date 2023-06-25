@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
-import { plantPickDataInterface } from "../Shared/interfaces";
+import { plantPickDataInterface, colorObjInterface } from "../Shared/interfaces";
 
 interface plantPickInterface {
     plant: plantPickDataInterface,
@@ -8,13 +8,15 @@ interface plantPickInterface {
     setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
     setCurPlantPick: React.Dispatch<React.SetStateAction<plantPickDataInterface | null>>,
     abbreviated?: boolean
+    updateSeedBasket: (arr: plantPickDataInterface[]) => Promise<void>
 };
 
-const PlantPick: React.FC<plantPickInterface> = function({ plant, plantPicks, setPlantPicks, setCurPlantPick, abbreviated }) {
+const PlantPick: React.FC<plantPickInterface> = function({ plant, plantPicks, setPlantPicks, setCurPlantPick, abbreviated, updateSeedBasket }) {
     const [ colorSliderVis, setColorSliderVis ] = useState(false);
 
-    function changePlantPickColor(color) {
-        setPlantPicks(plantPicks.map((pick, index) => {
+    async function changePlantPickColor(color: colorObjInterface) {
+        console.log(color);
+        const updatedPlantPicks = plantPicks.map(pick => {
             if (pick.id === plant.id) {
                 let plantCopy = plant;
                 plantCopy.gridcolor = color.hex;
@@ -22,11 +24,15 @@ const PlantPick: React.FC<plantPickInterface> = function({ plant, plantPicks, se
             } else {
                 return pick;
             };
-        }));
+        });
+        updateSeedBasket(updatedPlantPicks);
+        setPlantPicks(updatedPlantPicks);
     };
 
     function removePlantPick(id: number) {
-        setPlantPicks(plantPicks.filter(plant => plant.id !== id));
+        const updatedPlantPicks = plantPicks.filter(plant => plant.id !== id);
+        updateSeedBasket(updatedPlantPicks);
+        setPlantPicks(updatedPlantPicks);
     };
 
     if (abbreviated) {

@@ -6,10 +6,11 @@ import randomColor from "random-color";
 
 interface plantSearchInterface {
     plantPicks: plantPickDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>
+    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
+    updateSeedBasket: (arr: plantPickDataInterface[]) => Promise<void>
 };
 
-const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks }) {
+const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks, updateSeedBasket }) {
     const [ searchTerm, setSearchTerm ] = useState("");
 
     const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
@@ -101,10 +102,12 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     };
 
     async function addPlantPick(result: plantDataInterface) {
-        setPlantPicks([...plantPicks, {
+        const updatedPlantPicks = [...plantPicks, {
             ...result,
             gridcolor: randomColor().hexString(),
-        }]);
+        }];
+        updateSeedBasket(updatedPlantPicks);
+        setPlantPicks(updatedPlantPicks);
     };
 
     // pagination logic
@@ -151,7 +154,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     function generateFinalResultsArr(arr: plantDataInterface[]) {
         // if there are 10 or fewer results in the array (final search or sorted and filtered), just map through them
         if (totalPages === 1) {
-            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} />);
+            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} updateSeedBasket={updateSeedBasket} />);
             return resultsArr;
         } else {
             // but if there are more than 10 results in the provided array, filter out a subset of that array where the indices belong on the current page
@@ -162,7 +165,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                 };
             });
             // then generate elements from that array subset
-            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} />);
+            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} updateSeedBasket={updateSeedBasket} />);
             return resultsArr;
         };
     };
@@ -173,7 +176,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                 <label htmlFor="search">Search seeds:</label>
                 <input type="text" name="search" id="search" value={searchTerm} onChange={handleSearchTermChange} />
                 <button type="submit">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Interface / Search_Magnifying_Glass"><path id="Vector" d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Interface / Search_Magnifying_Glass"><path id="Vector" d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" strokeLinecap="round" strokeLinejoin="round"/></g></svg>
                 </button>
             </form>
             <div className="filter-sort-results-container">

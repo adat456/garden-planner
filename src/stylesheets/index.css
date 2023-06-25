@@ -333,12 +333,14 @@ main {
 .final-search-result {
   background-color: #FAEED1;
   border-radius: 0.5rem;
+  margin: 1rem 0;
+  padding: 1rem;
+}
+.final-search-result .collapsed-result {
   display: flex;
   justify-content: space-between;
   align-items: center;
   column-gap: 1.5rem;
-  margin: 1rem 0;
-  padding: 1rem;
 }
 .final-search-result .button-cluster {
   display: flex;
@@ -557,7 +559,7 @@ main {
 .bed .row {
   display: grid;
   height: 1.5rem;
-  grid-template-columns: repeat(auto-fit, 1.5rem);
+  grid-template-columns: repeat(250, 1.5rem);
 }
 .bed .grid-cell {
   border: 1px solid #a2bca7;

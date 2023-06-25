@@ -44,3 +44,27 @@ export interface plantDataInterface {
 export interface plantPickDataInterface extends plantDataInterface {
     gridcolor: string,
 };
+
+export interface colorObjInterface {
+    hex: string,
+    hsl: {
+        a: number,
+        h: number,
+        l: number,
+        s: number,
+    },
+    hsv: {
+        a: number,
+        h: number,
+        s: number,
+        v: number
+    },
+    oldHue: number,
+    rgb: {
+        r: number,
+        g: number,
+        b: number,
+        a: number
+    },
+    source: string
+};

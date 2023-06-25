@@ -1,21 +1,44 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { plantPickDataInterface } from "../Shared/interfaces";
+import { plantPickDataInterface, bedDataInterface } from "../Shared/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';
 
 const BedPlantingGroup: React.FC = function() {
+    const [ bedData, setBedData ] = useState<bedDataInterface | null>(null);
+    const [loading, setLoading] = useState(true);
+
     const [ plantPicks, setPlantPicks ] = useState<plantPickDataInterface[]>([]);
     const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
     const [ abbrPlantPicksVis, setAbbrPlantPicksVis ] = useState(false);
+   
+    const { bedid } = useParams();
 
-    const { bedId } = useParams();
+    useEffect(() => {
+        async function pullBedData() {
+            try {
+                const req = await fetch(`http://localhost:3000/retrieve-bed/${bedid}`, {credentials: "include"});
+                const res = await req.json();
+                if (req.ok) {
+                    setBedData(res);
+                    console.log(res.seedbasket);
+                    if (res.seedbasket.length > 0) setPlantPicks(res.seedbasket);
+                    setLoading(false);
+                } else {
+                    throw new Error(res);
+                };
+            } catch(err) {
+                console.log(err.message);
+            };
+        };
+        pullBedData();
+    }, []);
 
     function generatePlantPicks() {
         const plantPicksArr = plantPicks.map(plant => {
             return (
-                <PlantPick key={`plant-pick-${plant.id}`} plant={plant} plantPicks={plantPicks} setPlantPicks={setPlantPicks} setCurPlantPick={setCurPlantPick} abbreviated={false} />
+                <PlantPick key={`plant-pick-${plant.id}`} plant={plant} plantPicks={plantPicks} setPlantPicks={setPlantPicks} setCurPlantPick={setCurPlantPick} abbreviated={false} updateSeedBasket={updateSeedBasket} />
             );
         });
         return plantPicksArr;
@@ -24,39 +47,36 @@ const BedPlantingGroup: React.FC = function() {
     function generateAbbrPlantPicks() {
         const abbrPlantPicksArr = plantPicks.map(plant => {
             return (
-                <PlantPick key={`plant-pick-${plant.id}`} plant={plant} plantPicks={plantPicks} setPlantPicks={setPlantPicks} setCurPlantPick={setCurPlantPick} abbreviated={true} />
+                <PlantPick key={`plant-pick-${plant.id}`} plant={plant} plantPicks={plantPicks} setPlantPicks={setPlantPicks} setCurPlantPick={setCurPlantPick} abbreviated={true} updateSeedBasket={updateSeedBasket} />
             );
         });
         return abbrPlantPicksArr;
     };
 
-    useEffect(() => {
-        async function updateSeedBasket() {
-            const reqOptions: RequestInit = {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ seedBasket: plantPicks, bedId }),
-                credentials: "include"
-            };
-
-            try {
-                const req = await fetch("http://localhost:3000/update-seed-basket", reqOptions);
-                const res = await req.json();
-                if (req.ok) {
-                    console.log(res);
-                } else {
-                    throw new Error(res);
-                };
-            } catch(err) {
-                console.log(err.message);
-            };
+    async function updateSeedBasket(arr: plantPickDataInterface[]) {
+        const reqOptions: RequestInit = {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ seedBasket: arr, bedid }),
+            credentials: "include"
         };
-        updateSeedBasket();
-    }, [plantPicks]);
+
+        try {
+            const req = await fetch("http://localhost:3000/update-seed-basket", reqOptions);
+            const res = await req.json();
+            if (req.ok) {
+                console.log(res);
+            } else {
+                throw new Error(res);
+            };
+        } catch(err) {
+            console.log(err.message);
+        };
+    };
 
     return (
         <div className="bed-planting-group">
-            <BedPlantingGrid curPlantPick={curPlantPick} />
+            <BedPlantingGrid curPlantPick={curPlantPick} bedData={bedData} setBedData={setBedData} loading={loading} />
             <section className="seed-basket">
                 <h2>SEED BASKET</h2>
                 <hr />
@@ -78,7 +98,7 @@ const BedPlantingGroup: React.FC = function() {
                     }
                 </div>
             </section>
-            <PlantSearch plantPicks={plantPicks} setPlantPicks={setPlantPicks} />
+            <PlantSearch plantPicks={plantPicks} setPlantPicks={setPlantPicks} updateSeedBasket={updateSeedBasket} />
         </div>
     );
 };
