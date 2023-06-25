@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { plantPickDataInterface, bedDataInterface } from "../Shared/interfaces";
+import { isJWTInvalid } from "../Shared/helpers";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';
@@ -14,6 +15,8 @@ const BedPlantingGroup: React.FC = function() {
     const [ abbrPlantPicksVis, setAbbrPlantPicksVis ] = useState(false);
    
     const { bedid } = useParams();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function pullBedData() {
@@ -29,7 +32,13 @@ const BedPlantingGroup: React.FC = function() {
                     throw new Error(res);
                 };
             } catch(err) {
-                console.log(err.message);
+                const invalidJWTMessage = isJWTInvalid(err);
+                if (invalidJWTMessage) {
+                    console.log(invalidJWTMessage);
+                    navigate("/sign-in");
+                } else {
+                    console.log(err.message);
+                };
             };
         };
         pullBedData();
@@ -70,7 +79,13 @@ const BedPlantingGroup: React.FC = function() {
                 throw new Error(res);
             };
         } catch(err) {
-            console.log(err.message);
+            const invalidJWTMessage = isJWTInvalid(err);
+            if (invalidJWTMessage) {
+                console.log(invalidJWTMessage);
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+            };
         };
     };
 

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
+import { isJWTInvalid } from "../Shared/helpers";
 import randomColor from "random-color";
 
 interface plantSearchInterface {
@@ -23,6 +25,8 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
 
     const [ totalPages, setTotalPages ] = useState(0);
     const [ curPage, setCurPage ] = useState(0);
+
+    const navigate = useNavigate();
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
@@ -47,9 +51,17 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                     } else {
                         setLiveSearchResults("No matches found.");
                     };
-                };
+                } else {
+                    throw new Error(res);
+                }
             } catch(err) {
-                console.log(err.message);
+                const invalidJWTMessage = isJWTInvalid(err);
+                if (invalidJWTMessage) {
+                    console.log(invalidJWTMessage);
+                    navigate("/sign-in");
+                } else {
+                    console.log(err.message);
+                };
             };
         };
     };
@@ -91,11 +103,19 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                     setFinalSearchResults("No matches found.");
                     setLiveSearchResults([]);
                 };
+            } else { 
+                throw new Error(res);
             };
         } catch(err) {
-            console.log(err.message);
-            setFinalSearchResults("Unable to complete your search.");
-            setLiveSearchResults([]);
+            const invalidJWTMessage = isJWTInvalid(err);
+            if (invalidJWTMessage) {
+                console.log(invalidJWTMessage);
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+                setFinalSearchResults("Unable to complete your search.");
+                setLiveSearchResults([]);
+            };
         };
 
         setExtraResults(0);
@@ -113,7 +133,6 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     // pagination logic
     
     useEffect(() => {
-        console.log("change");
         // sets both the curPage at 1 and the total number of pages whenever either the filtered and sorted array or the final search results array changes
         // so, you'll only be sent to page 1 at the conclusion of every search AND whenever a filter or sort is changed, which makes sense
         function setInitialPagesState(arr: plantDataInterface[]) {

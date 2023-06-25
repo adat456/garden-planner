@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DragSelect from "dragselect";
 
 interface BedGridInterface {
     length: number,

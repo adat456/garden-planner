@@ -56,3 +56,11 @@ export function handleVisToggle(e) {
         field?.setAttribute("type", "password");
     };
 }; 
+
+export function isJWTInvalid(err) {
+    let message = "";
+    if (err instanceof Error) {
+        if (err.message === "JWT blacklisted." || err.message === "JWT is invalid." || err.message === "No JWT found.") message = err.message;
+    };
+    return message;
+};

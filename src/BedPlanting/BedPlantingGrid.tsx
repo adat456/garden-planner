@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { bedDataInterface, plantPickDataInterface } from "../Shared/interfaces";
+import { isJWTInvalid } from "../Shared/helpers";
 
 interface bedPlantingGridInterface {
     bedData: bedDataInterface | null,
@@ -9,26 +10,7 @@ interface bedPlantingGridInterface {
 };
 
 const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, setBedData, curPlantPick, loading }) {
-    // const [loading, setLoading] = useState(true);
-    // const [bedData, setBedData] = useState<bedDataInterface | null>(null);
-
-    // useEffect(() => {
-    //     async function pullBedData() {
-    //         try {
-    //             const req = await fetch("http://localhost:3000/retrieve-bed/31", {credentials: "include"});
-    //             const res = await req.json();
-    //             if (req.ok) {
-    //                 setBedData(res[0]);
-    //                 setLoading(false);
-    //             } else {
-    //                 throw new Error(res);
-    //             };
-    //         } catch(err) {
-    //             console.log(err.message);
-    //         };
-    //     };
-    //     pullBedData();
-    // }, []);
+    const navigate = useNavigate();
 
     function createBedGrid() {
         let bedInnards = [];
@@ -159,9 +141,17 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, 
             const message = await req.json();
             if (req.ok) {
                 console.log(message);
+            } else {
+                throw new Error(message);
             };
         } catch(err) {
-            console.log(err.message);
+            const invalidJWTMessage = isJWTInvalid(err);
+            if (invalidJWTMessage) {
+                console.log(invalidJWTMessage);
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+            };
         };
     };
 

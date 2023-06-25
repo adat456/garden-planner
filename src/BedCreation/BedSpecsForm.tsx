@@ -26,10 +26,6 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
         };
     };
 
-    // useEffect(() => {
-    //     document.documentElement.style.setProperty("--slider-number", `${hardiness[1]}`);
-    // }, [hardiness])
-
     return (
         <section className="bed-specs">
             <h2>SPECIFICATIONS</h2>

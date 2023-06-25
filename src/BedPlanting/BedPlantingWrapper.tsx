@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import { isJWTInvalid } from "../Shared/helpers";
 
 const BedPlantingPage: React.FC = function() {
     const [ bedIds, setBedIds ] = useState<number[]>([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function getBedIds() {
@@ -11,9 +14,18 @@ const BedPlantingPage: React.FC = function() {
                 const res = await req.json();
                 if (req.ok) {
                     setBedIds(res);
+                } else {
+                    // even though all API calls return just the err.message (a string), this message is rethrown as a whole error object (which is why it can be accessed as err.message in the catch block and by the helper fx)
+                    throw new Error(res);
                 };
             } catch(err) {
-                console.log(err);
+                const invalidJWTMessage = isJWTInvalid(err);
+                if (invalidJWTMessage) {
+                    console.log(invalidJWTMessage);
+                    navigate("/sign-in");
+                } else {
+                    console.log(err.message);
+                };
             };
         };
         getBedIds();

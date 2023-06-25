@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { isJWTInvalid } from "../Shared/helpers";
 import { gridMapInterface } from "../Shared/interfaces";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
@@ -11,6 +13,8 @@ const BedCreationPage: React.FC = function() {
     const [hardiness, setHardiness] = useState([0, 5]);
     const [sunlight, setSunlight] = useState("");
     const [soil, setSoil] = useState<string[]>([]);
+
+    const navigate = useNavigate();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -57,9 +61,17 @@ const BedCreationPage: React.FC = function() {
             const message = await req.json();
             if (req.ok) {
                 console.log(message);
+            } else { 
+                throw new Error(message);
             };
         } catch(err) {
-            console.log(err.message);
+            const invalidJWTMessage = isJWTInvalid(err);
+            if (invalidJWTMessage) {
+                console.log(invalidJWTMessage);
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+            };
         };
     };
     
