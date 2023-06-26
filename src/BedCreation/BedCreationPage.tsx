@@ -6,6 +6,7 @@ import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 
 const BedCreationPage: React.FC = function() {
+    const [name, setName] = useState("");
     const [length, setLength] = useState(10);
     const [width, setWidth] = useState(10);
     const [whole, setWhole] = useState(true);
@@ -13,6 +14,7 @@ const BedCreationPage: React.FC = function() {
     const [hardiness, setHardiness] = useState([0, 5]);
     const [sunlight, setSunlight] = useState("");
     const [soil, setSoil] = useState<string[]>([]);
+    const [publicBoard, setPublicBoard] = useState(false);
 
     const navigate = useNavigate();
 
@@ -50,8 +52,9 @@ const BedCreationPage: React.FC = function() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 hardiness: hardiness[1], 
-                sunlight, soil,
-                length, width, gridMap
+                public: publicBoard,
+                created: new Date(),
+                name, sunlight, soil, length, width, gridMap
             }),
             credentials: "include"
         };
@@ -77,8 +80,8 @@ const BedCreationPage: React.FC = function() {
     
     return (
         <form method="post" className="bed-creation-form" onSubmit={handleSubmit}>
-            <BedGridForm length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} />
-            <BedSpecsForm hardiness={hardiness} setHardiness={setHardiness} sunlight={sunlight} setSunlight={setSunlight} soil={soil} setSoil={setSoil} />
+            <BedGridForm name={name} setName={setName} length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} publicBoard={publicBoard} setPublicBoard={setPublicBoard} />
+            <BedSpecsForm hardiness={hardiness} setHardiness={setHardiness} sunlight={sunlight} setSunlight={setSunlight} soil={soil} setSoil={setSoil}  />
             <button type="submit">Create bed</button>
         </form>
     )

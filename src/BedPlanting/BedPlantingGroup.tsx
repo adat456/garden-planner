@@ -25,8 +25,11 @@ const BedPlantingGroup: React.FC = function() {
                 const res = await req.json();
                 if (req.ok) {
                     setBedData(res);
-                    console.log(res.seedbasket);
-                    if (res.seedbasket.length > 0) setPlantPicks(res.seedbasket);
+                    if (res.seedbasket) {
+                        if (res.seedbasket.length > 0) setPlantPicks(res.seedbasket);
+                    } else {
+                        setPlantPicks([]);
+                    };
                     setLoading(false);
                 } else {
                     throw new Error(res);
@@ -42,7 +45,7 @@ const BedPlantingGroup: React.FC = function() {
             };
         };
         pullBedData();
-    }, []);
+    }, [bedid]);
 
     function generatePlantPicks() {
         const plantPicksArr = plantPicks.map(plant => {

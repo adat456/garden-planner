@@ -15,10 +15,21 @@
         background-color: base.$green-2
         border-radius: base.$border-rad
 
+.meta-container
+    margin: 1.5rem 1rem 2rem 1rem
+
+    div.bed-name-input  
+        display: flex
+        column-gap: 1rem
+        margin-bottom: 1rem
+
+        input
+            flex-grow: 1
+
 // grid specs styles
 .dimensions-container, .whole-toggler-container
     @include base.flexcentered
-    margin: 1.5rem 0
+    margin: 1.5rem 1rem
     
     div
         display: flex
@@ -27,6 +38,7 @@
 
         input
             width: 2.5rem  
+            margin-right: 1rem
 
     button
         background-color: base.$green-1
