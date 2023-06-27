@@ -15,6 +15,13 @@ export interface bedDataInterface {
     width: number,
     gridmap: gridMapInterface[],
     id: number,
+    seedbasket: plantPickDataInterface[],
+    name: string,
+    public: boolean,
+    created: string,
+    username: string,
+    numhearts: number,
+    numcopies: number
 };
 
 export interface plantDataInterface {
@@ -43,6 +50,18 @@ export interface plantDataInterface {
 
 export interface plantPickDataInterface extends plantDataInterface {
     gridcolor: string,
+};
+
+export interface userInterface {
+    id: number,
+    firstname: string,
+    lastname: string,
+    email: string,
+    username: string,
+    board_ids: number[],
+    added_veg_data: number[],
+    favorited_beds: number[],
+    copied_beds: number[]
 };
 
 export interface colorObjInterface {

@@ -79,7 +79,7 @@ const CreateAccount: React.FC = function() {
             const message = await req.json();
             if (req.ok) {
                 console.log(message);
-                navigate("/view-bed");
+                navigate("/create");
             } else {
                 throw new Error(message);
             };

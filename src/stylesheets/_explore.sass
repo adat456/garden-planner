@@ -1,0 +1,85 @@
+@use 'base'
+
+.search-beds-form
+    display: flex
+    column-gap: 1rem
+
+    div:first-child
+
+.bed-results-container
+    margin-top: 2rem
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
+    row-gap: 1rem
+    column-gap: 1rem 
+
+.bed-result-preview 
+    .bed
+        margin: 0
+        margin-bottom: 1rem
+        position: relative
+        
+        .grid-cell:hover
+            border: transparent
+
+    .bed-overlay
+        position: absolute
+        top: 0
+        left: 0
+        width: 101%
+        height: 100%
+        @include base.flexcentered
+        flex-direction: column
+        color: transparent
+        row-gap: 1rem
+
+        button
+            color: transparent
+
+        &:hover
+            background-color: rgba(2,48,32, 0.6)
+            color: white
+
+            button
+                color: white
+
+.bed-result-preview .info
+    display: flex
+    align-items: center
+
+    h3
+        font-weight: bold
+
+    div.favorite, div.copy
+        @include base.flexcentered
+        flex-direction: column
+
+        p
+            font-size: 0.8rem
+            font-weight: bold
+
+    div.favorite
+        margin-left: auto
+
+    div.copy
+        margin-right: 0
+        margin-left: 1rem
+
+    svg
+        height: 1.25rem
+        width: auto
+        stroke-width: 0.2rem
+        stroke: grey
+        fill: none
+
+    button:hover, button:focus
+        svg
+            stroke: base.$green-black
+
+    button.favorite
+        svg
+            stroke: base.$green-black
+            fill: base.$green-black
+
+    
+

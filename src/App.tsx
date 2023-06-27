@@ -5,6 +5,7 @@ import LoggedInWrapper from "./LoggedInWrapper";
 import BedCreationPage from './BedCreation/BedCreationPage';
 import BedPlantingWrapper from './BedPlanting/BedPlantingWrapper';
 import BedPlantingGroup from "./BedPlanting/BedPlantingGroup";
+import BedExplorationPage from "./BedExploration/BedExplorationPage";
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
             <Route path="/create/new-bed" element={<BedCreationPage />} />
           </Route>
           <Route path="/share" />
-          <Route path="/explore" />
+          <Route path="/explore" element={<BedExplorationPage />} />
           <Route path="/profile" />
         </Route>
       </Routes>
