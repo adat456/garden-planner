@@ -91,8 +91,6 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed, us
             if (req.ok) {
                 console.log(res);
                 setNumCopies(numCopies + 1);
-                const copyButton = document.querySelector(".copy button");
-                copyButton?.setAttribute("disabled", "true");
             } else {
                 throw new Error(res);
             };

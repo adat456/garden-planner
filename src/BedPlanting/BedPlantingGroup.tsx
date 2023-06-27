@@ -8,7 +8,6 @@ import PlantSearch from './PlantSearch';
 
 const BedPlantingGroup: React.FC = function() {
     const [ bedData, setBedData ] = useState<bedDataInterface | null>(null);
-    const [loading, setLoading] = useState(true);
 
     const [ plantPicks, setPlantPicks ] = useState<plantPickDataInterface[]>([]);
     const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
@@ -26,11 +25,12 @@ const BedPlantingGroup: React.FC = function() {
                 if (req.ok) {
                     setBedData(res);
                     if (res.seedbasket) {
-                        if (res.seedbasket.length > 0) setPlantPicks(res.seedbasket);
-                    } else {
-                        setPlantPicks([]);
+                        if (res.seedbasket.length > 0) {
+                            setPlantPicks(res.seedbasket);
+                        } else {
+                            setPlantPicks([]);
+                        };
                     };
-                    setLoading(false);
                 } else {
                     throw new Error(res);
                 };
@@ -94,7 +94,9 @@ const BedPlantingGroup: React.FC = function() {
 
     return (
         <div className="bed-planting-group">
-            <BedPlantingGrid curPlantPick={curPlantPick} bedData={bedData} setBedData={setBedData} loading={loading} />
+            {bedData ?
+                <BedPlantingGrid curPlantPick={curPlantPick} bedData={bedData} setBedData={setBedData} /> : <p>Loading...</p>
+            }
             <section className="seed-basket">
                 <h2>SEED BASKET</h2>
                 <hr />
