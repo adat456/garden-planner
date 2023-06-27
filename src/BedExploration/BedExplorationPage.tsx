@@ -2,24 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { bedDataInterface, userInterface } from "../Shared/interfaces";
 import { isJWTInvalid } from "../Shared/helpers";
-import BedResultPreview from "./BedResultPreview";
+import BedResultsContainer from "./BedResultsContainer";
 
 const BedExplorationPage: React.FC = function() {
     const [ bedResults, setBedResults ] = useState<bedDataInterface[]>([]);
     const [ user, setUser ] = useState<userInterface | null>(null);
 
-    const [ search, setSearch ] = useSearchParams();
+    const [ searchParams, setSearchParams ] = useSearchParams();
 
     const navigate = useNavigate();
     const location = useLocation();
 
+    // pulling user info and ALL public beds
     useEffect(() => {
         async function pullUserData() {
             try {
                 const req = await fetch("http://localhost:3000/pull-user-data", {credentials: "include"});
                 const res = await req.json();
                 if (req.ok) {
-                    console.log(res);
                     setUser(res);
                 } else {
                     throw new Error(res);
@@ -37,6 +37,29 @@ const BedExplorationPage: React.FC = function() {
         pullUserData();
     }, [location])
 
+    useEffect(() => {
+        async function pullAllPublicBeds() {
+            try {
+                const req = await fetch("http://localhost:3000/all-public-beds", {credentials: "include"});
+                const res = await req.json();
+                if (req.ok) {
+                    setBedResults(res);
+                } else {
+                    throw new Error(res);
+                };
+            } catch(err) {
+                const invalidJWTMessage = isJWTInvalid(err);
+                if (invalidJWTMessage) {
+                    console.log(invalidJWTMessage);
+                    navigate("/sign-in");
+                } else {
+                    console.log(err.message);
+                };
+            };
+        };
+        pullAllPublicBeds();
+    }, [location]);
+
     function generateHardinessButtons() {
         let hardinessButtonsArr = [];
         for (let i = 1; i <= 12; i++) {
@@ -51,61 +74,52 @@ const BedExplorationPage: React.FC = function() {
         hardinessButton.classList.toggle("active-button");
     };
 
-    function handleSubmit(e: React.FormEvent) {
+    // setting and clearing search params
+    function submitSearchParams(e: React.FormEvent) {
         e.preventDefault();
+        let params: {
+            searchBy?: string,
+            searchTerm?: string,
+            hardinessNums?: string,
+            sunlight?: string,
+            soil?: string
+        } = {};
 
         const searchByElement = document.getElementById("search-category") as HTMLSelectElement;
         const searchBy = searchByElement?.value;
-
         const searchTermElement = document.getElementById("search-term") as HTMLInputElement;
-        const searchTerm = searchTermElement?.value;
+        const searchTerm = searchTermElement?.value.trim().toLowerCase();
+        if (searchTerm) {
+            params.searchBy = encodeURIComponent(searchBy);
+            params.searchTerm = encodeURIComponent(searchTerm);
+        };
 
         const hardinessButtons = [...document.querySelectorAll(".hardiness-button.active-button")];
-        const hardinessNums = JSON.stringify(hardinessButtons?.map(button => button.getAttribute("data-hardiness")));
+        const hardinessNums = (hardinessButtons?.map(button => button.getAttribute("data-hardiness"))).join(",");
+        if (hardinessNums) params.hardinessNums = encodeURIComponent(hardinessNums);
 
         const selectedSunlightElement = document.querySelector("input[name=light]:checked") as HTMLInputElement;
-        const sunlight = selectedSunlightElement.value;
+        const sunlight = selectedSunlightElement?.value;
+        if (sunlight) params.sunlight = encodeURIComponent(sunlight);
 
         const selectedSoilElements = [...document.querySelectorAll("input[name=soil]:checked")] as HTMLInputElement[];
-        const soil = JSON.stringify(selectedSoilElements.map(soil => soil.value));
+        const soil = (selectedSoilElements?.map(soil => soil.value)).join(",");
+        if (soil) params.soil = encodeURIComponent(soil);
 
-        const params = {
-            searchBy, searchTerm, hardinessNums, sunlight, soil
-        };
-        console.log(params);
+
+        setSearchParams(params);
     };
 
-    async function pullAllPublicBeds() {
-        try {
-            const req = await fetch("http://localhost:3000/all-public-beds", {credentials: "include"});
-            const res = await req.json();
-            if (req.ok) {
-                setBedResults(res);
-            } else {
-                throw new Error(res);
-            };
-        } catch(err) {
-            const invalidJWTMessage = isJWTInvalid(err);
-            if (invalidJWTMessage) {
-                console.log(invalidJWTMessage);
-                navigate("/sign-in");
-            } else {
-                console.log(err.message);
-            };
-        };
-    };
+    function clearSearchParams() {
+        const hardinessButtons = [...document.querySelectorAll(".hardiness-button")] as HTMLDivElement[];
+        hardinessButtons.forEach(btn => btn.classList.remove("active-button"));
 
-    function generateBedResults() {
-        if (bedResults.length > 0) {
-            console.log(bedResults);
-            const bedResultsArr = bedResults.map((result, index) => <BedResultPreview bed={result} user={user} key={index} />);
-            return bedResultsArr;
-        };
+        setSearchParams({});
     };
 
     return (
         <>
-            <form className="search-beds-form" onSubmit={handleSubmit}>
+            <form className="search-beds-form" onSubmit={submitSearchParams}>
                 <div>
                     <label htmlFor="search-category">Search by</label>
                     <select name="search-category" id="search-category">
@@ -165,13 +179,11 @@ const BedExplorationPage: React.FC = function() {
                     </fieldset>
                 </div>
                 <button type="submit">Search</button>
+                <button type="reset" onClick={clearSearchParams}>Clear all filters</button>
             </form>
-            <button type="button" onClick={pullAllPublicBeds}>Browse all</button>
             <section>
                 <h2>Results</h2>
-                <div className="bed-results-container">
-                    {generateBedResults()}
-                </div>
+                <BedResultsContainer bedResults={bedResults} user={user} />
             </section>
         </>
     );

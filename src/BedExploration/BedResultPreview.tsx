@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { isJWTInvalid } from "../Shared/helpers";
 import { bedDataInterface, userInterface } from "../Shared/interfaces";
@@ -11,6 +11,8 @@ interface bedResultPreviewInterface {
 const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed, user }) {
     const [ numHearts, setNumHearts ] = useState(bed.numhearts);
     const [ numCopies, setNumCopies ] = useState(bed.numcopies);
+
+    const heartButtonRef = useRef(null);
 
     const navigate = useNavigate();
 
@@ -53,13 +55,12 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed, us
             const res = await req.json();
             if (req.ok) {
                 // just front-end aesthetic changes
-                const favoriteButtonElement = document.querySelector(".favorite button");
-                if (favoriteButtonElement?.classList.contains("favorite")) {
+                if (heartButtonRef?.current?.classList.contains("favorite")) {
                     setNumHearts(numHearts - 1);
                 } else {
                     setNumHearts(numHearts + 1);
                 };
-                favoriteButtonElement?.classList.toggle("favorite"); 
+                heartButtonRef?.current?.classList.toggle("favorite"); 
             } else {
                 throw new Error(res);
             };
@@ -121,7 +122,7 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed, us
                     <p>{`by ${bed.username}`}</p>
                 </div>
                 <div className="favorite">
-                    <button type="button" className={user?.favorited_beds.includes(bed.id) ? "favorite" : undefined} onClick={handleToggleFavorite} title="Add bed to favorites">
+                    <button type="button" ref={heartButtonRef} className={user?.favorited_beds.includes(bed.id) ? "favorite" : undefined} onClick={handleToggleFavorite} title="Add bed to favorites">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Interface / Heart_02"><path id="Vector" d="M19.2373 6.23731C20.7839 7.78395 20.8432 10.2727 19.3718 11.8911L11.9995 20.0001L4.62812 11.8911C3.15679 10.2727 3.21605 7.7839 4.76269 6.23726C6.48961 4.51034 9.33372 4.66814 10.8594 6.5752L12 8.00045L13.1396 6.57504C14.6653 4.66798 17.5104 4.51039 19.2373 6.23731Z" strokeLinecap="round" strokeLinejoin="round"/></g></svg>
                     </button>
                     <p>{numHearts}</p>
