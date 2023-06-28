@@ -16,13 +16,13 @@ function App() {
           <CreateAccount />
         </>} />
         <Route path="/" element={<LoggedInWrapper />}>
-          <Route path="/create" element={<BedPlantingWrapper />}>
+          <Route path="create" element={<BedPlantingWrapper />}>
             <Route path=":bedid" element={<BedPlantingGroup />} />
-            <Route path="/create/new-bed" element={<BedCreationPage />} />
+            <Route path="new-bed" element={<BedCreationPage />} />
           </Route>
-          <Route path="/share" />
-          <Route path="/explore" element={<BedExplorationPage />} />
-          <Route path="/profile" />
+          <Route path="share" />
+          <Route path="explore" element={<BedExplorationPage />} />
+          <Route path="profile" />
         </Route>
       </Routes>
     </BrowserRouter>

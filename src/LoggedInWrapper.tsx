@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 
 const LoggedInWrapper: React.FC = function() {async function handleLogOut() {
         try {
@@ -16,11 +16,11 @@ const LoggedInWrapper: React.FC = function() {async function handleLogOut() {
         <>
             <header>
                 <nav className="main-nav">
-                    <Link to="/create/*">CREATE</Link>
-                    <Link to="/share">SHARE</Link>
-                    <Link to="/explore">EXPLORE</Link>
-                    <Link to="/profile">PROFILE</Link>
-                    <Link to="/sign-in" onClick={handleLogOut}>LOG OUT</Link>
+                    <NavLink to="create">CREATE</NavLink>
+                    <NavLink to="share">SHARE</NavLink>
+                    <NavLink to="explore">EXPLORE</NavLink>
+                    <NavLink to="profile">PROFILE</NavLink>
+                    <Link to="sign-in" onClick={handleLogOut}>LOG OUT</Link>
                 </nav>
             </header>
             <main>
