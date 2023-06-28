@@ -1,6 +1,12 @@
 import { useState } from "react";
+import { plantDataInterface } from "../Shared/interfaces";
 
-const CreateVeg: React.FC = function() {
+interface CreateVegInterface {
+    addPlantPick: (result: plantDataInterface) => Promise<void>,
+    setAddVegVis: React.Dispatch<React.SetStateAction<boolean>>
+};
+
+const CreateVeg: React.FC<CreateVegInterface> = function({ addPlantPick, setAddVegVis }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [lifecycle, setLifecycle] = useState("");
@@ -77,6 +83,8 @@ const CreateVeg: React.FC = function() {
             const res = await req.json();
             if (req.ok) {
                 console.log(res);
+                addPlantPick(res);
+                setAddVegVis(false);
             } else {
                 throw new Error(res);
             };
@@ -225,6 +233,7 @@ const CreateVeg: React.FC = function() {
                 <input type="checkbox" name="privateData" id="privateData" checked={privateData} onChange={() => setPrivateData(!privateData)} />
                 <label htmlFor="privateData">Set to private?</label>
             </div>
+            <button type="button" onClick={() => setAddVegVis(false)}>Close form</button>
             <button type="submit">Add to database</button>
         </form>
     );

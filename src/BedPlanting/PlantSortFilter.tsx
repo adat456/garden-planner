@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { plantDataInterface } from "../Shared/interfaces";
+import { plantDataInterface, userInterface } from "../Shared/interfaces";
+import { isJWTInvalid } from "../Shared/helpers";
+import { useNavigate } from "react-router-dom";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,
@@ -8,17 +10,44 @@ interface PlantSortFilterInterface {
 };
 
 const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSearchResults, setFiltSortSearchResults, setSortFiltOn}) { 
+    const [ user, setUser ] = useState<userInterface | null>(null);
     const [ vis, setVis ] = useState("");
     const [ hardinessFilters, setHardinessFilters ] = useState<number[]>([]);
     const [ lifecycleFilter, setLifecycleFilter ] = useState<string>("");
     const [ waterFilter, setWaterFilter ] = useState("");
     const [ lightFilter, setLightFilter ] = useState("");
     const [ plantingSznFilter, setPlantingSznFilter ] = useState("");
-    const [ includeUserVeg, setIncludeUserVeg ] = useState(false);
+    const [ includePersonalVeg, setIncludePersonalVeg ] = useState(true);
+    const [ includePublicVeg, setIncludePublicVeg ] = useState(false);
     // may be name, days to maturation, or height in inches
     const [ sorter, setSorter ] = useState("");
     // either ascending or descending
     const [ ascending, setAscending ] = useState(true);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        async function pullUserData() {
+            try {
+                const req = await fetch("http://localhost:3000/pull-user-data", {credentials: "include"});
+                const res = await req.json();
+                if (req.ok) {
+                    setUser(res);
+                } else {
+                    throw new Error(res);
+                };
+            } catch(err) {
+                const invalidJWTMessage = isJWTInvalid(err);
+                if (invalidJWTMessage) {
+                    console.log(invalidJWTMessage);
+                    navigate("/sign-in");
+                } else {
+                    console.log(err.message);
+                };
+            };
+        };
+        pullUserData();
+    }, [location]);
 
     function generateHardinessButtons() {
         let hardinessButtonsArr = [];
@@ -40,18 +69,30 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     };
 
     useEffect(() => {
+        console.log(finalSearchResults);
         let finalSearchResultsCopy = finalSearchResults as plantDataInterface[];
 
-        if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && includeUserVeg && !sorter) {
+        if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && includePersonalVeg && includePublicVeg && !sorter) {
             setSortFiltOn(false);
             setFiltSortSearchResults([]);
         } else {
             // by default finalSearchResults will include BOTH formal and user added contributions, and by default user added contributions will be filtered out
             // if this checkbox is checked, then this filtering process will be skipped and any other filtering/sorting ops will be performed on the entire result set
-            if (!includeUserVeg) {
+            if (!includePersonalVeg) {
                 finalSearchResultsCopy = finalSearchResultsCopy.filter(result => {
                     if (!result.contributor) return result;
-                    if (result.contributor && result.contributor === "adat456") return result;
+                    console.log(result.contributor);
+                    console.log(user?.username);
+                    if (result.contributor && result.contributor !== user?.username) return result;
+                });
+            };
+            if (!includePublicVeg) {
+                console.log("triggered");
+                finalSearchResultsCopy = finalSearchResultsCopy.filter(result => {
+                    if (!result.contributor) return result;
+                    console.log(result.contributor);
+                    console.log(user?.username);
+                    if (result.contributor && result.contributor === user?.username) return result;
                 });
             };
             if (hardinessFilters.length > 0) {
@@ -142,7 +183,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
             setSortFiltOn(true);
             setFiltSortSearchResults([...finalSearchResultsCopy]);
         };
-    }, [hardinessFilters, lifecycleFilter, waterFilter, lightFilter, plantingSznFilter, includeUserVeg, sorter, ascending, finalSearchResults]);
+    }, [hardinessFilters, lifecycleFilter, waterFilter, lightFilter, plantingSznFilter, includePersonalVeg, includePublicVeg, sorter, ascending, finalSearchResults]);
 
     function resetAll() {
         setHardinessFilters([]);
@@ -150,7 +191,8 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
         setWaterFilter("");
         setLightFilter("");
         setPlantingSznFilter("");
-        setIncludeUserVeg(false);
+        setIncludePersonalVeg(true);
+        setIncludePublicVeg(false);
         setSorter("");
     };
 
@@ -230,8 +272,12 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
                             </fieldset>
                         </div>
                         <div>
-                            <input type="checkbox" name="include" id="include" checked={includeUserVeg} onChange={() => setIncludeUserVeg(!includeUserVeg)} />
-                            <label htmlFor="include">Include contributions from other users</label>
+                            <input type="checkbox" name="include" id="include" checked={includePersonalVeg} onChange={() => setIncludePersonalVeg(!includePersonalVeg)} />
+                            <label htmlFor="include">Include personal contributions</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" name="include-public" id="include-public" checked={includePublicVeg} onChange={() => setIncludePublicVeg(!includePublicVeg)} />
+                            <label htmlFor="include-public">Include other users' contributions</label>
                         </div>
                     </div>
                     <div className="button-cluster">

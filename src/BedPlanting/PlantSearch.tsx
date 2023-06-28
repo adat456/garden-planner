@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
+import PaginationButtons from "./PaginationButtons";
 import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
 import { isJWTInvalid } from "../Shared/helpers";
 import randomColor from "random-color";
+import CreateVeg from "../Misc/CreateVeg";
 
 interface plantSearchInterface {
     plantPicks: plantPickDataInterface[],
@@ -26,11 +28,14 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     const [ totalPages, setTotalPages ] = useState(0);
     const [ curPage, setCurPage ] = useState(0);
 
+    const [ addVegVis, setAddVegVis ] = useState(false);
+
     const navigate = useNavigate();
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
         setSearchTerm(input.value);
+        setAddVegVis(false);
         
         if (input.value === "") {
             setLiveSearchResults([]);
@@ -198,91 +203,54 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Interface / Search_Magnifying_Glass"><path id="Vector" d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" strokeLinecap="round" strokeLinejoin="round"/></g></svg>
                 </button>
             </form>
-            <div className="filter-sort-results-container">
-                {typeof liveSearchResults === "string" ?
-                    <p>{liveSearchResults}</p> :
-                    // display the live results if they exist
-                    <ul className="live-search-results-container">
-                        {generateLiveResultsArr()}
-                        {extraResults ? <p className="total-results">{`${extraResults} more results.`}</p> : null }
-                    </ul> 
-                }
-                {typeof finalSearchResults !== "string" ?
-                    // display the sorting/filtering if there are final search results
-                    <PlantSortFilter finalSearchResults={finalSearchResults} setSortFiltOn={setSortFiltOn} setFiltSortSearchResults={setFiltSortSearchResults} /> :
-                    null
-                }
-                {typeof finalSearchResults === "string" ?
-                    // display the string if something's gone wrong
-                    <p>{finalSearchResults}</p> : 
-                    // else display either the filtered or the original final search results
-                    sortFiltOn ?
-                        <>
-                            <h3 className="total-results">{`${filtSortSearchResults.length} results`}</h3>
-                            {totalPages > 1 ?
-                                <div className="pages-button-cluster">
-                                    {curPage === 1 ?
-                                        <button type="button" disabled>BACK</button> :
-                                        <button type="button" onClick={() => setCurPage(curPage - 1)}>BACK</button> 
-                                    }
-                                    <p>{`Page ${curPage} of ${totalPages}`}</p>
-                                    {curPage === totalPages ?
-                                        <button type="button" disabled>NEXT</button> : 
-                                        <button type="button" onClick={() => setCurPage(curPage + 1)}>NEXT</button>
-                                    }
-                                </div> : null
-                            }
-                            <ul className="final-search-results-container">
-                                {generateFinalResultsArr(filtSortSearchResults)}
-                            </ul>
-                            {totalPages > 1 ?
-                                <div className="pages-button-cluster">
-                                    {curPage === 1 ?
-                                        <button type="button" disabled>BACK</button> :
-                                        <button type="button" onClick={() => setCurPage(curPage - 1)}>BACK</button> 
-                                    }
-                                    <p>{`Page ${curPage} of ${totalPages}`}</p>
-                                    {curPage === totalPages ?
-                                        <button type="button" disabled>NEXT</button> : 
-                                        <button type="button" onClick={() => setCurPage(curPage + 1)}>NEXT</button>
-                                    }
-                                </div> : null
-                            }
-                        </> :
-                        <>
-                            <h3 className="total-results">{`${finalSearchResults.length} results`}</h3>
-                            {totalPages > 1 ?
-                                <div className="pages-button-cluster">
-                                    {curPage === 1 ?
-                                        <button type="button" disabled>BACK</button> :
-                                        <button type="button" onClick={() => setCurPage(curPage - 1)}>BACK</button> 
-                                    }
-                                    <p>{`Page ${curPage} of ${totalPages}`}</p>
-                                    {curPage === totalPages ?
-                                        <button type="button" disabled>NEXT</button> : 
-                                        <button type="button" onClick={() => setCurPage(curPage + 1)}>NEXT</button>
-                                    }
-                                </div> : null
-                            }
-                            <ul className="final-search-results-container">
-                                {generateFinalResultsArr(finalSearchResults)}
-                            </ul>
-                            {totalPages > 1 ?
-                                <div className="pages-button-cluster">
-                                    {curPage === 1 ?
-                                        <button type="button" disabled>BACK</button> :
-                                        <button type="button" onClick={() => setCurPage(curPage - 1)}>BACK</button> 
-                                    }
-                                    <p>{`Page ${curPage} of ${totalPages}`}</p>
-                                    {curPage === totalPages ?
-                                        <button type="button" disabled>NEXT</button> : 
-                                        <button type="button" onClick={() => setCurPage(curPage + 1)}>NEXT</button>
-                                    }
-                                </div> : null
-                            }
-                        </>
-                }
-            </div>
+            <button type="button" onClick={() => setAddVegVis(!addVegVis)}>Or add a vegetable of your own</button>
+            {addVegVis ?
+                <CreateVeg addPlantPick={addPlantPick} setAddVegVis={setAddVegVis} /> :
+                <div className="filter-sort-results-container">
+                    {typeof liveSearchResults === "string" ?
+                        <p>{liveSearchResults}</p> :
+                        // display the live results if they exist
+                        <ul className="live-search-results-container">
+                            {generateLiveResultsArr()}
+                            {extraResults ? <p className="total-results">{`${extraResults} more results.`}</p> : null }
+                        </ul> 
+                    }
+                    {typeof finalSearchResults !== "string" ?
+                        // display the sorting/filtering if there are final search results
+                        <PlantSortFilter finalSearchResults={finalSearchResults} setSortFiltOn={setSortFiltOn} setFiltSortSearchResults={setFiltSortSearchResults} /> : null
+                    }
+                    {typeof finalSearchResults === "string" ?
+                        // display the string if something's gone wrong
+                        <p>{finalSearchResults}</p> : 
+                        // else display either the filtered or the original final search results
+                        sortFiltOn ?
+                            <>
+                                <h3 className="total-results">{`${filtSortSearchResults.length} results`}</h3>
+                                {totalPages > 1 ?
+                                    <PaginationButtons curPage={curPage} setCurPage={setCurPage} totalPages={totalPages} /> : null
+                                }
+                                <ul className="final-search-results-container">
+                                    {generateFinalResultsArr(filtSortSearchResults)}
+                                </ul>
+                                {totalPages > 1 ?
+                                    <PaginationButtons curPage={curPage} setCurPage={setCurPage} totalPages={totalPages} />  : null
+                                }
+                            </> :
+                            <>
+                                <h3 className="total-results">{`${finalSearchResults.length} results`}</h3>
+                                {totalPages > 1 ?
+                                    <PaginationButtons curPage={curPage} setCurPage={setCurPage} totalPages={totalPages} />  : null
+                                }
+                                <ul className="final-search-results-container">
+                                    {generateFinalResultsArr(finalSearchResults)}
+                                </ul>
+                                {totalPages > 1 ?
+                                    <PaginationButtons curPage={curPage} setCurPage={setCurPage} totalPages={totalPages} />  : null
+                                }
+                            </>
+                    }
+                </div>
+            }
         </section>
     );
 };
