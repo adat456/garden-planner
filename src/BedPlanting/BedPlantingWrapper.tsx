@@ -1,38 +1,22 @@
-import { useState, useEffect } from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { isJWTInvalid } from "../Shared/helpers";
+import { useEffect } from "react";
+import { Outlet, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBeds } from "../features/beds/bedsSlice";
+import { bedDataInterface } from "../Shared/interfaces";
 
 const BedPlantingPage: React.FC = function() {
-    const [ bedIds, setBedIds ] = useState<number[]>([]);
-
-    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const bedsInfoStatus = useSelector(state => state.beds.status);
+    const bedsData: bedDataInterface[] = useSelector(state => state.beds.beds);
 
     useEffect(() => {
-        async function getBedIds() {
-            try {
-                const req = await fetch("http://localhost:3000/get-bedids", {credentials: "include"});
-                const res = await req.json();
-                if (req.ok) {
-                    setBedIds(res);
-                } else {
-                    // even though all API calls return just the err.message (a string), this message is rethrown as a whole error object (which is why it can be accessed as err.message in the catch block and by the helper fx)
-                    throw new Error(res);
-                };
-            } catch(err) {
-                const invalidJWTMessage = isJWTInvalid(err);
-                if (invalidJWTMessage) {
-                    console.log(invalidJWTMessage);
-                    navigate("/sign-in");
-                } else {
-                    console.log(err.message);
-                };
-            };
+        if (bedsInfoStatus === "idle") {
+            dispatch(fetchBeds());
         };
-        getBedIds();
-    }, []);
+    }, [dispatch, bedsInfoStatus]);
 
     function generateBedLinks() {
-        let bedIdLinks = bedIds.map(id => <Link key={id} to={`/create/${id}`}>{`Bed ${id}`}</Link>);
+        let bedIdLinks = bedsData?.map(bed => <Link key={bed.id} to={`/create/${bed.id}`}>{bed.name}</Link>);
         return bedIdLinks;
     };
 
