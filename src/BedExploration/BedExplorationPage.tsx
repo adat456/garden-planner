@@ -1,41 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { bedDataInterface, userInterface } from "../Shared/interfaces";
+import { bedDataInterface } from "../Shared/interfaces";
 import { isJWTInvalid } from "../Shared/helpers";
 import BedResultsContainer from "./BedResultsContainer";
 
 const BedExplorationPage: React.FC = function() {
     const [ bedResults, setBedResults ] = useState<bedDataInterface[]>([]);
-    const [ user, setUser ] = useState<userInterface | null>(null);
 
     const [ searchParams, setSearchParams ] = useSearchParams();
 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // pulling user info and ALL public beds
-    useEffect(() => {
-        async function pullUserData() {
-            try {
-                const req = await fetch("http://localhost:3000/pull-user-data", {credentials: "include"});
-                const res = await req.json();
-                if (req.ok) {
-                    setUser(res);
-                } else {
-                    throw new Error(res);
-                };
-            } catch(err) {
-                const invalidJWTMessage = isJWTInvalid(err);
-                if (invalidJWTMessage) {
-                    console.log(invalidJWTMessage);
-                    navigate("/sign-in");
-                } else {
-                    console.log(err.message);
-                };
-            };
-        };
-        pullUserData();
-    }, [location])
+    // pulling ALL public beds
 
     useEffect(() => {
         async function pullAllPublicBeds() {
@@ -183,7 +160,7 @@ const BedExplorationPage: React.FC = function() {
             </form>
             <section>
                 <h2>Results</h2>
-                <BedResultsContainer bedResults={bedResults} user={user} />
+                <BedResultsContainer bedResults={bedResults} />
             </section>
         </>
     );

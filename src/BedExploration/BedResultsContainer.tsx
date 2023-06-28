@@ -4,10 +4,9 @@ import { bedDataInterface, userInterface } from "../Shared/interfaces";
 
 interface BedResultsContainerInterface {
     bedResults: bedDataInterface[],
-    user: userInterface | null,
 };
 
-const BedResultsContainer: React.FC<BedResultsContainerInterface> = function({ bedResults, user }) {
+const BedResultsContainer: React.FC<BedResultsContainerInterface> = function({ bedResults }) {
     const [ searchParams, setSearchParams ] = useSearchParams();
 
     let searchBy: string, searchTerm: string, hardinessNums: string[], sunlight: string, soil: string[];
@@ -53,7 +52,7 @@ const BedResultsContainer: React.FC<BedResultsContainerInterface> = function({ b
                 });
             };
 
-            const bedResultsArr = bedResultsCopy.map((result, index) => <BedResultPreview bed={result} user={user} key={index} />);
+            const bedResultsArr = bedResultsCopy.map((result, index) => <BedResultPreview bed={result} key={index} />);
             return bedResultsArr;
         };
     };

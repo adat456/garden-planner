@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { plantDataInterface, userInterface } from "../Shared/interfaces";
-import { isJWTInvalid } from "../Shared/helpers";
-import { useNavigate } from "react-router-dom";
+import { plantDataInterface } from "../Shared/interfaces";
+import { useSelector } from "react-redux";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,
@@ -10,7 +9,6 @@ interface PlantSortFilterInterface {
 };
 
 const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSearchResults, setFiltSortSearchResults, setSortFiltOn}) { 
-    const [ user, setUser ] = useState<userInterface | null>(null);
     const [ vis, setVis ] = useState("");
     const [ hardinessFilters, setHardinessFilters ] = useState<number[]>([]);
     const [ lifecycleFilter, setLifecycleFilter ] = useState<string>("");
@@ -24,30 +22,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     // either ascending or descending
     const [ ascending, setAscending ] = useState(true);
 
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        async function pullUserData() {
-            try {
-                const req = await fetch("http://localhost:3000/pull-user-data", {credentials: "include"});
-                const res = await req.json();
-                if (req.ok) {
-                    setUser(res);
-                } else {
-                    throw new Error(res);
-                };
-            } catch(err) {
-                const invalidJWTMessage = isJWTInvalid(err);
-                if (invalidJWTMessage) {
-                    console.log(invalidJWTMessage);
-                    navigate("/sign-in");
-                } else {
-                    console.log(err.message);
-                };
-            };
-        };
-        pullUserData();
-    }, [location]);
+    const username = useSelector(state => state.user.user.username);
 
     function generateHardinessButtons() {
         let hardinessButtonsArr = [];
@@ -69,7 +44,6 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     };
 
     useEffect(() => {
-        console.log(finalSearchResults);
         let finalSearchResultsCopy = finalSearchResults as plantDataInterface[];
 
         if (hardinessFilters.length === 0 && !lifecycleFilter && !waterFilter && !lightFilter && !plantingSznFilter && includePersonalVeg && includePublicVeg && !sorter) {
@@ -81,18 +55,13 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
             if (!includePersonalVeg) {
                 finalSearchResultsCopy = finalSearchResultsCopy.filter(result => {
                     if (!result.contributor) return result;
-                    console.log(result.contributor);
-                    console.log(user?.username);
-                    if (result.contributor && result.contributor !== user?.username) return result;
+                    if (result.contributor && result.contributor !== username) return result;
                 });
             };
             if (!includePublicVeg) {
-                console.log("triggered");
                 finalSearchResultsCopy = finalSearchResultsCopy.filter(result => {
                     if (!result.contributor) return result;
-                    console.log(result.contributor);
-                    console.log(user?.username);
-                    if (result.contributor && result.contributor === user?.username) return result;
+                    if (result.contributor && result.contributor === username) return result;
                 });
             };
             if (hardinessFilters.length > 0) {
