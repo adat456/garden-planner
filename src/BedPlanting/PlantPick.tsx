@@ -1,38 +1,73 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
+import { useAppDispatch } from "../app/hooks";
 import { plantPickDataInterface, colorObjInterface } from "../Shared/interfaces";
+import { updateSeedBasket } from "../features/beds/bedsSlice";
 
 interface plantPickInterface {
+    bedid: string | undefined,
     plant: plantPickDataInterface,
     plantPicks: plantPickDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
     setCurPlantPick: React.Dispatch<React.SetStateAction<plantPickDataInterface | null>>,
-    abbreviated?: boolean
-    updateSeedBasket: (arr: plantPickDataInterface[]) => Promise<void>
+    abbreviated: boolean,
 };
 
-const PlantPick: React.FC<plantPickInterface> = function({ plant, plantPicks, setPlantPicks, setCurPlantPick, abbreviated, updateSeedBasket }) {
+const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPicks, setCurPlantPick, abbreviated }) {
     const [ colorSliderVis, setColorSliderVis ] = useState(false);
+    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
+
+    const dispatch = useAppDispatch();
 
     async function changePlantPickColor(color: colorObjInterface) {
-        console.log(color);
-        const updatedPlantPicks = plantPicks.map(pick => {
-            if (pick.id === plant.id) {
-                let plantCopy = plant;
-                plantCopy.gridcolor = color.hex;
-                return plantCopy;
-            } else {
-                return pick;
+        if (updateSeedBasketStatus === "idle") {
+            const updatedseedbasket = plantPicks.map(pick => {
+                if (pick.id === plant.id) {
+                    let plantCopy = {
+                        ...plant,
+                        gridcolor: color.hex
+                    };
+                    return plantCopy;
+                } else {
+                    return pick;
+                };
+            });
+            const numericBedId = Number(bedid);
+
+            try {
+                setUpdateSeedBasketStatus("pending");
+                await dispatch(updateSeedBasket(
+                    {
+                        seedbasket: updatedseedbasket,
+                        bedid: numericBedId
+                    }
+                )).unwrap();
+            } catch(err) {
+                console.error("Unable to edit plant pick:", err.message);
+            } finally {
+                setUpdateSeedBasketStatus("idle");
             };
-        });
-        updateSeedBasket(updatedPlantPicks);
-        setPlantPicks(updatedPlantPicks);
+        };
     };
 
-    function removePlantPick(id: number) {
-        const updatedPlantPicks = plantPicks.filter(plant => plant.id !== id);
-        updateSeedBasket(updatedPlantPicks);
-        setPlantPicks(updatedPlantPicks);
+    async function removePlantPick(id: number) {
+        if (updateSeedBasketStatus === "idle") {
+            const updatedseedbasket = plantPicks?.filter(plant => plant.id !== id);
+            const numericBedId = Number(bedid);
+
+            try {
+                setUpdateSeedBasketStatus("pending");
+                await dispatch(updateSeedBasket(
+                    {
+                        seedbasket: updatedseedbasket,
+                        bedid: numericBedId
+                    }
+                ));
+            } catch(err) {
+                console.error("Unable to remove plant pick:", err.message);
+            } finally {
+                setUpdateSeedBasketStatus("idle");
+            };
+        };
     };
 
     if (abbreviated) {

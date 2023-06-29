@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../app/hooks";
+import { updateSeedBasket } from "../features/beds/bedsSlice";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "./PaginationButtons";
@@ -10,11 +12,10 @@ import CreateVeg from "../Misc/CreateVeg";
 
 interface plantSearchInterface {
     plantPicks: plantPickDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
-    updateSeedBasket: (arr: plantPickDataInterface[]) => Promise<void>
+    bedid: string | undefined
 };
 
-const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPlantPicks, updateSeedBasket }) {
+const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid }) {
     const [ searchTerm, setSearchTerm ] = useState("");
 
     const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
@@ -29,6 +30,10 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     const [ curPage, setCurPage ] = useState(0);
 
     const [ addVegVis, setAddVegVis ] = useState(false);
+
+    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
+
+    const dispatch = useAppDispatch();
 
     const navigate = useNavigate();
 
@@ -77,7 +82,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
             liveResultsArr = liveSearchResults.map(result => {
                 return (
                     <li key={result.id}>
-                        {plantPicks.find(plant => plant.id === result.id) ?
+                        {plantPicks?.find(plant => plant.id === result.id) ?
                             <button type="button" disabled>
                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 4C12.5523 4 13 4.44772 13 5V11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H13V19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19V13H5C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11H11V5C11 4.44772 11.4477 4 12 4Z" /></svg>
                             </button> :
@@ -127,12 +132,27 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, setPl
     };
 
     async function addPlantPick(result: plantDataInterface) {
-        const updatedPlantPicks = [...plantPicks, {
-            ...result,
-            gridcolor: randomColor().hexString(),
-        }];
-        updateSeedBasket(updatedPlantPicks);
-        setPlantPicks(updatedPlantPicks);
+        if (updateSeedBasketStatus === "idle") {
+            const updatedseedbasket = [...plantPicks, {
+                ...result,
+                gridcolor: randomColor().hexString()
+            }];
+            const numericbedid = Number(bedid);
+            
+            try {
+                setUpdateSeedBasketStatus("pending");
+                await dispatch(updateSeedBasket(
+                    {
+                        seedbasket: updatedseedbasket, 
+                        bedid: numericbedid
+                    }
+                )).unwrap();
+            } catch(err) {
+                console.error("Unable to add plant pick:", err.message);
+            } finally {
+                setUpdateSeedBasketStatus("idle");
+            };
+        };
     };
 
     // pagination logic
