@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { plantDataInterface } from "../Shared/interfaces";
+import { plantDataInterface } from "../app/interfaces";
 import { useSelector } from "react-redux";
 
 interface PlantSortFilterInterface {

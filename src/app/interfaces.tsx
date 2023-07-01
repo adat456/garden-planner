@@ -7,6 +7,14 @@ export interface gridMapInterface {
     gridColor: string
 };
 
+export interface rolesInterface {
+    title: string,
+    duties: {
+        value: string,
+        id: number
+    }[],
+};
+
 export interface bedDataInterface {
     hardiness: number,
     sunlight: string,
@@ -21,7 +29,8 @@ export interface bedDataInterface {
     created: string,
     username: string,
     numhearts: number,
-    numcopies: number
+    numcopies: number,
+    roles: rolesInterface[]
 };
 
 export interface plantDataInterface {

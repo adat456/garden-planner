@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { bedDataInterface, plantPickDataInterface, gridMapInterface } from "../Shared/interfaces";
-import { isJWTInvalid } from "../Shared/helpers";
+import { useParams } from "react-router-dom";
+import { useAppDispatch } from "../app/hooks";
+import { updateGrid } from "../app/features/bedsSlice";
+import { bedDataInterface, plantPickDataInterface, gridMapInterface } from "../app/interfaces";
 
 interface bedPlantingGridInterface {
     bedData: bedDataInterface | null,
@@ -12,8 +13,10 @@ interface bedPlantingGridInterface {
 const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, setBedData, curPlantPick }) {
     const [ lastTen, setLastTen ] = useState<gridMapInterface[][]>([JSON.parse(JSON.stringify(bedData?.gridmap))]);
     const [ counter, setCounter ] = useState(1);
+    const [ updateGridStatus, setUpdateGridStatus ] = useState("idle");
 
-    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+
     const { bedid } = useParams();
 
     function createBedGrid() {
@@ -54,7 +57,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, 
                 // if they do match, remove the planted class and replace the corresponding cell data with scrubbed cell data
                 if (cell.getAttribute("data-plant-id") === curPlantPick?.id.toString()) {
                     cell.classList.remove("planted");
-                    let gridMapCopy = bedData?.gridmap;
+                    let gridMapCopy = [...bedData?.gridmap];
                     if (gridMapCopy) {
                         let cellCopy = gridMapCopy[cellNum - 1];
                         gridMapCopy?.splice((cellNum - 1), 1, {
@@ -71,7 +74,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, 
                     };
                 } else {
                     // if they don't match, keep the planted class but replace the cell data with updated plant ID and name
-                    let gridMapCopy = bedData?.gridmap;
+                    let gridMapCopy = [...bedData?.gridmap];
                     if (gridMapCopy && curPlantPick) {
                         let cellCopy = gridMapCopy[cellNum - 1];
                         gridMapCopy?.splice((cellNum - 1), 1, {
@@ -90,7 +93,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, 
             } else {
                 // if the cell has not yet been planted, just replace the cell with plant ID and name data included
                 cell.classList.add("planted");
-                let gridMapCopy = bedData?.gridmap;
+                let gridMapCopy = [...bedData?.gridmap];
                 if (gridMapCopy && curPlantPick) {
                     let cellCopy = gridMapCopy[cellNum - 1];
                     gridMapCopy?.splice((cellNum - 1), 1, {
@@ -145,50 +148,34 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ bedData, 
         };    
     };
 
-    async function updateBedData(gridMap: gridMapInterface[], bedId: number, addToLastTen: boolean) {
-        const reqOptions: RequestInit = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gridMap, bedId }),
-            credentials: "include"
+    async function updateBedData(gridmap: gridMapInterface[], bedid: number, addToLastTen: boolean) {
+        if (updateGridStatus === "idle") {
+            try {
+                setUpdateGridStatus("pending");
+                await dispatch(updateGrid({
+                    gridmap, bedid
+                })).unwrap();
+            } catch(err) {
+                console.error("Unable to update grid:", err.message);
+            } finally {
+                setUpdateGridStatus("pending");
+            };
         };
-
-        try {
-            const req = await fetch("http://localhost:3000/save-bed", reqOptions);
-            const message = await req.json();
-            if (req.ok) {
-                console.log(message);
-                setBedData({
-                    ...bedData,
-                    gridmap: gridMap
-                });
                 
-                if (addToLastTen) {
-                    let lastTenCopy = lastTen;
-                    let gridMapCopy = JSON.parse(JSON.stringify(bedData?.gridmap));
-                    if (lastTenCopy.length < 10) {
-                        // adds most recent gridmap instance to index 0 if there are less than 10 instances
-                        lastTenCopy = [gridMapCopy, ...lastTenCopy];
-                    } else {
-                        // if there are 10 instances, remove the last instance before adding the newest
-                        lastTenCopy = lastTenCopy.slice(0, lastTenCopy.length - 1);
-                        lastTenCopy = [gridMapCopy, ...lastTenCopy];
-                    };
-                    setLastTen(lastTenCopy);
+        if (addToLastTen) {
+            let lastTenCopy = lastTen;
+            let gridMapCopy = JSON.parse(JSON.stringify(bedData?.gridmap));
+            if (lastTenCopy.length < 10) {
+                // adds most recent gridmap instance to index 0 if there are less than 10 instances
+                lastTenCopy = [gridMapCopy, ...lastTenCopy];
+            } else {
+                // if there are 10 instances, remove the last instance before adding the newest
+                lastTenCopy = lastTenCopy.slice(0, lastTenCopy.length - 1);
+                lastTenCopy = [gridMapCopy, ...lastTenCopy];
+            };
+            setLastTen(lastTenCopy);
 
-                    setCounter(1);
-                };
-            } else {
-                throw new Error(message);
-            };
-        } catch(err) {
-            const invalidJWTMessage = isJWTInvalid(err);
-            if (invalidJWTMessage) {
-                console.log(invalidJWTMessage);
-                navigate("/sign-in");
-            } else {
-                console.log(err.message);
-            };
+            setCounter(1);
         };
     };
 

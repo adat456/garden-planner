@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isJWTInvalid } from "../Shared/helpers";
-import { gridMapInterface } from "../Shared/interfaces";
+import { useAppDispatch } from "../../app/hooks";
+import { addBed } from "../../app/features/bedsSlice";
+import { gridMapInterface } from "../../app/interfaces";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 
@@ -16,15 +17,19 @@ const BedCreationPage: React.FC = function() {
     const [soil, setSoil] = useState<string[]>([]);
     const [publicBoard, setPublicBoard] = useState(false);
 
+    const [ addBedStatus, setAddBedStatus ] = useState("idle");
+
     const navigate = useNavigate();
+
+    const dispatch = useAppDispatch();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
         const allCells = [...document.querySelectorAll(".grid-cell")];
-        let gridMap: gridMapInterface[] = [];
+        let gridmap: gridMapInterface[] = [];
         if (whole) {
-            gridMap = allCells.map(cell => {
+            gridmap = allCells.map(cell => {
                 const cellDesc: gridMapInterface = {
                     num: cell.getAttribute("id")?.slice(5),
                     selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
@@ -35,7 +40,7 @@ const BedCreationPage: React.FC = function() {
                 return cellDesc;
             });
         } else if (!whole) {
-            gridMap = allCells.map(cell => {
+            gridmap = allCells.map(cell => {
                 const cellDesc: gridMapInterface = {
                     num: cell.getAttribute("id")?.slice(5),
                     selected: cell.classList.contains("selected"),
@@ -47,33 +52,20 @@ const BedCreationPage: React.FC = function() {
             });
         };
 
-        const reqOptions: RequestInit = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                hardiness: hardiness[1], 
-                public: publicBoard,
-                created: new Date(),
-                name, sunlight, soil, length, width, gridMap
-            }),
-            credentials: "include"
-        };
-
-        try {
-            const req = await fetch("http://localhost:3000/create-bed", reqOptions);
-            const message = await req.json();
-            if (req.ok) {
-                console.log(message);
-            } else { 
-                throw new Error(message);
-            };
-        } catch(err) {
-            const invalidJWTMessage = isJWTInvalid(err);
-            if (invalidJWTMessage) {
-                console.log(invalidJWTMessage);
-                navigate("/sign-in");
-            } else {
-                console.log(err.message);
+        if (addBedStatus === "idle") {
+            try {
+                setAddBedStatus("pending");
+                await dispatch(addBed(
+                    {
+                        name, publicBoard, length, width, soil, sunlight, gridmap, 
+                        hardiness: hardiness[1]
+                    }
+                )).unwrap();
+            } catch(err) {
+                console.error("Unable to add bed: ", err.message);
+            } finally {
+                setAddBedStatus("idle");
+                navigate("/create");
             };
         };
     };

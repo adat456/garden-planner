@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchBeds } from "../features/beds/bedsSlice";
-import { bedDataInterface } from "../Shared/interfaces";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { fetchBeds } from "../app/features/bedsSlice";
+import { bedDataInterface } from "../app/interfaces";
 
 const BedPlantingPage: React.FC = function() {
-    const dispatch = useDispatch();
-    const bedsInfoStatus = useSelector(state => state.beds.status);
-    const bedsData: bedDataInterface[] = useSelector(state => state.beds.beds);
+    const dispatch = useAppDispatch();
+    const bedsInfoStatus = useAppSelector(state => state.beds.status);
+    const bedsData: bedDataInterface[] = useAppSelector(state => state.beds.beds);
 
     useEffect(() => {
         if (bedsInfoStatus === "idle") {
@@ -19,6 +19,8 @@ const BedPlantingPage: React.FC = function() {
         let bedIdLinks = bedsData?.map(bed => <Link key={bed.id} to={`/create/${bed.id}`}>{bed.name}</Link>);
         return bedIdLinks;
     };
+
+    useEffect(() => console.log(bedsData), [bedsData]);
 
     return (
         <div className="bed-planting-wrapper">

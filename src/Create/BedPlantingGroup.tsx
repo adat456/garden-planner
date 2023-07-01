@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../app/hooks";
-import { plantPickDataInterface, bedDataInterface } from "../Shared/interfaces";
-import { selectBed } from "../features/beds/bedsSlice";
+import { plantPickDataInterface, bedDataInterface } from "../app/interfaces";
+import { selectBed } from "../app/features/bedsSlice";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';

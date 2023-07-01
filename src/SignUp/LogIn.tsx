@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCred, handleVisToggle } from "../Shared/helpers";
+import { validateCred, handleVisToggle } from "../app/helpers";
 
 const LogIn: React.FC = function() {
     const [ username, setUsername ] = useState("");

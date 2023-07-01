@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { plantDataInterface } from "../Shared/interfaces";
+import { plantDataInterface } from "../app/interfaces";
 
 interface CreateVegInterface {
     addPlantPick: (result: plantDataInterface) => Promise<void>,

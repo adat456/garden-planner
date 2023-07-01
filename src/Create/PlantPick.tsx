@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
 import { useAppDispatch } from "../app/hooks";
-import { plantPickDataInterface, colorObjInterface } from "../Shared/interfaces";
-import { updateSeedBasket } from "../features/beds/bedsSlice";
+import { plantPickDataInterface, colorObjInterface } from "../app/interfaces";
+import { updateSeedBasket } from "../app/features/bedsSlice";
 
 interface plantPickInterface {
     bedid: string | undefined,

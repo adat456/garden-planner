@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCred, validateEmail, validateReqString, handleVisToggle } from "../Shared/helpers";
+import { validateCred, validateEmail, validateReqString, handleVisToggle } from "../app/helpers";
 
 const CreateAccount: React.FC = function() {
     const [ firstName, setFirstName ] = useState("");

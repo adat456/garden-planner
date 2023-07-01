@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LogIn from "./SignUp/LogIn";
 import CreateAccount from "./SignUp/CreateAccount";
 import LoggedInWrapper from "./LoggedInWrapper";
-import BedCreationPage from './BedCreation/BedCreationPage';
-import BedPlantingWrapper from './BedPlanting/BedPlantingWrapper';
-import BedPlantingGroup from "./BedPlanting/BedPlantingGroup";
-import BedExplorationPage from "./BedExploration/BedExplorationPage";
+import BedCreationPage from './Create/NewBed/BedCreationPage';
+import BedPlantingPage from './Create/BedPlantingPage';
+import BedPlantingGroup from "./Create/BedPlantingGroup";
+import BedSharingPage from "./Share/Wrapper";
+import BedSharingGroup from "./Share/Group";
+import BedExplorationPage from "./Explore/BedExplorationPage";
 
 function App() {
   return (
@@ -16,11 +18,13 @@ function App() {
           <CreateAccount />
         </>} />
         <Route path="/" element={<LoggedInWrapper />}>
-          <Route path="create" element={<BedPlantingWrapper />}>
+          <Route path="create" element={<BedPlantingPage />}>
             <Route path=":bedid" element={<BedPlantingGroup />} />
             <Route path="new-bed" element={<BedCreationPage />} />
           </Route>
-          <Route path="share" />
+          <Route path="share" element={<BedSharingPage />}>
+            <Route path=":bedid" element={<BedSharingGroup />} />
+          </Route>
           <Route path="explore" element={<BedExplorationPage />} />
           <Route path="profile" />
         </Route>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { bedDataInterface } from "../Shared/interfaces";
-import { isJWTInvalid } from "../Shared/helpers";
+import { bedDataInterface } from "../app/interfaces";
+import { isJWTInvalid } from "../app/helpers";
 import BedResultsContainer from "./BedResultsContainer";
 
 const BedExplorationPage: React.FC = function() {

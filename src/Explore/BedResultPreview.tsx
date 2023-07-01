@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { isJWTInvalid } from "../Shared/helpers";
-import { bedDataInterface, userInterface } from "../Shared/interfaces";
+import { isJWTInvalid } from "../app/helpers";
+import { bedDataInterface, userInterface } from "../app/interfaces";
 
 interface bedResultPreviewInterface {
     bed: bedDataInterface,

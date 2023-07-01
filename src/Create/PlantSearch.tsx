@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../app/hooks";
-import { updateSeedBasket } from "../features/beds/bedsSlice";
+import { updateSeedBasket } from "../app/features/bedsSlice";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "./PaginationButtons";
-import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
-import { isJWTInvalid } from "../Shared/helpers";
+import { plantDataInterface, plantPickDataInterface } from "../app/interfaces";
+import { isJWTInvalid } from "../app/helpers";
 import randomColor from "random-color";
-import CreateVeg from "../Misc/CreateVeg";
+import CreateVeg from "./CreateVeg";
 
 interface plantSearchInterface {
     plantPicks: plantPickDataInterface[],
@@ -138,7 +138,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
                 gridcolor: randomColor().hexString()
             }];
             const numericbedid = Number(bedid);
-            
+
             try {
                 setUpdateSeedBasketStatus("pending");
                 await dispatch(updateSeedBasket(
@@ -198,7 +198,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
     function generateFinalResultsArr(arr: plantDataInterface[]) {
         // if there are 10 or fewer results in the array (final search or sorted and filtered), just map through them
         if (totalPages === 1) {
-            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} updateSeedBasket={updateSeedBasket} />);
+            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} bedid={bedid} result={result} plantPicks={plantPicks} />);
             return resultsArr;
         } else {
             // but if there are more than 10 results in the provided array, filter out a subset of that array where the indices belong on the current page
@@ -209,7 +209,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
                 };
             });
             // then generate elements from that array subset
-            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} result={result} plantPicks={plantPicks} setPlantPicks={setPlantPicks} updateSeedBasket={updateSeedBasket} />);
+            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} bedid={bedid} result={result} plantPicks={plantPicks} />);
             return resultsArr;
         };
     };

@@ -1,24 +1,43 @@
 import { useState } from "react";
-import { plantDataInterface, plantPickDataInterface } from "../Shared/interfaces";
+import { useAppDispatch } from "../app/hooks";
+import { updateSeedBasket } from "../app/features/bedsSlice";
+import { plantDataInterface, plantPickDataInterface } from "../app/interfaces";
 import randomColor from "random-color";
 
 interface plantSearchResultsInterface {
+    bedid: string | undefined,
     result: plantDataInterface,
-    plantPicks: plantPickDataInterface[],
-    setPlantPicks: React.Dispatch<React.SetStateAction<plantPickDataInterface[]>>,
-    updateSeedBasket: (arr: plantPickDataInterface[]) => Promise<void>
+    plantPicks: plantPickDataInterface[]
 };
 
-const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ result, plantPicks, setPlantPicks, updateSeedBasket }) {
+const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ bedid, result, plantPicks }) {
     const [ expanded, setExpanded ] = useState(false);
+    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
 
-    function addPlantPick() {
-        const updatedPlantPicks = [...plantPicks, {
-           ...result,
-           gridcolor: randomColor().hexString(),
-        }];
-        updateSeedBasket(updatedPlantPicks);
-        setPlantPicks(updatedPlantPicks);
+    const dispatch = useAppDispatch();
+
+    async function addPlantPick() {
+        if (updateSeedBasketStatus === "idle") {
+            const updatedseedbasket = [...plantPicks, {
+                ...result,
+                gridcolor: randomColor().hexString()
+            }];
+            const numericbedid = Number(bedid);
+
+            try {
+                setUpdateSeedBasketStatus("pending");
+                await dispatch(updateSeedBasket(
+                    {
+                        seedbasket: updatedseedbasket, 
+                        bedid: numericbedid
+                    }
+                )).unwrap();
+            } catch(err) {
+                console.error("Unable to add plant pick:", err.message);
+            } finally {
+                setUpdateSeedBasketStatus("idle");
+            };
+        };
     };
 
     return (

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { userInterface } from "../../Shared/interfaces";
+import { userInterface } from "../interfaces";
 
 enum statusEnum {
     idle = "idle",

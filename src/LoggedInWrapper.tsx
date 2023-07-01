@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUserInfo, userInfoWiped } from "./features/user/userSlice";
+import { fetchUserInfo, userInfoWiped } from "./app/features/userSlice";
 
 const LoggedInWrapper: React.FC = function() {
     const dispatch = useDispatch();
