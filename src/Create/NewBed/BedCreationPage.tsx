@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../app/hooks";
-import { addBed } from "../../app/features/bedsSlice";
 import { gridMapInterface } from "../../app/interfaces";
+import { useCreateBedMutation } from "../../app/apiSlice";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 
@@ -17,11 +16,8 @@ const BedCreationPage: React.FC = function() {
     const [soil, setSoil] = useState<string[]>([]);
     const [publicBoard, setPublicBoard] = useState(false);
 
-    const [ addBedStatus, setAddBedStatus ] = useState("idle");
-
+    const  [createBed,  { isLoading }] = useCreateBedMutation();
     const navigate = useNavigate();
-
-    const dispatch = useAppDispatch();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -52,19 +48,17 @@ const BedCreationPage: React.FC = function() {
             });
         };
 
-        if (addBedStatus === "idle") {
+        if (!isLoading) {
             try {
-                setAddBedStatus("pending");
-                await dispatch(addBed(
-                    {
-                        name, publicBoard, length, width, soil, sunlight, gridmap, 
-                        hardiness: hardiness[1]
-                    }
-                )).unwrap();
+                await createBed({
+                    name, length, width, soil, sunlight, gridmap,
+                    public: publicBoard,
+                    created: new Date(), 
+                    hardiness: hardiness[1]
+                }).unwrap();
             } catch(err) {
                 console.error("Unable to add bed: ", err.message);
             } finally {
-                setAddBedStatus("idle");
                 navigate("/create");
             };
         };

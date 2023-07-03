@@ -28,20 +28,20 @@ const bedsSlice = createSlice({
     },
     extraReducers: builder => {
         builder
-            .addCase(fetchBeds.pending, (state) => {
-                state.status = statusEnum.loading;
-            })
-            .addCase(fetchBeds.fulfilled, (state, action) => {
-                state.status = statusEnum.succeeded;
-                state.beds = action.payload;
-            })
-            .addCase(fetchBeds.rejected, (state, action) => {
-                state.status = statusEnum.failed,
-                state.error = action.payload;
-            })
-            .addCase(addBed.fulfilled, (state, action) => {
-                state.beds.push(action.payload);
-            })
+            // .addCase(fetchBeds.pending, (state) => {
+            //     state.status = statusEnum.loading;
+            // })
+            // .addCase(fetchBeds.fulfilled, (state, action) => {
+            //     state.status = statusEnum.succeeded;
+            //     state.beds = action.payload;
+            // })
+            // .addCase(fetchBeds.rejected, (state, action) => {
+            //     state.status = statusEnum.failed,
+            //     state.error = action.payload;
+            // // })
+            // .addCase(addBed.fulfilled, (state, action) => {
+            //     state.beds.push(action.payload);
+            // })
             .addCase(updateSeedBasket.fulfilled, (state, action) => {
                 const { updatedseedbasket, bedid } = action.payload;
 
@@ -77,41 +77,41 @@ const bedsSlice = createSlice({
     }
 });
 
-export const fetchBeds = createAsyncThunk("beds/fetchInfo", async function() {
-    const req = await fetch("http://localhost:3000/pull-beds-data", {credentials: "include"});
-    const res = await req.json();
-    return res;
-});
+// export const fetchBeds = createAsyncThunk("beds/fetchInfo", async function() {
+//     const req = await fetch("http://localhost:3000/pull-beds-data", {credentials: "include"});
+//     const res = await req.json();
+//     return res;
+// });
 
-interface addBedDataInterface {
-    name: string,
-    publicBoard: boolean,
-    length: number,
-    width: number,
-    soil: string[],
-    sunlight: string,
-    hardiness: number,
-    gridmap: gridMapInterface[]
-}
+// interface addBedDataInterface {
+//     name: string,
+//     publicBoard: boolean,
+//     length: number,
+//     width: number,
+//     soil: string[],
+//     sunlight: string,
+//     hardiness: number,
+//     gridmap: gridMapInterface[]
+// }
 
-export const addBed = createAsyncThunk("beds/addBed", async function(data: addBedDataInterface) {
-    const { name, publicBoard, length, width, soil, sunlight, hardiness, gridmap } = data;
-    const reqOptions: RequestInit = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            hardiness: hardiness[1], 
-            public: publicBoard,
-            created: new Date(),
-            name, sunlight, soil, length, width, gridmap
-        }),
-        credentials: "include"
-    };
+// export const addBed = createAsyncThunk("beds/addBed", async function(data: addBedDataInterface) {
+//     const { name, publicBoard, length, width, soil, sunlight, hardiness, gridmap } = data;
+//     const reqOptions: RequestInit = {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//             hardiness: hardiness[1], 
+//             public: publicBoard,
+//             created: new Date(),
+//             name, sunlight, soil, length, width, gridmap
+//         }),
+//         credentials: "include"
+//     };
 
-    const req = await fetch("http://localhost:3000/create-bed", reqOptions);
-    const res = await req.json();
-    return res;
-})
+//     const req = await fetch("http://localhost:3000/create-bed", reqOptions);
+//     const res = await req.json();
+//     return res;
+// })
 
 interface updateSeedBasketDataInterface {
     seedbasket: plantPickDataInterface[],

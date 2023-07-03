@@ -1,47 +1,17 @@
-// import { useEffect } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
-// import { useSelector, useDispatch } from "react-redux";
-import { fetchUserInfo, userInfoWiped } from "./app/features/userSlice";
 import { useGetUserQuery } from "./app/apiSlice";
 
 const LoggedInWrapper: React.FC = function() {
-    // const dispatch = useDispatch();
-    // const userInfoStatus = useSelector(state => state.user.status);
-
-    // useEffect(() => {
-    //     if (userInfoStatus === "idle") {
-    //         dispatch(fetchUserInfo());
-    //     };
-    // }, [userInfoStatus, dispatch]);
-
-    // async function handleLogOut() {
-    //     try {
-    //         const req = await fetch("http://localhost:3000/users/log-out", {credentials: "include"});
-    //         const res = await req.json();
-    //         if (req.ok) {
-    //             dispatch(userInfoWiped());
-    //             console.log(res);
-    //         };
-    //     } catch(err) {
-    //         console.log(err.message);
-    //     };
-    // };
-
-    const {
-        data: user,
-        isLoading,
-        isSuccess,
-        isError,
-        error
-    } = useGetUserQuery();
+    const userResult = useGetUserQuery();
+    const user = userResult.data;
 
     let content;
 
-    if (isLoading) {
+    if (userResult.isLoading) {
         content = <p>User info loading.</p>;
-    } else if (isSuccess) {
+    } else if (userResult.isSuccess) {
         content = <p>{user.username}</p>
-    } else if (isError) {
+    } else if (userResult.isError) {
         content = <p>Error encounered.</p>
     };
 

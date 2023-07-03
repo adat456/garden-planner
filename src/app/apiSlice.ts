@@ -11,8 +11,18 @@ export const apiSlice = createApi({
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data"
-        })
+        }),
+        getBeds: builder.query({
+            query: () => "/pull-beds-data"
+        }),
+        createBed: builder.mutation({
+            query: data => ({
+                url: "/create-bed",
+                method: "POST",
+                body: data
+            }),
+        }),
     })
 });
 
-export const { useGetUserQuery } = apiSlice;
+export const { useGetUserQuery, useGetBedsQuery, useCreateBedMutation } = apiSlice;

@@ -1,29 +1,30 @@
-import { useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { fetchBeds } from "../app/features/bedsSlice";
+import { useGetBedsQuery } from "../app/apiSlice";
 import { bedDataInterface } from "../app/interfaces";
 
 const BedSharingPage: React.FC = function() {
-    const dispatch = useAppDispatch();
-    const bedsInfoStatus = useAppSelector(state => state.beds.status);
-    const bedsData: bedDataInterface[] = useAppSelector(state => state.beds.beds);
+    const bedsResult = useGetBedsQuery();
+    const beds = bedsResult.data as bedDataInterface[];
 
-    useEffect(() => {
-        if (bedsInfoStatus === "idle") {
-            dispatch(fetchBeds());
-        };
-    }, [dispatch, bedsInfoStatus]);
+    let links;
 
     function generateBedLinks() {
-        let bedIdLinks = bedsData?.map(bed => <Link key={bed.id} to={`/share/${bed.id}`}>{bed.name}</Link>);
+        let bedIdLinks = beds?.map(bed => <Link key={bed.id} to={`/create/${bed.id}`}>{bed.name}</Link>);
         return bedIdLinks;
+    };
+
+    if (bedsResult.isLoading) {
+        links = <p>Loading links...</p>;
+    } else if (bedsResult.isSuccess) {
+        links = generateBedLinks();
+    } else if (bedsResult.isError) {
+        links = <p>Unable to retrieve bed links.</p>
     };
 
     return (
         <div>
             <nav>
-                {generateBedLinks()}
+                {links}
             </nav>
             <Outlet />
         </div>
