@@ -67,11 +67,11 @@ const roles = [
 const ExampleRoles: React.FC = function() {
     function generateRoles() {
         const rolesArr = roles.map((role, index) => (
-            <button key={`pre-role-${index}`}>
+            <button key={`example-role-${index}`}>
                 <p>{role.title}</p>
                 <ul>
                     {role.duties.map((duty, index) => (
-                        <li key={`pre-duty-${index}`}>{duty}</li>
+                        <li key={`example-duty-${index}`}>{duty}</li>
                     ))}
                 </ul>
             </button>

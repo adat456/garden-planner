@@ -1,18 +1,20 @@
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { useGetUserQuery } from "./app/apiSlice";
+import { useDispatch } from "react-redux";
+import { util } from "./app/apiSlice";
 
 const LoggedInWrapper: React.FC = function() {
     const userResult = useGetUserQuery();
     const user = userResult.data;
 
-    let content;
+    const dispatch = useDispatch();
 
-    if (userResult.isLoading) {
-        content = <p>User info loading.</p>;
-    } else if (userResult.isSuccess) {
-        content = <p>{user.username}</p>
-    } else if (userResult.isError) {
-        content = <p>Error encounered.</p>
+    async function handleLogOut() {
+        try {
+            await dispatch(util.resetApiState());
+        } catch(err) {
+            console.error("Unable to clear API data: ", err.message)
+        };
     };
 
     return (
@@ -23,8 +25,9 @@ const LoggedInWrapper: React.FC = function() {
                     <NavLink to="share">SHARE</NavLink>
                     <NavLink to="explore">EXPLORE</NavLink>
                     <NavLink to="profile">PROFILE</NavLink>
-                    {/* <Link to="sign-in" onClick={handleLogOut}>LOG OUT</Link> */}
-                    {content}
+                    {userResult.isSuccess ?
+                        <Link to="sign-in" onClick={handleLogOut}>LOG OUT</Link> : null
+                    }
                 </nav>
             </header>
             <main>

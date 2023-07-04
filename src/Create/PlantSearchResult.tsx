@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useAppDispatch } from "../app/hooks";
-import { updateSeedBasket } from "../app/features/bedsSlice";
+import { useUpdateSeedBasketMutation } from "../app/apiSlice";
 import { plantDataInterface, plantPickDataInterface } from "../app/interfaces";
 import randomColor from "random-color";
 
@@ -12,30 +11,24 @@ interface plantSearchResultsInterface {
 
 const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ bedid, result, plantPicks }) {
     const [ expanded, setExpanded ] = useState(false);
-    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
 
-    const dispatch = useAppDispatch();
+    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
 
     async function addPlantPick() {
-        if (updateSeedBasketStatus === "idle") {
+        if (!isLoading) {
             const updatedseedbasket = [...plantPicks, {
                 ...result,
                 gridcolor: randomColor().hexString()
             }];
-            const numericbedid = Number(bedid);
-
             try {
-                setUpdateSeedBasketStatus("pending");
-                await dispatch(updateSeedBasket(
+                await updateSeedBasket(
                     {
                         seedbasket: updatedseedbasket, 
-                        bedid: numericbedid
+                        bedid
                     }
-                )).unwrap();
+                ).unwrap();
             } catch(err) {
                 console.error("Unable to add plant pick:", err.message);
-            } finally {
-                setUpdateSeedBasketStatus("idle");
             };
         };
     };

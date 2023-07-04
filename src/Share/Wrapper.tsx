@@ -9,7 +9,7 @@ const BedSharingPage: React.FC = function() {
     let links;
 
     function generateBedLinks() {
-        let bedIdLinks = beds?.map(bed => <Link key={bed.id} to={`/create/${bed.id}`}>{bed.name}</Link>);
+        let bedIdLinks = beds?.map(bed => <Link key={bed.id} to={`/share/${bed.id}`}>{bed.name}</Link>);
         return bedIdLinks;
     };
 

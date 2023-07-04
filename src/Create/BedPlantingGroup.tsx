@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAppSelector } from "../app/hooks";
-import { plantPickDataInterface, bedDataInterface } from "../app/interfaces";
-import { selectBed } from "../app/features/bedsSlice";
+import { useGetBedsQuery } from "../app/apiSlice";
+import { plantPickDataInterface } from "../app/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
 import PlantSearch from './PlantSearch';
 
 const BedPlantingGroup: React.FC = function() {
-    let { bedid } = useParams();
+    const { bedid } = useParams();
 
-    const bedData: bedDataInterface = useAppSelector(state => selectBed(state, Number(bedid)));
-    const plantPicks = bedData?.seedbasket;
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed;
+    
+    const plantPicks = bed?.seedbasket as plantPickDataInterface[];
 
     const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
     const [ abbrPlantPicksVis, setAbbrPlantPicksVis ] = useState(false);
@@ -27,8 +32,8 @@ const BedPlantingGroup: React.FC = function() {
 
     return (
         <div className="bed-planting-group">
-            {bedData ?
-                <BedPlantingGrid curPlantPick={curPlantPick} bedData={bedData} /> : <p>Loading...</p>
+            {bed ?
+                <BedPlantingGrid curPlantPick={curPlantPick} /> : <p>Loading...</p>
             }
             <section className="seed-basket">
                 <h2>SEED BASKET</h2>

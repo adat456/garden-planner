@@ -8,6 +8,7 @@ export interface gridMapInterface {
 };
 
 export interface rolesInterface {
+    id: string,
     title: string,
     duties: {
         value: string,

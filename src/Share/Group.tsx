@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useAppSelector } from "../app/hooks";
-import { selectBed } from "../app/features/bedsSlice";
+import { useGetBedsQuery } from "../app/apiSlice";
 import { bedDataInterface } from "../app/interfaces";
 
 import Grid from "./Grid";
@@ -9,12 +8,17 @@ import RoleGroup from "./Roles/RoleGroup";
 
 const BedSharingGroup: React.FC = function() {
     const { bedid } = useParams();
-    const bedData: bedDataInterface = useAppSelector(state => selectBed(state, Number(bedid)));
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed;
 
     return (
         <div>
-            <h1>{bedData?.name}</h1>
-            <Grid bedData={bedData} />
+            <h1>{bed?.name}</h1>
+            <Grid bedData={bed} />
             <MemberGroup />
             <RoleGroup bedid={bedid} />
         </div>

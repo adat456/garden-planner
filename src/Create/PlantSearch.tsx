@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../app/hooks";
-import { updateSeedBasket } from "../app/features/bedsSlice";
+import { useUpdateSeedBasketMutation } from "../app/apiSlice";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "./PaginationButtons";
@@ -31,11 +30,9 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
 
     const [ addVegVis, setAddVegVis ] = useState(false);
 
-    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
-
-    const dispatch = useAppDispatch();
-
     const navigate = useNavigate();
+
+    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
@@ -132,25 +129,20 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
     };
 
     async function addPlantPick(result: plantDataInterface) {
-        if (updateSeedBasketStatus === "idle") {
+        if (!isLoading) {
             const updatedseedbasket = [...plantPicks, {
                 ...result,
                 gridcolor: randomColor().hexString()
             }];
-            const numericbedid = Number(bedid);
-
             try {
-                setUpdateSeedBasketStatus("pending");
-                await dispatch(updateSeedBasket(
+                await updateSeedBasket(
                     {
                         seedbasket: updatedseedbasket, 
-                        bedid: numericbedid
+                        bedid
                     }
-                )).unwrap();
+                ).unwrap();
             } catch(err) {
                 console.error("Unable to add plant pick:", err.message);
-            } finally {
-                setUpdateSeedBasketStatus("idle");
             };
         };
     };

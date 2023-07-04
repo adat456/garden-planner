@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
-import { useAppDispatch } from "../app/hooks";
+import { useUpdateSeedBasketMutation } from "../app/apiSlice";
 import { plantPickDataInterface, colorObjInterface } from "../app/interfaces";
-import { updateSeedBasket } from "../app/features/bedsSlice";
 
 interface plantPickInterface {
     bedid: string | undefined,
@@ -14,12 +13,11 @@ interface plantPickInterface {
 
 const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPicks, setCurPlantPick, abbreviated }) {
     const [ colorSliderVis, setColorSliderVis ] = useState(false);
-    const [ updateSeedBasketStatus, setUpdateSeedBasketStatus ] = useState("idle");
-
-    const dispatch = useAppDispatch();
+    
+    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
 
     async function changePlantPickColor(color: colorObjInterface) {
-        if (updateSeedBasketStatus === "idle") {
+        if (!isLoading) {
             const updatedseedbasket = plantPicks.map(pick => {
                 if (pick.id === plant.id) {
                     let plantCopy = {
@@ -31,41 +29,33 @@ const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPi
                     return pick;
                 };
             });
-            const numericBedId = Number(bedid);
 
             try {
-                setUpdateSeedBasketStatus("pending");
-                await dispatch(updateSeedBasket(
+                await updateSeedBasket(
                     {
-                        seedbasket: updatedseedbasket,
-                        bedid: numericBedId
+                        seedbasket: updatedseedbasket, 
+                        bedid
                     }
-                )).unwrap();
+                ).unwrap();
             } catch(err) {
-                console.error("Unable to edit plant pick:", err.message);
-            } finally {
-                setUpdateSeedBasketStatus("idle");
+                console.error("Unable to update plant pick color:", err.message);
             };
         };
     };
 
     async function removePlantPick(id: number) {
-        if (updateSeedBasketStatus === "idle") {
+        if (!isLoading) {
             const updatedseedbasket = plantPicks?.filter(plant => plant.id !== id);
-            const numericBedId = Number(bedid);
 
             try {
-                setUpdateSeedBasketStatus("pending");
-                await dispatch(updateSeedBasket(
+                await updateSeedBasket(
                     {
-                        seedbasket: updatedseedbasket,
-                        bedid: numericBedId
+                        seedbasket: updatedseedbasket, 
+                        bedid
                     }
-                ));
+                ).unwrap();
             } catch(err) {
-                console.error("Unable to remove plant pick:", err.message);
-            } finally {
-                setUpdateSeedBasketStatus("idle");
+                console.error("Unable to update plant pick color:", err.message);
             };
         };
     };
