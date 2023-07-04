@@ -17,7 +17,7 @@ export const apiSlice = createApi({
             query: () => "/pull-beds-data",
             providesTags: (result, error, arg) => [
                 "beds",
-                ...result.map(bed => ({type: "beds", id: bed.id}))
+                ...result.map(bed => ({ type: "beds", id: bed.id }))
             ],
         }),
         createBed: builder.mutation({
@@ -43,6 +43,14 @@ export const apiSlice = createApi({
                 body: data.roles
             }),
             invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid }]
+        }),
+        updateMembers: builder.mutation({
+            query: data => ({
+                url: `/update-members/${data.bedid}`,
+                method: "PATCH",
+                body: data.members
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid }]
         })
     })
 });
@@ -53,5 +61,6 @@ export const {
     useCreateBedMutation, 
     useUpdateSeedBasketMutation,
     useUpdateRolesMutation,
+    useUpdateMembersMutation,
     util
 } = apiSlice;

@@ -3,7 +3,7 @@ import { useGetBedsQuery } from "../app/apiSlice";
 import { bedDataInterface } from "../app/interfaces";
 
 import Grid from "./Grid";
-import MemberGroup from "./MemberGroup";
+import MemberGroup from "./Members/MemberGroup";
 import RoleGroup from "./Roles/RoleGroup";
 
 const BedSharingGroup: React.FC = function() {

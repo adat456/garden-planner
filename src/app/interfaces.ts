@@ -16,6 +16,16 @@ export interface rolesInterface {
     }[],
 };
 
+export interface membersInterface {
+    id: number,
+    username: string,
+    name: string,
+    role: rolesInterface | undefined,
+    invitedate: string,
+    status: "pending" | "final",
+    finaldate: string | undefined
+};
+
 export interface bedDataInterface {
     hardiness: number,
     sunlight: string,
