@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { plantDataInterface } from "../app/interfaces";
-import { useSelector } from "react-redux";
+import { useGetUserQuery } from "../app/apiSlice";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,
@@ -22,7 +22,8 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     // either ascending or descending
     const [ ascending, setAscending ] = useState(true);
 
-    const username = useSelector(state => state.user.user.username);
+    const { data: user } = useGetUserQuery();
+    const username = user?.username;
 
     function generateHardinessButtons() {
         let hardinessButtonsArr = [];
@@ -168,8 +169,8 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     return (
         <form className="filter-sort-form">
             <div className="button-cluster">
-                <button type="button" onClick={() => setVis("filters")} style={vis === "filters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : null}>+ FILTER</button>
-                <button type="button" onClick={() => setVis("sorters")} style={vis === "sorters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : null}>+ SORTER</button>
+                <button type="button" onClick={() => setVis("filters")} style={vis === "filters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : undefined}>+ FILTER</button>
+                <button type="button" onClick={() => setVis("sorters")} style={vis === "sorters" ? {border: "1px solid #F0CB75", borderBottom: "none", borderRadius: "5px 5px 0 0"} : undefined}>+ SORTER</button>
             </div>
             {vis === "filters" ?
                 <div className="filters-container">

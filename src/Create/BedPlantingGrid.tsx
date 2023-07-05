@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useUpdateSeedBasketMutation } from "../app/apiSlice";
+import cloneDeep from "lodash/fp/cloneDeep";
+import { useGetBedsQuery, useUpdateGridMapMutation } from "../app/apiSlice";
 import { bedDataInterface, plantPickDataInterface, gridMapInterface } from "../app/interfaces";
 
 interface bedPlantingGridInterface {
@@ -17,10 +18,10 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     });
     const bed = bedObject.bed;
 
-    const [ lastTen, setLastTen ] = useState<gridMapInterface[][]>([]);
-    // JSON.parse(JSON.stringify(bed?.gridmap))
-    const [ counter, setCounter ] = useState(1);
-    const [ updateGridStatus, setUpdateGridStatus ] = useState("idle");
+    const [ updateGridMap, { isLoading } ] = useUpdateGridMapMutation();
+
+    const [ lastTen, setLastTen ] = useState<gridMapInterface[]>([]);
+    const [ counter, setCounter ] = useState(0);
 
     function createBedGrid() {
         let bedInnards = [];
@@ -49,10 +50,22 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
         return bedInnards;
     };
 
+    function updateLastTen() {
+        if (lastTen.length < 10) {
+            setLastTen([cloneDeep(bed?.gridmap), ...lastTen]);
+        } else if (lastTen.length >= 10) {
+            let lastTenCopy = cloneDeep(lastTen);
+            lastTenCopy.splice(-1, 1);
+            setLastTen([cloneDeep(bed?.gridmap), ...lastTenCopy])
+        };
+        
+        setCounter(-1);
+    };
+
     function togglePlant(e: React.MouseEvent) {
         const cell = e.target as HTMLDivElement;
 
-        // if a cell is a selected cell and NOT a walkway cell
+        // if a cell is NOT a walkway cell
         if (cell.classList.contains("selected")) {
             const cellNum = Number(cell.getAttribute("id")?.slice(5));
             // if it has already been planted, determine whether the cell's plant ID matches the current plant pick's ID
@@ -60,7 +73,9 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                 // if they do match, remove the planted class and replace the corresponding cell data with scrubbed cell data
                 if (cell.getAttribute("data-plant-id") === curPlantPick?.id.toString()) {
                     cell.classList.remove("planted");
-                    let gridMapCopy = [...bed?.gridmap];
+                    updateLastTen();
+
+                    let gridMapCopy = cloneDeep(bed?.gridmap);
                     if (gridMapCopy) {
                         let cellCopy = gridMapCopy[cellNum - 1];
                         gridMapCopy?.splice((cellNum - 1), 1, {
@@ -77,7 +92,9 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     };
                 } else {
                     // if they don't match, keep the planted class but replace the cell data with updated plant ID and name
-                    let gridMapCopy = [...bed?.gridmap];
+                    updateLastTen();
+
+                    let gridMapCopy = cloneDeep(bed?.gridmap);
                     if (gridMapCopy && curPlantPick) {
                         let cellCopy = gridMapCopy[cellNum - 1];
                         gridMapCopy?.splice((cellNum - 1), 1, {
@@ -96,7 +113,9 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
             } else {
                 // if the cell has not yet been planted, just replace the cell with plant ID and name data included
                 cell.classList.add("planted");
-                let gridMapCopy = [...bed?.gridmap];
+                updateLastTen();
+
+                let gridMapCopy = cloneDeep(bed?.gridmap);
                 if (gridMapCopy && curPlantPick) {
                     let cellCopy = gridMapCopy[cellNum - 1];
                     gridMapCopy?.splice((cellNum - 1), 1, {
@@ -116,26 +135,26 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     };
 
     function handleUndo() {
-        console.log(counter);
-        if (counter <= lastTen.length - 1) {
+        if (counter < lastTen.length - 1) {
             if (bed?.id) {
-                updateBedData(lastTen[counter], bed.id, false);
+                updateBedData(lastTen[counter + 1], bed.id);
             }; 
-            if (counter < lastTen.length - 1) setCounter(counter + 1);
+            setCounter(counter + 1);
         };
     };
 
     function handleRedo() {
-        console.log(counter);
-        if (counter >= 1) {
+        if (counter > 0) {
             if (bed?.id) {
-                updateBedData(lastTen[counter-1], bed.id, false);
+                updateBedData(lastTen[counter - 1], bed.id);
             }; 
-            if (counter > 1) setCounter(counter - 1);
+            setCounter(counter - 1); 
         };
     };
 
     function clearAll() {
+        updateLastTen();
+
         const clearedGridMap = bed?.gridmap.map(grid => {
             return ({
                 num: grid.num,
@@ -151,42 +170,18 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
         };    
     };
 
-    async function updateBedData(gridmap: gridMapInterface[], bedid: number, addToLastTen: boolean) {
-        if (updateGridStatus === "idle") {
+    async function updateBedData(gridmap: gridMapInterface[], bedid: number) {
+        if (!isLoading) {
             try {
-                // setUpdateGridStatus("pending");
-                // await dispatch(updateGrid({
-                //     gridmap, bedid
-                // })).unwrap();
+                await updateGridMap({
+                    gridmap,
+                    bedid
+                }).unwrap();
             } catch(err) {
-                console.error("Unable to update grid:", err.message);
-            } finally {
-                setUpdateGridStatus("pending");
+                console.error("Unable to update gridmap: ", err.message);
             };
-        };
-                
-        if (addToLastTen) {
-            let lastTenCopy = lastTen;
-            let gridMapCopy = JSON.parse(JSON.stringify(bed?.gridmap));
-            if (lastTenCopy.length < 10) {
-                // adds most recent gridmap instance to index 0 if there are less than 10 instances
-                lastTenCopy = [gridMapCopy, ...lastTenCopy];
-            } else {
-                // if there are 10 instances, remove the last instance before adding the newest
-                lastTenCopy = lastTenCopy.slice(0, lastTenCopy.length - 1);
-                lastTenCopy = [gridMapCopy, ...lastTenCopy];
-            };
-            setLastTen(lastTenCopy);
-
-            setCounter(1);
         };
     };
-
-    useEffect(() => {
-        setCounter(1);
-    }, [bedid]);
-
-    useEffect(() => console.log(lastTen), [lastTen]);
 
     return (
         <div className="bed-planting-grid">

@@ -7,6 +7,7 @@ export interface gridMapInterface {
     gridColor: string
 };
 
+// the only interface with a string for an id
 export interface rolesInterface {
     id: string,
     title: string,
@@ -82,6 +83,18 @@ export interface userInterface {
     added_veg_data: number[],
     favorited_beds: number[],
     copied_beds: number[]
+};
+
+export interface notificationInterface {
+    id: number,
+    senderid: number,
+    sendername: string,
+    recipientid: number,
+    message: string,
+    dispatched: string,
+    acknowledged: string | undefined,
+    // enum? like "invite"?
+    type: string
 };
 
 export interface colorObjInterface {

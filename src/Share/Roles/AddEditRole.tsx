@@ -85,6 +85,7 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
         if (title && !isLoading && existingRoles) {
             try {
                 await updateRoles(
+                    // necessary to generate a string id here (rather than allowing postgresql to generate a serial number id) because it will be added as JSON object to a single column
                     {
                         roles: [...existingRoles, { id: nanoid(), title, duties }],
                         bedid 
