@@ -6,7 +6,7 @@ import Grid from "./Grid";
 import MemberGroup from "./Members/MemberGroup";
 import RoleGroup from "./Roles/RoleGroup";
 
-const BedSharingGroup: React.FC = function() {
+const BedSharingGroup: React.FC = function({ socket }) {
     const { bedid } = useParams();
     const bedObject = useGetBedsQuery(undefined, {
         selectFromResult: ({ data }) => ({
@@ -19,7 +19,7 @@ const BedSharingGroup: React.FC = function() {
         <div>
             <h1>{bed?.name}</h1>
             <Grid bedData={bed} />
-            <MemberGroup />
+            <MemberGroup socket={socket} />
             <RoleGroup bedid={bedid} />
         </div>
     );

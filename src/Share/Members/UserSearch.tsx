@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useGetBedsQuery, useUpdateMembersMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetBedsQuery, useUpdateMembersMutation, useAddNotificationMutation } from "../../app/apiSlice";
+import { bedDataInterface, userInterface } from "../../app/interfaces";
 
 interface initialResultInterface {
     id: string,
@@ -8,7 +9,7 @@ interface initialResultInterface {
     lastname: string
 };
 
-const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
+const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid, socket }) {
     const [ search, setSearch ] = useState("");
     const [ searchResults, setSearchResults ] = useState<initialResultInterface[]>([]);
     const [ numExtra, setNumExtra ] = useState(0);
@@ -18,9 +19,14 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
             bed: data?.find(bed => bed.id === Number(bedid))
         }),
     });
-    const existingMembers = bedObject.bed?.members;
+    const bed = bedObject.bed as bedDataInterface;
+    const existingMembers = bed?.members;
 
-    const [ updateMembers, { isLoading } ] = useUpdateMembersMutation();
+    const userObject = useGetUserQuery();
+    const user = userObject.data as userInterface;
+
+    const [ updateMembers, { isLoading: membersIsLoading } ] = useUpdateMembersMutation();
+    const [ addNotification, { isLoading: notificationIsLoading } ] = useAddNotificationMutation();
 
     async function handleSearchMemberChange(e: React.FormEvent<HTMLInputElement>) {
         const input = e.target as HTMLInputElement;
@@ -65,7 +71,7 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
     };
 
     async function addMember(member: initialResultInterface) {
-        if (!isLoading && existingMembers) {
+        if (!membersIsLoading && !notificationIsLoading && existingMembers) {
             try {
                 await updateMembers({
                     members: [
@@ -81,6 +87,17 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
                             }
                     ],
                     bedid
+                }).unwrap();
+
+                await addNotification({
+                    senderid: user.id,
+                    sendername: `${user.firstname} ${user.lastname}`,
+                    senderusername: user.username,
+                    recipientid: member.id,
+                    message: `${user.firstname} ${user.lastname} invites you to join ${bed.name}`,
+                    dispatched: new Date().toISOString().slice(0, 10),
+                    acknowledged: false,
+                    type: "invite"
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to add member: ", err.message);

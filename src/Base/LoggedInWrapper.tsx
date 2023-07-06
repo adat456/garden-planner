@@ -1,11 +1,13 @@
 import { Outlet, NavLink, Link } from "react-router-dom";
-import { useGetUserQuery } from "./app/apiSlice";
 import { useDispatch } from "react-redux";
-import { util } from "./app/apiSlice";
+import { useGetUserQuery } from "../app/apiSlice";
+import { util } from "../app/apiSlice";
+import { userInterface } from "../app/interfaces";
+import Notifications from "./Notifications";
 
 const LoggedInWrapper: React.FC = function() {
     const userResult = useGetUserQuery();
-    const user = userResult.data;
+    const user = userResult.data as userInterface;
 
     const dispatch = useDispatch();
 
@@ -29,6 +31,7 @@ const LoggedInWrapper: React.FC = function() {
                         <Link to="sign-in" onClick={handleLogOut}>LOG OUT</Link> : null
                     }
                 </nav>
+                <Notifications />
             </header>
             <main>
                 <Outlet />

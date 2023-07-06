@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { io } from "socket.io-client";
+
 import LogIn from "./SignUp/LogIn";
 import CreateAccount from "./SignUp/CreateAccount";
-import LoggedInWrapper from "./LoggedInWrapper";
+import LoggedInWrapper from "./Base/LoggedInWrapper";
 import BedCreationPage from './Create/NewBed/BedCreationPage';
 import BedPlantingPage from './Create/BedPlantingPage';
 import BedPlantingGroup from "./Create/BedPlantingGroup";
@@ -10,6 +12,11 @@ import BedSharingGroup from "./Share/Group";
 import BedExplorationPage from "./Explore/BedExplorationPage";
 
 function App() {
+  const socket = io("http://localhost:4000");
+  socket.on("connect", () => {
+    console.log(socket.id);
+  });
+
   return (
     <BrowserRouter> 
       <Routes>
@@ -23,7 +30,7 @@ function App() {
             <Route path="new-bed" element={<BedCreationPage />} />
           </Route>
           <Route path="share" element={<BedSharingPage />}>
-            <Route path=":bedid" element={<BedSharingGroup />} />
+            <Route path=":bedid" element={<BedSharingGroup socket={socket} />} />
           </Route>
           <Route path="explore" element={<BedExplorationPage />} />
           <Route path="profile" />

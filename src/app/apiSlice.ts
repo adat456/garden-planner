@@ -11,7 +11,8 @@ export const apiSlice = createApi({
     tagTypes: ["user", "beds", "notifications"],
     endpoints: builder => ({
         getUser: builder.query({
-            query: () => "/pull-user-data"
+            query: () => "/pull-user-data",
+            providesTags: ["user"]
         }),
         getBeds: builder.query({
             query: () => "/pull-beds-data",
@@ -61,15 +62,34 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid }]
         }),
+        // notifications
         getNotifications: builder.query({
             query: () => "/pull-notifications",
             providesTags: [ "notifications" ]
         }),
+        // data = notification
         addNotification: builder.mutation({
             query: data => ({
                 url: "/add-notification",
                 method: "POST",
                 body: data
+            }),
+            invalidatesTags: [ "notifications" ]
+        }),
+        // data = { notifid, acknowledged }
+        updateNotification: builder.mutation({
+            query: data => ({
+                url: `/update-notification/${data.notifid}`,
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: [ "notifications" ]
+        }),
+        // data = notifid
+        deleteNotification: builder.mutation({
+            query: data => ({
+                url: `/delete-notification/${data}`,
+                method: "DELETE"
             }),
             invalidatesTags: [ "notifications" ]
         })
@@ -78,11 +98,18 @@ export const apiSlice = createApi({
 
 export const { 
     useGetUserQuery, 
+
     useGetBedsQuery, 
     useCreateBedMutation, 
     useUpdateSeedBasketMutation,
     useUpdateGridMapMutation,
     useUpdateRolesMutation,
     useUpdateMembersMutation,
+
+    useGetNotificationsQuery,
+    useAddNotificationMutation,
+    useUpdateNotificationMutation,
+    useDeleteNotificationMutation,
+
     util
 } = apiSlice;

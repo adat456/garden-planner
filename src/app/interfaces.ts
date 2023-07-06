@@ -42,6 +42,7 @@ export interface bedDataInterface {
     username: string,
     numhearts: number,
     numcopies: number,
+    members: membersInterface[],
     roles: rolesInterface[]
 };
 
@@ -89,12 +90,13 @@ export interface notificationInterface {
     id: number,
     senderid: number,
     sendername: string,
+    senderusername: string,
     recipientid: number,
     message: string,
     dispatched: string,
-    acknowledged: string | undefined,
+    acknowledged: boolean,
     // enum? like "invite"?
-    type: string
+    type: "invite" | "acceptance"
 };
 
 export interface colorObjInterface {
