@@ -3,10 +3,11 @@ import { useGetBedsQuery } from "../app/apiSlice";
 import { bedDataInterface } from "../app/interfaces";
 
 import Grid from "./Grid";
+import EventsGroup from "./Events/EventsGroup";
 import MemberGroup from "./Members/MemberGroup";
 import RoleGroup from "./Roles/RoleGroup";
 
-const BedSharingGroup: React.FC = function({ socket }) {
+const BedSharingGroup: React.FC = function() {
     const { bedid } = useParams();
     const bedObject = useGetBedsQuery(undefined, {
         selectFromResult: ({ data }) => ({
@@ -18,8 +19,9 @@ const BedSharingGroup: React.FC = function({ socket }) {
     return (
         <div>
             <h1>{bed?.name}</h1>
+            <EventsGroup />
             <Grid bedData={bed} />
-            <MemberGroup socket={socket} />
+            <MemberGroup />
             <RoleGroup bedid={bedid} />
         </div>
     );

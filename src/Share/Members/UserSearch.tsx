@@ -9,7 +9,7 @@ interface initialResultInterface {
     lastname: string
 };
 
-const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid, socket }) {
+const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
     const [ search, setSearch ] = useState("");
     const [ searchResults, setSearchResults ] = useState<initialResultInterface[]>([]);
     const [ numExtra, setNumExtra ] = useState(0);

@@ -1,6 +1,6 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { io } from "socket.io-client";
-
+import Socket from "./app/socket";
 import LogIn from "./SignUp/LogIn";
 import CreateAccount from "./SignUp/CreateAccount";
 import LoggedInWrapper from "./Base/LoggedInWrapper";
@@ -12,10 +12,13 @@ import BedSharingGroup from "./Share/Group";
 import BedExplorationPage from "./Explore/BedExplorationPage";
 
 function App() {
-  const socket = io("http://localhost:4000");
-  socket.on("connect", () => {
-    console.log(socket.id);
-  });
+  // just indicattes whther or not it is connected--may be deleted later
+  const [ isConnected, setIsConnected ]  = useState(Socket.connected);
+  useEffect(() => {
+    Socket.on("connect", () => {
+      setIsConnected(true);
+    });
+  }, []);
 
   return (
     <BrowserRouter> 
@@ -24,13 +27,13 @@ function App() {
           <LogIn />
           <CreateAccount />
         </>} />
-        <Route path="/" element={<LoggedInWrapper />}>
+        <Route path="/" element={<LoggedInWrapper isConnected={isConnected} />}>
           <Route path="create" element={<BedPlantingPage />}>
             <Route path=":bedid" element={<BedPlantingGroup />} />
             <Route path="new-bed" element={<BedCreationPage />} />
           </Route>
           <Route path="share" element={<BedSharingPage />}>
-            <Route path=":bedid" element={<BedSharingGroup socket={socket} />} />
+            <Route path=":bedid" element={<BedSharingGroup />} />
           </Route>
           <Route path="explore" element={<BedExplorationPage />} />
           <Route path="profile" />

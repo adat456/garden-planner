@@ -4,7 +4,7 @@ import { useGetBedsQuery, useUpdateMembersMutation } from "../../app/apiSlice";
 import { membersInterface } from "../../app/interfaces";
 import UserSearch from "./UserSearch";
 
-const MemberGroup: React.FC = function({ socket }) {
+const MemberGroup: React.FC = function() {
     const [ searchMembersVis, setSearchMembersVis ] = useState(false);
 
     const { bedid } = useParams();
@@ -73,7 +73,7 @@ const MemberGroup: React.FC = function({ socket }) {
                 </ul>
             </section>
             <button type="button" onClick={() => setSearchMembersVis(!searchMembersVis)}>Add member</button>
-            {searchMembersVis ? <UserSearch bedid={bedid} socket={socket} /> :  null }
+            {searchMembersVis ? <UserSearch bedid={bedid} /> :  null }
         </section>
     );
 };

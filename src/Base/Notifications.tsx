@@ -1,11 +1,12 @@
+import { useEffect } from "react";
 import { useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
 import { notificationInterface, userInterface } from "../app/interfaces";
 
-const Notifications: React.FC = function() {
+const Notifications: React.FC = function({ newNotif }) {
     const userResult = useGetUserQuery();
     const user = userResult.data as userInterface;
 
-    const { data } = useGetNotificationsQuery();
+    const { data, refetch: refetchNotifications } = useGetNotificationsQuery();
     const notifications = data as notificationInterface[];
 
     const [ addNotification, { isLoading: addNotificationIsLoading } ]  = useAddNotificationMutation();
@@ -115,6 +116,14 @@ const Notifications: React.FC = function() {
             await handleDelete(notification.id);
         });
     };
+
+    useEffect(() => {
+        console.log(newNotif);
+        async function refetch() {
+            await refetchNotifications();
+        };
+        refetch();
+    }, [newNotif]);
 
     return (
         <div>
