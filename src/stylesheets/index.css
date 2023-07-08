@@ -70,6 +70,18 @@ main {
   border-top-right-radius: 0.5rem;
 }
 
+.react-calendar__tile--range {
+  background-color: green;
+}
+
+.react-calendar__tile--rangeStart, .react-calendar__tile--rangeEnd {
+  background-color: red;
+}
+
+.react-calendar__tile--hasActive {
+  background-color: red;
+}
+
 .bed-planting-wrapper {
   display: grid;
   grid-template-columns: 25% minmax(0, 1fr);

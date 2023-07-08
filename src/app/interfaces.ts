@@ -99,6 +99,31 @@ export interface notificationInterface {
     type: "invite" | "acceptance"
 };
 
+export interface eventParticipantInterface {
+    id: number,
+    username: string,
+    name: string,
+};
+
+export interface eventInterface {
+    id: number,
+    bedid: number,
+    creatorid: number,
+    creatorname: string,
+    creatorusername: string,
+    eventname: string,
+    eventdesc: string,
+    eventlocation: string,
+    eventpublic: boolean,
+    eventparticipants?: eventParticipantInterface[],
+    eventstarttime: string,
+    eventendtime: string,
+    eventdate: string[],
+    repeating: boolean,
+    repeatevery?: "weekly" | "biweekly" | "monthly",
+    repeattill?: string,
+};
+
 export interface colorObjInterface {
     hex: string,
     hsl: {

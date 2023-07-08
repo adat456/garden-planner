@@ -8,7 +8,7 @@ export const apiSlice = createApi({
         },
         credentials: "include",
     }),
-    tagTypes: ["user", "beds", "notifications"],
+    tagTypes: ["user", "beds", "notifications", "events"],
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data",
@@ -92,6 +92,19 @@ export const apiSlice = createApi({
                 method: "DELETE"
             }),
             invalidatesTags: [ "notifications" ]
+        }),
+        /////// EVENTS ////////////////
+        getEvents: builder.query({
+            query: data => `/pull-events/${data}`,
+            providesTags: [ "events" ]
+        }),
+        addEvent: builder.mutation({
+            query: data => ({
+                url: `/add-event/${data.bedid}`,
+                method: "POST",
+                body: data.event
+            }),
+            invalidatesTags: [ "events" ]
         })
     })
 });
@@ -110,6 +123,9 @@ export const {
     useAddNotificationMutation,
     useUpdateNotificationMutation,
     useDeleteNotificationMutation,
+
+    useGetEventsQuery,
+    useAddEventMutation,
 
     util
 } = apiSlice;

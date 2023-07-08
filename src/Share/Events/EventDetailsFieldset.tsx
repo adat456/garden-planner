@@ -1,12 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
-import { bedDataInterface } from "../../app/interfaces";
-
-interface eventParticipantsInterface {
-    id: number,
-    username: string,
-    name: string,
-};
+import { eventParticipantInterface, bedDataInterface } from "../../app/interfaces";
 
 interface eventDetailsFieldsetInterface {
     eventName: string,
@@ -19,10 +13,10 @@ interface eventDetailsFieldsetInterface {
     setEventPublic: React.Dispatch<React.SetStateAction<boolean>>,
     participantSearch: string,
     setParticipantSearch: React.Dispatch<React.SetStateAction<string>>,
-    participantSearchResults: eventParticipantsInterface[],
-    setParticipantSearchResults: React.Dispatch<React.SetStateAction<eventParticipantsInterface[]>>,
-    eventParticipants: eventParticipantsInterface[],
-    setEventParticipants: React.Dispatch<React.SetStateAction<eventParticipantsInterface[]>>,
+    participantSearchResults: eventParticipantInterface[],
+    setParticipantSearchResults: React.Dispatch<React.SetStateAction<eventParticipantInterface[]>>,
+    eventParticipants: eventParticipantInterface[],
+    setEventParticipants: React.Dispatch<React.SetStateAction<eventParticipantInterface[]>>,
 };
 
 const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({ eventName, setEventName, eventDesc, setEventDesc, eventLocation, setEventLocation, eventPublic, setEventPublic, participantSearch, setParticipantSearch, participantSearchResults, setParticipantSearchResults, eventParticipants, setEventParticipants}) {

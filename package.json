@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
+    "@wojtekmaj/react-timerange-picker": "^5.2.0",
     "lodash": "^4.17.21",
     "random-color": "^1.0.1",
     "react": "^18.2.0",
+    "react-calendar": "^4.3.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-range-slider-input": "^3.0.7",
