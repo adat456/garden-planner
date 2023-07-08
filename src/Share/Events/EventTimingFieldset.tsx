@@ -49,13 +49,14 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
                 <>
                     <label htmlFor="repeat-every">Repeat every:</label>
                     <select name="repeat-every" id="repeat-every" onChange={(e) => setRepeatEvery(e.target.value)}>
+                        <option value=""></option>
                         <option value="weekly">7 days</option>
                         <option value="biweekly">14 days</option>
                         <option value="monthly">28 days</option>
                     </select>
                     <div>
                         <label htmlFor="repeat-till">Repeat till:</label>
-                        <input type="date" id="repeat-till" value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
+                        <input type="date" id="repeat-till" min={eventDate[0].toString()} value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
                     </div>
                 </> : null
             }

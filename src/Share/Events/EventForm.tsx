@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import cloneDeep from "lodash/fp/cloneDeep";
 import { useGetUserQuery, useAddEventMutation } from "../../app/apiSlice";
 import { userInterface } from "../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
@@ -36,18 +37,45 @@ const EventForm: React.FC = function() {
 
     const [ addEvent, { isLoading } ] = useAddEventMutation();
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    // where interval is the number of days between repeating events, e.g., 7, 14, 28
+    function generateRepeatingDatesForSingleDayEvents(interval: number, repeatTillDate: Date, arr: Date[][]) {
+        const timeDifference = repeatTillDate.getTime() - eventDate[0].getTime();
+        const dayDifference = timeDifference / (1000 * 3600 * 24);
+        const numTimeIntervals = Math.floor(dayDifference / interval);
 
-        const preppedEventDate = eventDate.map(date => {
-            if (date) {
-                return date.toString().slice(0, 15);
-            } else {
-                return "";
-            };
-        });
+        for (let i = 0; i <= numTimeIntervals; i++) {
+            const numDaysAhead = interval * i;
+            const eventDate0Clone = cloneDeep(eventDate[0]);
+            
+            arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), ""])
+        };
+    };
 
+    function generateRepeatingDatesForMultiDayEvents(interval: number,
+    repeatTillDate: Date, arr: Date[][]) {
+        const timeDifference = repeatTillDate.getTime() - eventDate[0].getTime();
+        const dayDifference = timeDifference / (1000 * 3600 * 24);
+        const numTimeIntervals = Math.floor(dayDifference / interval);
+
+        for (let i = 0; i <= numTimeIntervals; i++) {
+            const numDaysAhead = interval * i;
+            const eventDate0Clone = cloneDeep(eventDate[0]);
+            const eventDate1Clone = cloneDeep(eventDate[1]);
+            
+            arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), new Date(eventDate1Clone.setDate(eventDate1Clone.getDate() + numDaysAhead))])
+        };
+    };
+
+    async function createEvent(eventDates: Date[]) {
         if (!isLoading) {
+            const preppedEventDate = eventDates.map(date => {
+                if (date) {
+                    return date.toString().slice(0, 15);
+                } else {
+                    return "";
+                };
+            });
+
             try {
                 await addEvent({
                     bedid,
@@ -63,6 +91,44 @@ const EventForm: React.FC = function() {
             } catch(err) {
                 console.error("Unable to add event: ", err.message);
             };
+        };
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        let repeatingDatesArr: Date[][] = [];
+        const repeatTillDate = new Date(repeatTill);
+        // above is necessary because "time" inputs only return a string
+
+        if (repeating && repeatEvery && repeatTillDate) {
+            switch(repeatEvery) {
+                case "weekly":
+                    if (eventDate[1]) {
+                        generateRepeatingDatesForMultiDayEvents(7, repeatTillDate, repeatingDatesArr);
+                    } else {
+                        generateRepeatingDatesForSingleDayEvents(7, repeatTillDate, repeatingDatesArr);
+                    };
+                    break;
+                case "biweekly":
+                    if (eventDate[1]) {
+                        generateRepeatingDatesForMultiDayEvents(14, repeatTillDate, repeatingDatesArr);
+                    } else {
+                        generateRepeatingDatesForSingleDayEvents(14, repeatTillDate, repeatingDatesArr);
+                    };
+                    break;
+                case "monthly":
+                    if (eventDate[1]) {
+                        generateRepeatingDatesForMultiDayEvents(28, repeatTillDate, repeatingDatesArr);
+                    } else {
+                        generateRepeatingDatesForSingleDayEvents(28, repeatTillDate, repeatingDatesArr);
+                    };
+                    break;
+            };
+            
+            repeatingDatesArr.forEach(async (dateArr) => {
+                createEvent(dateArr);
+            });
         };
     };
 
