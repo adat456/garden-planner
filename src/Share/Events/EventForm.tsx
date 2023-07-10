@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetUserQuery, useAddEventMutation, useUpdateEventMutation, useDeleteEventMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetEventsQuery, useAddEventMutation, useUpdateEventMutation, useDeleteEventMutation } from "../../app/apiSlice";
 import { userInterface, eventInterface } from "../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
@@ -39,40 +39,67 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
     const { bedid } = useParams();
 
-    const userResult = useGetUserQuery();
+    const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
+    const eventsResult = useGetEventsQuery(bedid);
+    const events = eventsResult?.data as eventInterface[];
 
-    const [ addEvent, { addEventIsLoading } ] = useAddEventMutation();
-    const [ updateEvent, { updateEventIsLoading } ] = useUpdateEventMutation();
-    const [ deleteEvent, { deleteEventIsLoading } ] = useDeleteEventMutation();
+    const [ addEvent, { isLoading: addEventIsLoading } ] = useAddEventMutation();
+    const [ updateEvent, { isLoading: updateEventIsLoading } ] = useUpdateEventMutation();
+    const [ deleteEvent, { isLoading: deleteEventIsLoading } ] = useDeleteEventMutation();
 
-    // where interval is the number of days between repeating events, e.g., 7, 14, 28
-    function generateRepeatingDatesForSingleDayEvents(interval: number, repeatTillDate: Date, arr: Date[][]) {
-        const timeDifference = repeatTillDate.getTime() - eventDate[0].getTime();
+    // where interval is the number of days between repeating events, e.g., 7, 14, 28, and single refers to whether the event is a single or multi day affair
+    function generateRepeatingDates(interval: number, repeatTillDate: Date, arr: Date[][], single: boolean) {
+        const timeDifference = repeatTillDate.getTime() - new Date(eventDate[0]).getTime();
         const dayDifference = timeDifference / (1000 * 3600 * 24);
         const numTimeIntervals = Math.floor(dayDifference / interval);
 
+        // adding the appropriate number of days to each date/set of dates based on the iteration number
         for (let i = 0; i <= numTimeIntervals; i++) {
             const numDaysAhead = interval * i;
-            const eventDate0Clone = cloneDeep(eventDate[0]);
-            
-            arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), ""])
+            if (single) {
+                const eventDate0Clone = cloneDeep(new Date(eventDate[0]));
+
+                arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), ""]);
+            } else {
+                const eventDate0Clone = cloneDeep(new Date(eventDate[0]));
+                const eventDate1Clone = cloneDeep(new Date(eventDate[1]));
+                
+                arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), new Date(eventDate1Clone.setDate(eventDate1Clone.getDate() + numDaysAhead))])
+            };
         };
     };
 
-    function generateRepeatingDatesForMultiDayEvents(interval: number,
-    repeatTillDate: Date, arr: Date[][]) {
-        const timeDifference = repeatTillDate.getTime() - eventDate[0].getTime();
-        const dayDifference = timeDifference / (1000 * 3600 * 24);
-        const numTimeIntervals = Math.floor(dayDifference / interval);
+    function generateRepeatingDatesCircumstantially() {
+        let repeatingDatesArr: Date[][] = [];
+        const repeatTillDate = new Date(repeatTill);
+        // above is necessary because "time" inputs only return a string
 
-        for (let i = 0; i <= numTimeIntervals; i++) {
-            const numDaysAhead = interval * i;
-            const eventDate0Clone = cloneDeep(eventDate[0]);
-            const eventDate1Clone = cloneDeep(eventDate[1]);
-            
-            arr.push([new Date(eventDate0Clone.setDate(eventDate0Clone.getDate() + numDaysAhead)), new Date(eventDate1Clone.setDate(eventDate1Clone.getDate() + numDaysAhead))])
+        switch(repeatEvery) {
+            case "weekly":
+                if (eventDate[1]) {
+                    generateRepeatingDates(7, repeatTillDate, repeatingDatesArr, false);
+                } else {
+                    generateRepeatingDates(7, repeatTillDate, repeatingDatesArr, true);
+                };
+                break;
+            case "biweekly":
+                if (eventDate[1]) {
+                    generateRepeatingDates(14, repeatTillDate, repeatingDatesArr, false);
+                } else {
+                    generateRepeatingDates(14, repeatTillDate, repeatingDatesArr, true);
+                };
+                break;
+            case "monthly":
+                if (eventDate[1]) {
+                    generateRepeatingDates(28, repeatTillDate, repeatingDatesArr, false);
+                } else {
+                    generateRepeatingDates(28, repeatTillDate, repeatingDatesArr, true);
+                };
+                break;
         };
+
+        return repeatingDatesArr;
     };
 
     async function createEvent(eventDates: Date[], repeatId?: string) {
@@ -103,48 +130,24 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         };
     };
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    async function handleCreateEvent(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        let repeatingDatesArr: Date[][] = [];
-        const repeatTillDate = new Date(repeatTill);
-        // above is necessary because "time" inputs only return a string
+        if (!repeating) {
+            createEvent(eventDate);
+            handleCloseEventForm();
+            return;
+        };        
 
-        if (repeating && repeatEvery && repeatTillDate) {
+        if (repeating && repeatEvery && repeatTill) {
+            const repeatingDatesArr = generateRepeatingDatesCircumstantially();
             const repeatId = nanoid();
-
-            switch(repeatEvery) {
-                case "weekly":
-                    if (eventDate[1]) {
-                        generateRepeatingDatesForMultiDayEvents(7, repeatTillDate, repeatingDatesArr);
-                    } else {
-                        generateRepeatingDatesForSingleDayEvents(7, repeatTillDate, repeatingDatesArr);
-                    };
-                    break;
-                case "biweekly":
-                    if (eventDate[1]) {
-                        generateRepeatingDatesForMultiDayEvents(14, repeatTillDate, repeatingDatesArr);
-                    } else {
-                        generateRepeatingDatesForSingleDayEvents(14, repeatTillDate, repeatingDatesArr);
-                    };
-                    break;
-                case "monthly":
-                    if (eventDate[1]) {
-                        generateRepeatingDatesForMultiDayEvents(28, repeatTillDate, repeatingDatesArr);
-                    } else {
-                        generateRepeatingDatesForSingleDayEvents(28, repeatTillDate, repeatingDatesArr);
-                    };
-                    break;
-            };
-
             repeatingDatesArr.forEach(async (dateArr) => {
                 createEvent(dateArr, repeatId);
             });
-        } else {
-            createEvent(eventDate);
-        };
 
-        handleCloseEventForm();
+            handleCloseEventForm();
+        };
     };
 
     async function handleUpdateEvent() {
@@ -172,39 +175,56 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         };
         handleCloseEventForm();
     };
-    async function handleUpdateAllRepeatingEvents() {
-        if (currentEvent && !updateEventIsLoading) {
-            try {
-            } catch(err) {
-                console.error("Unable to delete all repeating events: ", err.message);
-            };
+    // unlike the single update (which actually updates the event object), the update for reeatig events actually just creates new events and deletes the outdated ones
+    // modifies the current event and all of the events that follow
+    async function handleUpdateAllRepeatingEvents() {   
+        // allRepeatingEventsThereafter.sort(function(a, b) {
+        //     return new Date(a.eventdate[0]) - new Date(b.eventdate[0]);
+        // });
+        if (repeating && repeatEvery && repeatTill) {
+            const repeatingDatesArr = generateRepeatingDatesCircumstantially();
+            repeatingDatesArr.forEach(async (dateArr) => {
+                createEvent(dateArr, currentEvent?.repeatid);
+            });
         };
+
+        // all of the repeating events to be deleted now that new ones have been created
+        const allRepeatingEventsTBD = events?.filter(event => event.repeatid === currentEvent?.repeatid && event.id >= currentEvent?.id);
+        allRepeatingEventsTBD.forEach(async (event) => {
+            if (currentEvent && !updateEventIsLoading) {
+                try {
+                    await deleteEvent({
+                        eventid: event.id,
+                    }).unwrap();
+                } catch(err) {
+                    console.error("Unable to delete all repeating events: ", err.message);
+                };
+            };
+        });
+
         handleCloseEventForm();
     };
 
-    async function handleDeleteEvent() {
+    async function handleDeleteEvent(repeatid: string | undefined = undefined) {
         if (currentEvent && !deleteEventIsLoading) {
             try {
-                await deleteEvent({
-                    eventid: currentEvent.id,
-                }).unwrap();
+                if (repeatid) {
+                    await deleteEvent({
+                        eventid: currentEvent.id,
+                        repeatid: currentEvent.repeatid
+                    }).unwrap();
+                };
+
+                if (!repeatid) {
+                    await deleteEvent({
+                        eventid: currentEvent.id,
+                    }).unwrap();
+                };
             } catch(err) {
-                console.error("Unable to delete all repeating events: ", err.message);
+                console.error("Unable to delete event(s): ", err.message);
             };
         };
-        handleCloseEventForm();
-    };
-    async function handleDeleteAllRepeatingEvents() {
-        if (currentEvent && !deleteEventIsLoading) {
-            try {
-                await deleteEvent({
-                    eventid: currentEvent.id,
-                    repeatid: currentEvent.repeatid
-                }).unwrap();
-            } catch(err) {
-                console.error("Unable to delete all repeating events: ", err.message);
-            };
-        };
+
         handleCloseEventForm();
     };
 
@@ -218,7 +238,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
     return (
         <dialog className="event-form">
-            <form method="POST" onSubmit={handleSubmit}>
+            <form method="POST" onSubmit={!currentEvent ? handleCreateEvent : undefined}>
                 <button type="button" onClick={handleCloseEventForm}>Close form</button>
                 <h3>Create new event</h3>
                 <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} />
@@ -226,12 +246,13 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                 {currentEvent?
                     <>
                         <button type="button" onClick={handleUpdateEvent}>Submit edits</button>
-                        <button type="button" onClick={handleDeleteEvent}>Delete this event</button>
+                        <button type="button" onClick={() => handleDeleteEvent(undefined)}>Delete this event</button>
                         {currentEvent?.repeating ?
                             <>
                                 <button type="button" onClick={handleUpdateAllRepeatingEvents}>Update this event and all repeating events</button>
-                                <button type="button" onClick={handleDeleteAllRepeatingEvents}>Delete this event and all repeating events</button>
-                            </> : null
+                                <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button>
+                            </> :
+                            null
                         }
                     </> :
                     <button type="submit">Add to calendar</button> 

@@ -108,7 +108,7 @@ export const apiSlice = createApi({
         }),
         updateEvent: builder.mutation({
             query: data => ({
-                url: `/update-event/${data.eventid}/${data.repeatid}`,
+                url: `/update-event/${data.eventid}`,
                 method: "PATCH",
                 body: data.event
             }),
