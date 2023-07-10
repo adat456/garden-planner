@@ -120,6 +120,8 @@ export interface eventInterface {
     eventendtime: string,
     eventdate: string[],
     repeating: boolean,
+    // if repeating events are generated, they will have unique numeric ids (created by SERIAL in postgresql) but the same string repeatid (generated once with the nanoid import in the EventForm component)
+    repeatid?: string,
     repeatevery?: "weekly" | "biweekly" | "monthly",
     repeattill?: string,
 };
