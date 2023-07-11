@@ -1,14 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
-import { eventInterface, userInterface } from "../../app/interfaces";
+import { eventInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./EventForm";
 
-const EventsGroup: React.FC = function() {
+const EventsPage: React.FC = function() {
     const [ eventOverviewVis, setEventOverviewVis ] = useState(false);
     const [ eventFormVis, setEventFormVis ] = useState(false);
     const [ currentEvent, setCurrentEvent ] = useState<eventInterface | null>(null);
+    const [ timeFilter, setTimeFilter ] = useState("");
+    const [ processedEvents, setProcessedEvents ] = useState<eventInterface[]>([]);
 
     let { bedid } = useParams();
     const navigate = useNavigate();
@@ -18,7 +20,7 @@ const EventsGroup: React.FC = function() {
 
     const eventsResult = useGetEventsQuery(bedid);
     const events = eventsResult?.data as eventInterface[];
-    const sortedFilteredEvents = useMemo(() => {
+    const prelimEvents = useMemo(() => {
         const filteredEvents = events?.filter(event => {
             if (event?.creatorid === user?.id) return event;
             if (event?.eventpublic === true) return event;
@@ -33,12 +35,41 @@ const EventsGroup: React.FC = function() {
         sortedEvents?.sort((a, b) => {
             return new Date(a.eventdate[0]) - new Date(b.eventdate[0]);
         });
-        const firstFiveEvents = sortedEvents.slice(0, 5);
-        return firstFiveEvents;
+        return sortedEvents;
     }, [events]);
 
-    function generateEvents() {
-        const eventsArr = sortedFilteredEvents?.map(event => (
+    const today = new Date();
+    function addDays(date: Date, days: number) {
+        const dateCopy = new Date(date);
+        dateCopy.setDate(dateCopy.getDate() + days);
+        return dateCopy;
+    };
+    const nextWeek = addDays(today, 7);
+    const nextTwoWeeks = addDays(today, 14);
+    const nextMonth = addDays(today, 28);
+
+    useEffect(() => {
+        let processedEventsArr: eventInterface[] = [];
+        if (timeFilter) {
+            switch (timeFilter) {
+                case "7":
+                    processedEventsArr = prelimEvents?.filter(event => {
+                        if (new Date(event.eventdate[0]) <= new Date(nextWeek)) return event;
+                    });
+                    break;
+                case "14":
+                    processedEventsArr = prelimEvents?.filter(event => new Date(event.eventdate[0]) <= new Date(nextTwoWeeks));
+                    break;
+                case "28":
+                    processedEventsArr = prelimEvents?.filter(event => new Date(event.eventdate[0]) <= new Date(nextMonth));
+                    break;
+            };
+        };
+        setProcessedEvents(processedEventsArr);
+    }, [timeFilter]);
+
+    function generateEvents(events: eventInterface[]) {
+        const eventsArr = events?.map(event => (
             <li key={event.id}>
                 <p>{`Event id: ${event.id}`}</p>
                 <p>{`Repeat id: ${event.repeatid}`}</p>
@@ -66,12 +97,19 @@ const EventsGroup: React.FC = function() {
 
     return (
         <section>
-            <h2>Upcoming Events</h2>
+            <button type="button" onClick={() => navigate(`/share/${bedid}`)}>Return to bed overview</button>
+            <h2>Events</h2>
+            <label htmlFor="time-filter">See events:</label>
+            <select name="time-filter" id="time-filter" defaultValue={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
+                <option value="">from all time</option>
+                <option value="7">in the next 7 days</option>
+                <option value="14">in the next 14 days</option>
+                <option value="28">in the next 28 days</option>
+            </select>
             <ul>
-                {generateEvents()}
+                {(timeFilter) ? generateEvents(processedEvents) : generateEvents(prelimEvents)}
             </ul>
             <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button>
-            <button type="button" onClick={() => navigate(`/share/${bedid}/events`)}>See all events</button>
 
             {eventOverviewVis ? <EventOverview setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}
             {eventFormVis ? <EventForm setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}
@@ -79,4 +117,4 @@ const EventsGroup: React.FC = function() {
     );
 };
 
-export default EventsGroup;
+export default EventsPage;

@@ -9,6 +9,7 @@ import BedPlantingPage from './Create/BedPlantingPage';
 import BedPlantingGroup from "./Create/BedPlantingGroup";
 import BedSharingPage from "./Share/Wrapper";
 import BedSharingGroup from "./Share/Group";
+import EventsPage from "./Share/Events/EventsPage";
 import BedExplorationPage from "./Explore/BedExplorationPage";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           </Route>
           <Route path="share" element={<BedSharingPage />}>
             <Route path=":bedid" element={<BedSharingGroup />} />
+            <Route path=":bedid/events" element={<EventsPage />} />
           </Route>
           <Route path="explore" element={<BedExplorationPage />} />
           <Route path="profile" />
