@@ -24,6 +24,11 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
         setRepeating(!repeating);
     };
 
+    // const repeatTillDate = new Date(eventDate[0].getDate() + 1).toISOString().slice(0, 10);
+    const repeatTillDate = new Date(eventDate[0]);
+    repeatTillDate.setDate(repeatTillDate.getDate() + 1);
+    const repeatTillString = repeatTillDate.toISOString().slice(0, 10);
+
     return (
         <fieldset>
             <legend>Time</legend>
@@ -48,7 +53,7 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
             {repeating ?
                 <>
                     <label htmlFor="repeat-every">Repeat every:</label>
-                    <select name="repeat-every" id="repeat-every" onChange={(e) => setRepeatEvery(e.target.value)}>
+                    <select name="repeat-every" id="repeat-every" defaultValue={repeatEvery} onChange={(e) => setRepeatEvery(e.target.value)}>
                         <option value=""></option>
                         <option value="weekly">7 days</option>
                         <option value="biweekly">14 days</option>
@@ -56,7 +61,7 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
                     </select>
                     <div>
                         <label htmlFor="repeat-till">Repeat till:</label>
-                        <input type="date" id="repeat-till" min={eventDate[0].toString()} value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
+                        <input type="date" id="repeat-till" min={repeatTillString} value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
                     </div>
                 </> : null
             }

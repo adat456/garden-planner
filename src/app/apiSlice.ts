@@ -106,14 +106,6 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "events" ]
         }),
-        updateEvent: builder.mutation({
-            query: data => ({
-                url: `/update-event/${data.eventid}`,
-                method: "PATCH",
-                body: data.event
-            }),
-            invalidatesTags: [ "events" ]
-        }),
         deleteEvent: builder.mutation({
             query: data => ({
                 url: `/delete-event/${data.eventid}/${data.repeatid}`,
@@ -141,7 +133,6 @@ export const {
 
     useGetEventsQuery,
     useAddEventMutation,
-    useUpdateEventMutation,
     useDeleteEventMutation,
 
     util

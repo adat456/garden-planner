@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { useGetEventsQuery } from "../../app/apiSlice";
-import { eventInterface } from "../../app/interfaces";
+import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
+import { eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./EventForm";
 
@@ -12,10 +12,23 @@ const EventsGroup: React.FC = function() {
 
     let { bedid } = useParams();
 
+    const userResult = useGetUserQuery(undefined);
+    const user = userResult.data as userInterface;
+
     const eventsResult = useGetEventsQuery(bedid);
     const events = eventsResult?.data as eventInterface[];
-    const sortedEvents = useMemo(() => {
-        const sortedEvents = events?.slice();
+    const sortedFilteredEvents = useMemo(() => {
+        const filteredEvents = events?.filter(event => {
+            if (event?.creatorid === user?.id) return event;
+            if (event?.eventpublic === true) return event;
+
+            let returningEvent;
+            event?.eventparticipants?.forEach(participant => {
+                if (participant.id === user?.id) returningEvent = event;
+            });
+            return returningEvent;
+        });
+        const sortedEvents = filteredEvents?.slice();
         sortedEvents?.sort((a, b) => {
             return new Date(a.eventdate[0]) - new Date(b.eventdate[0]);
         });
@@ -23,8 +36,10 @@ const EventsGroup: React.FC = function() {
     }, [events]);
 
     function generateEvents() {
-        const eventsArr = sortedEvents?.map(event => (
+        const eventsArr = sortedFilteredEvents?.map(event => (
             <li key={event.id}>
+                <p>{`Event id: ${event.id}`}</p>
+                <p>{`Repeat id: ${event.repeatid}`}</p>
                 <h3>{event.eventname}</h3>
                 <p>{`Located at: ${event.eventlocation}`}</p>
                 <p>{`${event.eventdate[0]} ${event.eventdate[1] ? `- ${event.eventdate[1]}` : ""}`}</p>
@@ -43,6 +58,7 @@ const EventsGroup: React.FC = function() {
         if (eventFormVis) {
             const eventForm: HTMLDialogElement | null = document.querySelector(".event-form");
             eventForm?.showModal();
+            console.log(currentEvent);
         };
     }, [eventFormVis, eventOverviewVis]);
 
