@@ -15,11 +15,12 @@ interface eventParticipantsInterface {
 
 interface eventFormInterface {
     setEventFormVis: React.Dispatch<React.SetStateAction<boolean>>,
+    setEventOverviewVis: React.Dispatch<React.SetStateAction<boolean>>,
     currentEvent?: eventInterface | null,
     setCurrentEvent: React.Dispatch<React.SetStateAction<eventInterface | null>>
-}
+};
 
-const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent }) {
+const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
     const [ eventName, setEventName ] = useState(currentEvent?.eventname || "");
     const [ eventDesc, setEventDesc ] = useState(currentEvent?.eventdesc || "");
     const [ eventLocation, setEventLocation ] = useState(currentEvent?.eventlocation || "");
@@ -130,12 +131,13 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         };
     };
 
-    async function handleCreateEvent(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function handleCreateEvent(e?: React.FormEvent<HTMLFormElement>) {
+        e?.preventDefault();
 
         if (!repeating) {
             createEvent(eventDate);
             handleCloseEventForm();
+            setCurrentEvent(null);
             return;
         };        
 
@@ -147,35 +149,25 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
             });
 
             handleCloseEventForm();
+            setCurrentEvent(null);
         };
     };
 
+    // unlike other updates, below functions actually just create new events and delete the outdated ones (appears to be a more straightforward solution, especially if the repeating status, repeat till, and/or repeat every inputs are edited)
     async function handleUpdateEvent() {
-        if (currentEvent && !updateEventIsLoading) {
-            const preppedEventDate = eventDate.map(date => {
-                if (date) {
-                    return date.toString().slice(0, 15);
-                } else {
-                    return "";
-                };
-            });
+        handleCreateEvent();
 
-            try {
-                await updateEvent({
-                    eventid: currentEvent.id,
-                    event: {
-                        eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
-                        eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill
-                    },
-                }).unwrap();
-            } catch(err) {
-                console.error("Unable to delete all repeating events: ", err.message);
-            };
+        try {
+            await deleteEvent({
+                eventid: currentEvent?.id,
+            }).unwrap();
+        } catch(err) {
+            console.error("Unable to delete all repeating events: ", err.message);
         };
+
         handleCloseEventForm();
+        setCurrentEvent(null);
     };
-    // unlike the single update (which actually updates the event object), the update for reeatig events actually just creates new events and deletes the outdated ones
     // modifies the current event and all of the events that follow
     async function handleUpdateAllRepeatingEvents() {   
         // allRepeatingEventsThereafter.sort(function(a, b) {
@@ -183,6 +175,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         // });
         if (repeating && repeatEvery && repeatTill) {
             const repeatingDatesArr = generateRepeatingDatesCircumstantially();
+            // note how the current events repeat id is preserved, rather than generating a brand new nanoid
             repeatingDatesArr.forEach(async (dateArr) => {
                 createEvent(dateArr, currentEvent?.repeatid);
             });
@@ -190,6 +183,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
         // all of the repeating events to be deleted now that new ones have been created
         const allRepeatingEventsTBD = events?.filter(event => event.repeatid === currentEvent?.repeatid && event.id >= currentEvent?.id);
+        console.log(allRepeatingEventsTBD);
         allRepeatingEventsTBD.forEach(async (event) => {
             if (currentEvent && !updateEventIsLoading) {
                 try {
@@ -203,56 +197,33 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         });
 
         handleCloseEventForm();
-    };
-
-    async function handleDeleteEvent(repeatid: string | undefined = undefined) {
-        if (currentEvent && !deleteEventIsLoading) {
-            try {
-                if (repeatid) {
-                    await deleteEvent({
-                        eventid: currentEvent.id,
-                        repeatid: currentEvent.repeatid
-                    }).unwrap();
-                };
-
-                if (!repeatid) {
-                    await deleteEvent({
-                        eventid: currentEvent.id,
-                    }).unwrap();
-                };
-            } catch(err) {
-                console.error("Unable to delete event(s): ", err.message);
-            };
-        };
-
-        handleCloseEventForm();
+        setCurrentEvent(null);
     };
 
     function handleCloseEventForm() {
         const eventForm: HTMLDialogElement | null = document.querySelector(".event-form");
         eventForm?.close();
-
         setEventFormVis(false);
-        setCurrentEvent(null);
+    };
+
+    function handleBackToOverview() {
+        handleCloseEventForm();
+        setEventOverviewVis(true);
     };
 
     return (
         <dialog className="event-form">
+            <button type="button" onClick={handleBackToOverview}>Back to overview</button>
             <form method="POST" onSubmit={!currentEvent ? handleCreateEvent : undefined}>
-                <button type="button" onClick={handleCloseEventForm}>Close form</button>
                 <h3>Create new event</h3>
                 <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} />
                 <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} /> 
+                <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>
                 {currentEvent?
                     <>
-                        <button type="button" onClick={handleUpdateEvent}>Submit edits</button>
-                        <button type="button" onClick={() => handleDeleteEvent(undefined)}>Delete this event</button>
+                        <button type="button" onClick={handleUpdateEvent}>Update</button>
                         {currentEvent?.repeating ?
-                            <>
-                                <button type="button" onClick={handleUpdateAllRepeatingEvents}>Update this event and all repeating events</button>
-                                <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button>
-                            </> :
-                            null
+                            <button type="button" onClick={handleUpdateAllRepeatingEvents}>Update this event and all repeating events</button> : null
                         }
                     </> :
                     <button type="submit">Add to calendar</button> 

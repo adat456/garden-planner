@@ -63,7 +63,7 @@ const MemberGroup: React.FC = function() {
             <section>
                 <h3>Current</h3>
                 <ul>
-                    {generateMembers("current")}
+                    {generateMembers("final")}
                 </ul>
             </section>
             <section>

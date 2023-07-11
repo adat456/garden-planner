@@ -67,7 +67,8 @@ const Notifications: React.FC = function({ newNotif }) {
                     message: `${user.firstname} ${user.lastname} has accepted your invite.`,
                     dispatched: new Date().toISOString().slice(0, 10),
                     acknowledged: false,
-                    type: "acceptance"
+                    type: "acceptance",
+                    bedid: notification.bedid
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to accept invite: ", err.message);

@@ -96,7 +96,9 @@ export interface notificationInterface {
     dispatched: string,
     acknowledged: boolean,
     // enum? like "invite"?
-    type: "invite" | "acceptance"
+    type: "invite" | "acceptance" | "rsvpinvite" | "rsvpacceptance",
+    bedid?: number,
+    eventid?: number
 };
 
 export interface eventParticipantInterface {

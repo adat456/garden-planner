@@ -97,7 +97,8 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
                     message: `${user.firstname} ${user.lastname} invites you to join ${bed.name}`,
                     dispatched: new Date().toISOString().slice(0, 10),
                     acknowledged: false,
-                    type: "invite"
+                    type: "invite",
+                    bedid: bed?.id
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to add member: ", err.message);
