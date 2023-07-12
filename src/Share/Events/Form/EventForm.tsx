@@ -38,7 +38,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const [ repeating, setRepeating ] = useState(currentEvent?.repeating || false);
     const [ repeatEvery, setRepeatEvery ] = useState<string>(currentEvent?.repeatevery || "");
     const [ repeatTill, setRepeatTill ] = useState(currentEvent?.repeattill || "");
-    const [ tags, setTags ] = useState<string[]>([])
+    const [ tags, setTags ] = useState<string[]>(currentEvent?.tags || [])
 
     const { bedid } = useParams();
 
@@ -222,7 +222,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                 <h3>Create new event</h3>
                 <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} />
                 <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} /> 
-                <EventTags tags={tags} setTags={setTags} />
+                <EventTags tags={tags} setTags={setTags} currentEvent={currentEvent} />
                 <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>
                 {currentEvent?
                     <>

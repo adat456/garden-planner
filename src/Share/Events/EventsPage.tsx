@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
-import { eventInterface } from "../../app/interfaces";
+import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
+import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
+import cloneDeep from "lodash/fp/cloneDeep";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
 
@@ -10,6 +11,7 @@ const EventsPage: React.FC = function() {
     const [ eventFormVis, setEventFormVis ] = useState(false);
     const [ currentEvent, setCurrentEvent ] = useState<eventInterface | null>(null);
     const [ timeFilter, setTimeFilter ] = useState("");
+    const [ tagFilters, setTagFilters ] = useState<string[]>([]);
     const [ processedEvents, setProcessedEvents ] = useState<eventInterface[]>([]);
 
     let { bedid } = useParams();
@@ -17,6 +19,13 @@ const EventsPage: React.FC = function() {
 
     const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
+
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed as bedDataInterface;
 
     const eventsResult = useGetEventsQuery(bedid);
     const events = eventsResult?.data as eventInterface[];
@@ -49,24 +58,50 @@ const EventsPage: React.FC = function() {
     const nextMonth = addDays(today, 28);
 
     useEffect(() => {
-        let processedEventsArr: eventInterface[] = [];
+        // exit/guard clause - avoids all unnecessary work below if there is a change in the filters, but it is just back to "" or an empty array
+        if (!timeFilter && tagFilters.length === 0) return;
+        
+        let processedEventsArr: eventInterface[] = cloneDeep(prelimEvents);
         if (timeFilter) {
             switch (timeFilter) {
                 case "7":
-                    processedEventsArr = prelimEvents?.filter(event => {
-                        if (new Date(event.eventdate[0]) <= new Date(nextWeek)) return event;
-                    });
+                    processedEventsArr = processedEventsArr?.filter(event => new Date(event.eventdate[0]) <= new Date(nextWeek));
                     break;
                 case "14":
-                    processedEventsArr = prelimEvents?.filter(event => new Date(event.eventdate[0]) <= new Date(nextTwoWeeks));
+                    processedEventsArr = processedEventsArr?.filter(event => new Date(event.eventdate[0]) <= new Date(nextTwoWeeks));
                     break;
                 case "28":
-                    processedEventsArr = prelimEvents?.filter(event => new Date(event.eventdate[0]) <= new Date(nextMonth));
+                    processedEventsArr = processedEventsArr?.filter(event => new Date(event.eventdate[0]) <= new Date(nextMonth));
                     break;
             };
         };
+        if (tagFilters.length > 0) {
+            processedEventsArr = processedEventsArr.filter(event => {
+                let dings = 0;
+                tagFilters.forEach(tag => {
+                    if (!event.tags.includes(tag)) dings++;
+                });
+                if (dings === 0) return event;
+            });
+        };
         setProcessedEvents(processedEventsArr);
-    }, [timeFilter]);
+    }, [timeFilter, tagFilters]);
+
+    // need to show visually that the tag has been selected
+    function generateTagFilters() {
+        const tagFilters = bed?.eventtags?.map(tag => (
+            <button type="button" key={tag} onClick={() => toggleTagFilter(tag)}>{tag}</button>
+        ));
+        return tagFilters;
+    };
+
+    function toggleTagFilter(tag: string) {
+        if (tagFilters.includes(tag)) {
+            setTagFilters(tagFilters.filter(tagFilter => tagFilter !== tag));
+        } else {
+            setTagFilters([...tagFilters, tag]);
+        };
+    };
 
     function generateEvents(events: eventInterface[]) {
         const eventsArr = events?.map(event => (
@@ -106,8 +141,10 @@ const EventsPage: React.FC = function() {
                 <option value="14">in the next 14 days</option>
                 <option value="28">in the next 28 days</option>
             </select>
+            <p>Filter by tag(s):</p>
+            {generateTagFilters()}
             <ul>
-                {(timeFilter) ? generateEvents(processedEvents) : generateEvents(prelimEvents)}
+                {(timeFilter || tagFilters.length > 0) ? generateEvents(processedEvents) : generateEvents(prelimEvents)}
             </ul>
             <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button>
 

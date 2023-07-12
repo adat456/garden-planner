@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetBedsQuery, useDeleteTagMutation } from "../../../app/apiSlice";
-import { bedDataInterface } from "../../../app/interfaces";
+import { bedDataInterface, eventInterface } from "../../../app/interfaces";
 
 interface eventTagsInterface {
     tags: string[],
-    setTags: React.Dispatch<React.SetStateAction<string[]>>
+    setTags: React.Dispatch<React.SetStateAction<string[]>>,
+    currentEvent: eventInterface
 };
 
-const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags }) {
+const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags, currentEvent }) {
     const [ newTag, setNewTag ] = useState("");
     const [ errMessage, setErrMessage ] = useState("");
 
@@ -24,7 +25,7 @@ const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags }) {
 
     function generateAddedTags() {
         const tagsArr = tags?.map(tag => (
-            <button type="button" key={tag} onClick={() => setTags(tags.filter(existingTag => existingTag !== tag))}>{`- ${tag}`}</button>
+            <button type="button" key={`event-${currentEvent?.id}-${tag}`} onClick={() => setTags(tags.filter(existingTag => existingTag !== tag))}>{`- ${tag}`}</button>
         ));
         return tagsArr;
     };
@@ -35,8 +36,8 @@ const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags }) {
                 return null;
             } else {
                 return (
-                    <div>
-                        <button type="button" key={tag} onClick={() => setTags([...tags, tag])}>+</button>
+                    <div key={`event-${currentEvent?.id}-${tag}`}>
+                        <button type="button" onClick={() => setTags([...tags, tag])}>+</button>
                         <p>{tag}</p>
                         <button type="button" onClick={() => handleDeleteTag(tag)}>Delete</button>
                     </div>
