@@ -1,23 +1,24 @@
 import { useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetBedsQuery, useUpdateRolesMutation } from "../../app/apiSlice";
-import { rolesInterface } from "../../app/interfaces";
+import { useGetBedsQuery, useUpdateRolesMutation } from "../../../app/apiSlice";
+import { rolesInterface } from "../../../app/interfaces";
 import * as React from "react";
 
 interface AddRoleInterface {
     bedid: string | undefined,
-    role?: rolesInterface,
-    setEditVis: React.Dispatch<React.SetStateAction<boolean>>
+    focusRole?: rolesInterface | null,
+    setFocusRole: React.Dispatch<React.SetStateAction<rolesInterface | null>>,
+    setAddEditRoleVis: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditVis }) {
-    const [ title, setTitle ] = useState(role?.title || "");
-    const [ counter, setCounter ] = useState(role?.duties.length || 2);
+const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, setFocusRole, setAddEditRoleVis }) {
+    const [ title, setTitle ] = useState(focusRole?.title || "");
+    const [ counter, setCounter ] = useState(focusRole?.duties.length || 2);
     const [ duties, setDuties ] = useState<{
         value: string,
         id: number,
-    }[]>(role?.duties ? 
-        JSON.parse(JSON.stringify(role?.duties)) : 
+    }[]>(focusRole?.duties ? 
+        JSON.parse(JSON.stringify(focusRole?.duties)) : 
         [
             { value: "", id: 0 },
             { value: "", id: 1 }
@@ -45,7 +46,6 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
         ));
         return dutiesInputs;
     };
-
     function addDuties() {
         setDuties([
             ...duties,
@@ -53,7 +53,6 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
         ]);
         setCounter(counter + 1);
     };
-
     function handleDutiesChange(e: React.FormEvent<HTMLInputElement>) {
         const input = e.target as HTMLInputElement;
         const value = input.value;
@@ -65,18 +64,8 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
         });
         setDuties(dutiesCopy);
     };
-
     function removeDuties(dutyId: number) {
         setDuties(duties.filter(duty => duty.id !== dutyId));
-    };
-
-    function resetState() {
-        setTitle("");
-        setCounter(2);
-        setDuties([
-            { value: "", id: 0 },
-            { value: "", id: 1 }
-        ]);
     };
 
     async function handleAddRole(e: React.FormEvent) {
@@ -84,15 +73,13 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
 
         if (title && !isLoading && existingRoles) {
             try {
-                await updateRoles(
+                await updateRoles({
                     // necessary to generate a string id here (rather than allowing postgresql to generate a serial number id) because it will be added as JSON object to a single column
-                    {
-                        roles: [...existingRoles, { id: nanoid(), title, duties }],
-                        bedid 
-                    }
-                ).unwrap();
+                    roles: [...existingRoles, { id: nanoid(), title, duties }],
+                    bedid 
+                }).unwrap();
 
-                resetState();
+                handleCloseForm();
             } catch(err) {
                 console.error("Unable to add role: ", err.message);
             };
@@ -104,37 +91,45 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, role, setEditV
 
         if (title && !isLoading && existingRoles) {
             try {
-                let updatedRoles = existingRoles.filter(existingRole => existingRole.id !== role?.id);
-                updatedRoles.push({ id: role?.id, title, duties });
+                let updatedRoles = existingRoles.filter(existingRole => existingRole.id !== focusRole?.id);
+                updatedRoles.push({ id: focusRole?.id, title, duties });
 
-                await updateRoles(
-                    {
-                        roles: updatedRoles,
-                        bedid 
-                    }
-                ).unwrap();
+                await updateRoles({
+                    roles: updatedRoles,
+                    bedid 
+                }).unwrap();
 
-                setEditVis(false);
-                resetState();
+                handleCloseForm();
             } catch(err) {
                 console.error("Unable to edit role: ", err.message);
             };
         };
     };
 
+    function handleCloseForm() {
+        const addEditRoleForm: HTMLDialogElement | null = document.querySelector(".add-edit-role-form");
+        addEditRoleForm?.close();
+
+        setAddEditRoleVis(false);
+        setFocusRole(null);
+    };
+
     return (
-        <form method="POST" onSubmit={role ? handleEditRole : handleAddRole}>
-            <div>
-                <label htmlFor="title">Title</label>
-                <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            <fieldset>
-                <legend>Duties</legend>
-                {generateDutiesInputs()}
-                <button type="button" onClick={addDuties}>Add duty</button>
-            </fieldset>
-            <button type="submit">{role ? "Submit edits" : "Create new role"}</button>
-        </form>
+        <dialog className="add-edit-role-form">
+            <form method="POST" onSubmit={focusRole ? handleEditRole : handleAddRole}>
+                <div>
+                    <label htmlFor="title">Title</label>
+                    <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <fieldset>
+                    <legend>Duties</legend>
+                    {generateDutiesInputs()}
+                    <button type="button" onClick={addDuties}>Add duty</button>
+                </fieldset>
+                <button type="submit">{focusRole ? "Submit edits" : "Create new role"}</button>
+                <button type="button" onClick={handleCloseForm}>Close</button>
+            </form>
+        </dialog>
     );
 };
 

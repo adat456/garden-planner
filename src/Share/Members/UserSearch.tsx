@@ -22,7 +22,7 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
     const bed = bedObject.bed as bedDataInterface;
     const existingMembers = bed?.members;
 
-    const userObject = useGetUserQuery();
+    const userObject = useGetUserQuery(undefined);
     const user = userObject.data as userInterface;
 
     const [ updateMembers, { isLoading: membersIsLoading } ] = useUpdateMembersMutation();

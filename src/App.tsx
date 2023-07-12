@@ -11,6 +11,7 @@ import BedSharingPage from "./Share/Wrapper";
 import BedSharingGroup from "./Share/Group";
 import EventsPage from "./Share/Events/EventsPage";
 import BedExplorationPage from "./Explore/BedExplorationPage";
+import MembersPage from "./Share/Members/MembersPage";
 
 function App() {
   // just indicattes whther or not it is connected--may be deleted later
@@ -36,6 +37,7 @@ function App() {
           <Route path="share" element={<BedSharingPage />}>
             <Route path=":bedid" element={<BedSharingGroup />} />
             <Route path=":bedid/events" element={<EventsPage />} />
+            <Route path=":bedid/members" element={<MembersPage />} />
           </Route>
           <Route path="explore" element={<BedExplorationPage />} />
           <Route path="profile" />

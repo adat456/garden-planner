@@ -5,7 +5,6 @@ import { bedDataInterface } from "../app/interfaces";
 import Grid from "./Grid";
 import EventsGroup from "./Events/EventsGroup";
 import MemberGroup from "./Members/MemberGroup";
-import RoleGroup from "./Roles/RoleGroup";
 
 const BedSharingGroup: React.FC = function() {
     const { bedid } = useParams();
@@ -22,7 +21,6 @@ const BedSharingGroup: React.FC = function() {
             <EventsGroup />
             <Grid bedData={bed} />
             <MemberGroup />
-            <RoleGroup bedid={bedid} />
         </div>
     );
 };

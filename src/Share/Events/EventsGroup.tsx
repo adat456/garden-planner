@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
@@ -11,7 +11,6 @@ const EventsGroup: React.FC = function() {
     const [ currentEvent, setCurrentEvent ] = useState<eventInterface | null>(null);
 
     let { bedid } = useParams();
-    const navigate = useNavigate();
 
     const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
@@ -71,7 +70,7 @@ const EventsGroup: React.FC = function() {
                 {generateEvents()}
             </ul>
             <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button>
-            <button type="button" onClick={() => navigate(`/share/${bedid}/events`)}>See all events</button>
+            <Link to={`/share/${bedid}/events`}>See all events</Link>
 
             {eventOverviewVis ? <EventOverview setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}
             {eventFormVis ? <EventForm setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}

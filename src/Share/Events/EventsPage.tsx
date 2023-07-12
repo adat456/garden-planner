@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
@@ -15,7 +15,6 @@ const EventsPage: React.FC = function() {
     const [ processedEvents, setProcessedEvents ] = useState<eventInterface[]>([]);
 
     let { bedid } = useParams();
-    const navigate = useNavigate();
 
     const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
@@ -132,7 +131,7 @@ const EventsPage: React.FC = function() {
 
     return (
         <section>
-            <button type="button" onClick={() => navigate(`/share/${bedid}`)}>Return to bed overview</button>
+            <Link to={`/share/${bedid}`}>Return to bed overview</Link>
             <h2>Events</h2>
             <label htmlFor="time-filter">See events:</label>
             <select name="time-filter" id="time-filter" defaultValue={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
