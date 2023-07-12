@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetBedsQuery } from "../app/apiSlice";
 import { plantPickDataInterface } from "../app/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
-import PlantSearch from './PlantSearch';
+import CreateVeg from "./CreateVeg";
+import PlantSearch from './PlantSearch/PlantSearch';
 
 const BedPlantingGroup: React.FC = function() {
+    const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
+    const [ abbrPlantPicksVis, setAbbrPlantPicksVis ] = useState(false);
+    const [ createVegVis, setCreateVegVis ] = useState(false);
+
     const { bedid } = useParams();
 
     const bedObject = useGetBedsQuery(undefined, {
@@ -18,9 +23,6 @@ const BedPlantingGroup: React.FC = function() {
     
     const plantPicks = bed?.seedbasket as plantPickDataInterface[];
 
-    const [ curPlantPick, setCurPlantPick ] = useState<plantPickDataInterface | null>(null);
-    const [ abbrPlantPicksVis, setAbbrPlantPicksVis ] = useState(false);
-
     function generatePlantPicks(abbreviated: boolean) {
         const plantPicksArr = plantPicks?.map(plant => {
             return (
@@ -29,6 +31,13 @@ const BedPlantingGroup: React.FC = function() {
         });
         return plantPicksArr;    
     };
+
+    useEffect(() => {
+        if (createVegVis) {
+            const createVegForm: HTMLDialogElement | null = document.querySelector(".create-veg-form");
+            createVegForm?.showModal();
+        };
+    }, [createVegVis]);
 
     return (
         <div className="bed-planting-group">
@@ -56,6 +65,11 @@ const BedPlantingGroup: React.FC = function() {
                     }
                 </div>
             </section>
+            <button type="button" onClick={() => setCreateVegVis(true)}>Add a vegetable</button>
+            {createVegVis ?
+                <CreateVeg setCreateVegVis={setCreateVegVis} />
+                : null
+            }
             <PlantSearch plantPicks={plantPicks} bedid={bedid} />
         </div>
     );

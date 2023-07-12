@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { plantDataInterface } from "../app/interfaces";
-import { useGetUserQuery } from "../app/apiSlice";
+import { plantDataInterface } from "../../app/interfaces";
+import { useGetUserQuery } from "../../app/apiSlice";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,

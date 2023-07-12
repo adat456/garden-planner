@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
-import { membersInterface } from "../../app/interfaces";
+import { bedDataInterface } from "../../app/interfaces";
 
 const MemberGroup: React.FC = function() {
     const { bedid } = useParams();
@@ -10,15 +10,26 @@ const MemberGroup: React.FC = function() {
             bed: data?.find(bed => bed.id === Number(bedid))
         }),
     });
-    const existingMembers = bedObject.bed?.members as membersInterface[];
+    const bed = bedObject?.bed as bedDataInterface;
+    const existingMembers = bed?.members;
+
+    // rather than storing the entire role interface/object in member details, only the role id is stored. although the role title must then be pulled from the list of bed roles in order to be displayed, the limited redundancy means that any future changes to the role (e.g., title edits, deletion) are automatically reflected among the members
+    function findRoleTitle(roleId: string) {
+        let roleTitle = null;
+        bed?.roles.forEach(role => {
+            if (role.id === roleId) roleTitle = <p>{role.title}</p>;
+        });
+        return roleTitle;
+    };
 
     function generateMembers() {
         let membersArr;
-        const filteredMembers = existingMembers?.filter(member => member.status === "final");
+        let filteredMembers = existingMembers?.filter(member => member.status === "final");
+        filteredMembers = filteredMembers?.slice(0, 5);
         membersArr = filteredMembers?.map(member => (
             <li key={member.id}>
                 <p>{member.name}</p>
-                {member.role? <p>{member.role.title}</p> : null}
+                {member.role? findRoleTitle(member.role) : null}
             </li>
         ));
         return membersArr;
@@ -30,6 +41,10 @@ const MemberGroup: React.FC = function() {
             <ul>
                 {generateMembers()}
             </ul>
+            {(existingMembers?.length - 5 > 0) ? 
+                <p>{`+ ${existingMembers.length - 5} more`}</p> :
+                null
+            }
             <Link to={`/share/${bedid}/members`}>Manage members and roles</Link>
         </section>
     );

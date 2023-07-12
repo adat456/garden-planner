@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useUpdateSeedBasketMutation } from "../app/apiSlice";
-import { plantDataInterface, plantPickDataInterface } from "../app/interfaces";
+import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { plantDataInterface, plantPickDataInterface } from "../../app/interfaces";
 import randomColor from "random-color";
 
 interface plantSearchResultsInterface {
