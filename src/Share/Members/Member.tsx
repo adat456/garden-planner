@@ -5,11 +5,11 @@ import { useUpdateMembersMutation, useGetBedsQuery } from "../../app/apiSlice";
 
 interface memberInterface {
     member: membersInterface
-}
+};
 
 const Member: React.FC<memberInterface> = function({ member }) {
     const [ assigningRole, setAssigningRole ] = useState(false);
-    const [ role, setRole ] = useState(member.role?.id || "");
+    const [ role, setRole ] = useState(member.role || "");
 
     const { bedid } = useParams();
 
@@ -23,9 +23,17 @@ const Member: React.FC<memberInterface> = function({ member }) {
 
     const [ updateMembers, { isLoading } ] = useUpdateMembersMutation();
 
+    function findRoleTitle(id: string) {
+        let roleTitle = null;
+        bed?.roles.forEach(role => {
+            if (role.id === id) roleTitle = <p>{role.title}</p>;
+        });
+        return roleTitle;
+    };
+
     function generateRoleOptions() {
         const roleOptions = bed?.roles.map(role => (
-            <option value={role.id}>{role.title}</option>
+            <option key={role.id} value={role.id}>{role.title}</option>
         ));
         return roleOptions;
     };
@@ -38,7 +46,6 @@ const Member: React.FC<memberInterface> = function({ member }) {
                     bedid,
                     members: [...filteredMembers, {
                         ...member,
-                        // need to fix this... currently only assigning the role ID, not the entire role interface (with title and duties... though maybe this is for the best?)
                         role: role
                     }]
                 });
@@ -75,10 +82,12 @@ const Member: React.FC<memberInterface> = function({ member }) {
                         <>
                             <label htmlFor="role"></label>
                             <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
+                                <option value=""></option>
                                 {generateRoleOptions()}
                             </select>
                         </>
-                        : <p>{member.role.title}</p>
+                        : 
+                        findRoleTitle(member.role)
                     }
                 </>
                 : 
@@ -87,10 +96,12 @@ const Member: React.FC<memberInterface> = function({ member }) {
                         <>
                             <label htmlFor="role"></label>
                             <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
+                                <option value=""></option>
                                 {generateRoleOptions()}
                             </select>
                         </>
-                        : null
+                        : 
+                        null
                     }
                 </>
             }

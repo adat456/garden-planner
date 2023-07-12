@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { useGetBedsQuery, useUpdateRolesMutation } from "../../../app/apiSlice";
-import { rolesInterface } from "../../../app/interfaces";
+import { bedDataInterface } from "../../../app/interfaces";
 import * as React from "react";
 
 interface AddRoleInterface {
@@ -30,7 +30,8 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
             bed: data?.find(bed => bed.id === Number(bedid))
         }),
     });
-    const existingRoles = bedObject.bed?.roles as rolesInterface[];
+    const bed = bedObject.bed as bedDataInterface;
+    const existingRoles = bed?.roles;
 
     const [ updateRoles, { isLoading }] = useUpdateRolesMutation();
 

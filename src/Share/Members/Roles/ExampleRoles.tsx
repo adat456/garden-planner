@@ -75,6 +75,7 @@ const roles = [
 import { useUpdateRolesMutation, useGetBedsQuery } from "../../../app/apiSlice";
 import { useParams } from "react-router-dom";
 import { rolesInterface } from "../../../app/interfaces";
+import { nanoid } from "@reduxjs/toolkit";
 
 const ExampleRoles: React.FC = function() {
     let { bedid } = useParams();
@@ -110,7 +111,11 @@ const ExampleRoles: React.FC = function() {
                     bedid,
                     roles: [
                         ...existingRoles,
-                        role
+                        {
+                            ...role,
+                            // give the added role a different nanoid, so that multiple copies of an example role can be added and messing with one copy won't affect the others
+                            id: nanoid(),
+                        }
                     ]
                 }).unwrap;
             } catch(err) {
