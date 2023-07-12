@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetUserQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation } from "../../app/apiSlice";
-import { userInterface, eventInterface } from "../../app/interfaces";
+import { useGetUserQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation } from "../../../app/apiSlice";
+import { userInterface, eventInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
+import EventTags from "./EventTags";
 
 interface eventParticipantsInterface {
     id: number,
@@ -37,6 +38,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const [ repeating, setRepeating ] = useState(currentEvent?.repeating || false);
     const [ repeatEvery, setRepeatEvery ] = useState<string>(currentEvent?.repeatevery || "");
     const [ repeatTill, setRepeatTill ] = useState(currentEvent?.repeattill || "");
+    const [ tags, setTags ] = useState<string[]>([])
 
     const { bedid } = useParams();
 
@@ -121,7 +123,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         creatorName: `${user?.firstname} ${user?.lastname}`,
                         eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
                         eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId
+                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, tags
                     },
                 }).unwrap();
             } catch(err) {
@@ -220,6 +222,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                 <h3>Create new event</h3>
                 <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} />
                 <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} /> 
+                <EventTags tags={tags} setTags={setTags} />
                 <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>
                 {currentEvent?
                     <>

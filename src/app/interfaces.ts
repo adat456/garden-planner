@@ -43,7 +43,8 @@ export interface bedDataInterface {
     numhearts: number,
     numcopies: number,
     members: membersInterface[],
-    roles: rolesInterface[]
+    roles: rolesInterface[],
+    eventtags: string[]
 };
 
 export interface plantDataInterface {
@@ -126,6 +127,7 @@ export interface eventInterface {
     repeatid?: string,
     repeatevery?: "weekly" | "biweekly" | "monthly",
     repeattill?: string,
+    tags: string[],
 };
 
 export interface colorObjInterface {

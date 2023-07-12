@@ -62,6 +62,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             <p>{currentEvent?.eventdesc}</p>
             <p>{`Location: ${currentEvent?.eventlocation}`}</p>
             <p>{participants}</p>
+            <p>{currentEvent?.tags}</p>
 
             <div>
                 <button type="button" onClick={() => {handleCloseEventOverview(); setCurrentEvent(null)}}>Close</button>

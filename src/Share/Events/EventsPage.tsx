@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
-import EventForm from "./EventForm";
+import EventForm from "./Form/EventForm";
 
 const EventsPage: React.FC = function() {
     const [ eventOverviewVis, setEventOverviewVis ] = useState(false);

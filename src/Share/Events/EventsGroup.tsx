@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
-import EventForm from "./EventForm";
+import EventForm from "./Form/EventForm";
 
 const EventsGroup: React.FC = function() {
     const [ eventOverviewVis, setEventOverviewVis ] = useState(false);
@@ -33,7 +33,7 @@ const EventsGroup: React.FC = function() {
         sortedEvents?.sort((a, b) => {
             return new Date(a.eventdate[0]) - new Date(b.eventdate[0]);
         });
-        const firstFiveEvents = sortedEvents.slice(0, 5);
+        const firstFiveEvents = sortedEvents?.slice(0, 5);
         return firstFiveEvents;
     }, [events]);
 

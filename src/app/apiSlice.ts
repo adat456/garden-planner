@@ -104,15 +104,23 @@ export const apiSlice = createApi({
                 method: "POST",
                 body: data.event
             }),
-            invalidatesTags: [ "events" ]
+            invalidatesTags: [ "events", "beds" ]
         }),
         deleteEvent: builder.mutation({
             query: data => ({
                 url: `/delete-event/${data.eventid}/${data.repeatid}`,
                 method: "DELETE",
             }),
-            invalidatesTags: [ "events" ]
+            invalidatesTags: [ "events", "beds" ]
         }),
+        deleteTag: builder.mutation({
+            query: data => ({
+                url: `/delete-tag/${data.bedid}`,
+                method: "PATCH",
+                body: data.body
+            }),
+            invalidatesTags: [ "events", "beds" ]
+        })
     })
 });
 
@@ -134,6 +142,7 @@ export const {
     useGetEventsQuery,
     useAddEventMutation,
     useDeleteEventMutation,
+    useDeleteTagMutation,
 
     util
 } = apiSlice;

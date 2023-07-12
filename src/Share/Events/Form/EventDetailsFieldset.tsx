@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery } from "../../app/apiSlice";
-import { eventParticipantInterface, bedDataInterface } from "../../app/interfaces";
+import { useGetBedsQuery } from "../../../app/apiSlice";
+import { eventParticipantInterface, bedDataInterface } from "../../../app/interfaces";
 
 interface eventDetailsFieldsetInterface {
     eventName: string,
