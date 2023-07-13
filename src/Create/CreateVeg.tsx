@@ -65,6 +65,7 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
     });
     const bed = bedObject.bed as bedDataInterface;
     const plantPicks = bed?.seedbasket;
+    
     const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
 
     async function addPlantPick(result: plantDataInterface) {

@@ -33,11 +33,11 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
                 <legend>Sunlight:</legend>
                 <ul>
                     <li>
-                        <input type="radio" name="sunlight" id="full-sun" value="full sun" onChange={handleSunlightChange} />
+                        <input type="radio" name="sunlight" id="full-sun" value="full sun" onChange={handleSunlightChange} checked={sunlight === "full sun"} />
                         <label htmlFor="full-sun">Full sun</label>
                     </li>
                     <li>
-                        <input type="radio" name="sunlight" id="partial-sun" value="partial sun" onChange={handleSunlightChange} />
+                        <input type="radio" name="sunlight" id="partial-sun" value="partial sun" onChange={handleSunlightChange} checked={sunlight === "partial sun"} />
                         <label htmlFor="partial-sun">Partial sun</label>
                     </li>
                 </ul>
@@ -46,27 +46,27 @@ const BedSpecsForm: React.FC<BedSpecsFormInterface> = function({ hardiness, setH
                 <legend>Soil:</legend>
                 <ul>
                     <li>
-                        <input type="checkbox" name="soil" id="well-drained" value="well-drained" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="well-drained" value="well-drained" onChange={handleSoilChange} checked={soil.includes("well-drained")} />
                         <label htmlFor="well-drained">Well drained/Droughty</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="soil" id="poorly-drained" value="poorly drained" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="poorly-drained" value="poorly drained" onChange={handleSoilChange} checked={soil.includes("poorly drained")} />
                         <label htmlFor="poorly-drained">Poorly drained/Damp</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="soil" id="high-fertility" value="high fertility" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="high-fertility" value="high fertility" onChange={handleSoilChange} checked={soil.includes("high fertility")} />
                         <label htmlFor="high-fertility">High fertility</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="soil" id="low-fertility" value="low fertility" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="low-fertility" value="low fertility" onChange={handleSoilChange} checked={soil.includes("low fertility")} />
                         <label htmlFor="low-fertility">Low fertility</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="soil" id="acidic" value="acidic" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="acidic" value="acidic" onChange={handleSoilChange} checked={soil.includes("acidic")} />
                         <label htmlFor="acidic">Acidic (pH less than 7)</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="soil" id="basic" value="basic" onChange={handleSoilChange} />
+                        <input type="checkbox" name="soil" id="basic" value="basic" onChange={handleSoilChange} checked={soil.includes("basic")} />
                         <label htmlFor="basic">Basic (pH greater than 7)</label>
                     </li>
                 </ul>    

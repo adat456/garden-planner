@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../app/apiSlice";
 import { plantPickDataInterface } from "../app/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
@@ -65,6 +65,7 @@ const BedPlantingGroup: React.FC = function() {
                     }
                 </div>
             </section>
+            <Link to={`/create/${bedid}/edit`}>Edit bed</Link>
             <button type="button" onClick={() => setCreateVegVis(true)}>Add a vegetable</button>
             {createVegVis ?
                 <CreateVeg setCreateVegVis={setCreateVegVis} />

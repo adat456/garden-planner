@@ -29,6 +29,21 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: ["beds"],
         }),
+        updateBed: builder.mutation({
+            query: data => ({
+                url: `/update-bed/${data.bedid}`,
+                method: "PATCH",
+                body: data.bed
+            }),
+            invalidatesTags: ["beds"],
+        }),
+        deleteBed: builder.mutation({
+            query: data => ({
+                url: `/delete-bed/${data}`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ["beds"],
+        }),
         // all PATCH requests below receive a data object, e.g., data = {bedid: number, someData}
         updateSeedBasket: builder.mutation({
             query: data => ({
@@ -129,6 +144,8 @@ export const {
 
     useGetBedsQuery, 
     useCreateBedMutation, 
+    useUpdateBedMutation,
+    useDeleteBedMutation,
     useUpdateSeedBasketMutation,
     useUpdateGridMapMutation,
     useUpdateRolesMutation,

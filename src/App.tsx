@@ -32,6 +32,7 @@ function App() {
         <Route path="/" element={<LoggedInWrapper isConnected={isConnected} />}>
           <Route path="create" element={<BedPlantingPage />}>
             <Route path=":bedid" element={<BedPlantingGroup />} />
+            <Route path=":bedid/edit" element={<BedCreationPage />} />
             <Route path="new-bed" element={<BedCreationPage />} />
           </Route>
           <Route path="share" element={<BedSharingPage />}>
