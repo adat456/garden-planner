@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { nanoid } from "@reduxjs/toolkit";
 import { useAddPostMutation } from "../../app/apiSlice";
 
 interface newPostInterface {
@@ -20,7 +21,7 @@ const NewPost: React.FC<newPostInterface> = function({ setNewPostVis }) {
             try {
                 await addPost({
                     bedid,
-                    post: { title, content }
+                    post: { title, content, id: nanoid() }
                 });
             } catch(err) {
                 console.error("Unable to add post: ", err.message);

@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Link, useParams} from "react-router-dom";
 import { useGetPostsQuery } from "../../app/apiSlice";
 import { postInterface } from "../../app/interfaces";
+import PostPreview from "./PostPreview";
 import NewPost from "./NewPost";
 
 const BulletinLatest: React.FC = function() {
@@ -21,12 +22,7 @@ const BulletinLatest: React.FC = function() {
     }, [posts]);
 
     function generateLatestPosts() {
-        const posts = sortedLatestPosts?.map(post => (
-            <li key={post.id}>
-                <h3>{post.title}</h3>
-                <p>{`${post.content.slice(0, 150)}${post.content.length > 150 ? "..." : ""}`}</p>
-            </li>
-        ));
+        const posts = sortedLatestPosts?.map(post => <PostPreview key={post.id} post={post} />);
         return posts;
     };
 

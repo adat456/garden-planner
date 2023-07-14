@@ -8,7 +8,7 @@ export const apiSlice = createApi({
         },
         credentials: "include",
     }),
-    tagTypes: ["user", "beds", "notifications", "events", "posts"],
+    tagTypes: ["user", "beds", "notifications", "events", "posts", "comments"],
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data",
@@ -148,7 +148,23 @@ export const apiSlice = createApi({
                 body: data.post
             }),
             invalidatesTags: [ "posts" ]
-        })
+        }),
+        updateReactions: builder.mutation({
+            query: data => ({
+                url: `/update-reactions/${data.table}/${data.id}`,
+                method: "PATCH",
+                body: data.reaction
+            }),
+            invalidatesTags: [ "posts", "comments" ]
+        }),
+        addComment: builder.mutation({
+            query: data => ({
+                url:`/add-comment/${data.postid}`,
+                method: "POST",
+                body: data.comment
+            }),
+            invalidatesTags: [ "comments" ]
+        }),
     })
 });
 
@@ -176,6 +192,8 @@ export const {
 
     useGetPostsQuery,
     useAddPostMutation,
+    useUpdateReactionsMutation,
+    useAddCommentMutation,
 
     util
 } = apiSlice;

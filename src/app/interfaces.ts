@@ -137,7 +137,7 @@ export interface eventInterface {
 };
 
 export interface postInterface {
-    id: number,
+    id: string,
     bedid: number,
     authorid: number,
     authorusername: string,
@@ -151,8 +151,8 @@ export interface postInterface {
 };
 
 export interface commentInterface {
-    id: number,
-    postid: number,
+    id: string,
+    postid: string,
     responseorder: number[],
     authorid: number,
     authorusername: string,
