@@ -18,7 +18,7 @@ const BedCreationPage: React.FC = function() {
     const [name, setName] = useState(bed?.name || "");
     const [length, setLength] = useState(bed?.length || 10);
     const [width, setWidth] = useState(bed?.width || 10);
-    const [whole, setWhole] = useState(true);
+    const [whole, setWhole] = useState(bed?.whole || true);
     // first value will always be 0
     const [hardiness, setHardiness] = useState([0, bed?.hardiness] || [0, 5]);
     const [sunlight, setSunlight] = useState(bed?.sunlight || "");
@@ -33,29 +33,41 @@ const BedCreationPage: React.FC = function() {
     function generateGridmap() {
         const allCells = [...document.querySelectorAll(".grid-cell")];
         let gridmap: gridMapInterface[] = [];
-        if (whole) {
-            gridmap = allCells.map(cell => {
-                const cellDesc: gridMapInterface = {
-                    num: cell.getAttribute("id")?.slice(5),
-                    selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
-                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
-                    plantId: 0,
-                    plantName: "",
-                };
-                return cellDesc;
-            });
-        } else if (!whole) {
-            gridmap = allCells.map(cell => {
-                const cellDesc: gridMapInterface = {
-                    num: cell.getAttribute("id")?.slice(5),
-                    selected: cell.classList.contains("selected"),
-                    walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
-                    plantId: 0,
-                    plantName: "",
-                };
-                return cellDesc;
-            });
-        };
+        // if (whole) {
+        //     gridmap = allCells.map(cell => {
+        //         const cellDesc: gridMapInterface = {
+        //             num: cell.getAttribute("id")?.slice(5),
+        //             selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
+        //             walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
+        //             plantId: 0,
+        //             plantName: "",
+        //         };
+        //         return cellDesc;
+        //     });
+        // } else if (!whole) {
+            // gridmap = allCells.map(cell => {
+            //     const cellDesc: gridMapInterface = {
+            //         num: cell.getAttribute("id")?.slice(5),
+            //         selected: cell.classList.contains("selected"),
+            //         walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
+            //         plantId: 0,
+            //         plantName: "",
+            //     };
+            //     return cellDesc;
+            // });
+        // };
+        gridmap = allCells.map(cell => {
+            const cellDesc: gridMapInterface = {
+                num: cell.getAttribute("id")?.slice(5),
+                selected: cell.classList.contains("selected"),
+                horizontalwalkway: cell.classList.contains("horizontal-walkway"),
+                verticalwalkway: cell.classList.contains("vertical-walkway"),
+                customwalkway: cell.classList.contains("custom-walkway"),
+                plantId: 0,
+                plantName: "",
+            };
+            return cellDesc;
+        });
         return gridmap;
     };
 
@@ -67,7 +79,7 @@ const BedCreationPage: React.FC = function() {
         if (!createBedIsLoading) {
             try {
                 await createBed({
-                    name, length, width, soil, sunlight, gridmap,
+                    name, whole, length, width, soil, sunlight, gridmap,
                     public: publicBoard,
                     created: new Date(), 
                     hardiness: hardiness[1]
@@ -90,7 +102,7 @@ const BedCreationPage: React.FC = function() {
                 await updateBed({
                     bedid,
                     bed: {
-                        name, length, width, soil, sunlight, gridmap,
+                        name, whole, length, width, soil, sunlight, gridmap,
                         public: publicBoard,
                         hardiness: hardiness[1]
                     }

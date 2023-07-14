@@ -5,36 +5,45 @@ import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../app/apiSlice";
 import randomColor from "random-color";
 
 interface CreateVegInterface {
-    setCreateVegVis: React.Dispatch<React.SetStateAction<boolean>>
+    setCreateVegVis: React.Dispatch<React.SetStateAction<boolean>>,
+    focusVeg?: plantDataInterface | undefined,
+    setFocusVeg?: React.Dispatch<React.SetStateAction<plantDataInterface | undefined>>
+    setSeedContributions?: React.Dispatch<React.SetStateAction<plantDataInterface[]>>
 };
 
-const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [lifecycle, setLifecycle] = useState("");
-    const [plantingSzn, setPlantingSzn] = useState<string[]>([]);
-    const [fruitSize, setFruitSize] = useState("");
-    const [growthHabit, setGrowthHabit] = useState("");
-    const [growthConditions, setGrowthConditions] = useState("");
-    const [sowingMethod, setSowingMethod] = useState("");
-    const [light, setLight] = useState<string[]>([]);
-    const [depth, setDepth] = useState("");
-    const [heightLower, setHeightLower] = useState<number | null>(null);
-    const [heightUpper, setHeightUpper] = useState<number | null>(null);
-    const [spacingInLower, setSpacingInLower] = useState<number | null>(null);
-    const [spacingInUpper, setSpacingInUpper] = useState<number | null>(null);
-    const [water, setWater] = useState("");
-    const [hardiness, setHardiness] = useState<number[]>([]);
-    const [dtmLower, setDTMLower] = useState<number | null>(null);
-    const [dtmUpper, setDTMUpper] = useState<number | null>(null);
-    const [privateData, setPrivateData] = useState(false);
+const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focusVeg, setFocusVeg, setSeedContributions }) {
+    const [name, setName] = useState(focusVeg?.name || "");
+    const [description, setDescription] = useState(focusVeg?.description || "");
+    const [lifecycle, setLifecycle] = useState(focusVeg?.lifecycle || "");
+    const [plantingSzn, setPlantingSzn] = useState<string[]>(focusVeg?.plantingseason || []);
+    const [fruitSize, setFruitSize] = useState(focusVeg?.fruitsize || "");
+    const [growthHabit, setGrowthHabit] = useState(focusVeg?.growthhabit || "");
+    const [growthConditions, setGrowthConditions] = useState(focusVeg?.growconditions || "");
+    const [sowingMethod, setSowingMethod] = useState(focusVeg?.sowingmethod || "");
+    const [light, setLight] = useState<string[]>(focusVeg?.light || []);
+    const [depth, setDepth] = useState(focusVeg?.depth || "");
+    const [heightLower, setHeightLower] = useState<number | undefined>(focusVeg?.heightin[0] || undefined);
+    const [heightUpper, setHeightUpper] = useState<number | undefined>(focusVeg?.heightin[1] || undefined);
+    const [spacingInLower, setSpacingInLower] = useState<number | undefined>(focusVeg?.spacingin[0] || undefined);
+    const [spacingInUpper, setSpacingInUpper] = useState<number | undefined>(focusVeg?.spacingin[1] || undefined);
+    const [water, setWater] = useState(focusVeg?.water || "");
+    const [hardiness, setHardiness] = useState<number[]>(focusVeg?.hardiness || []);
+    const [dtmLower, setDTMLower] = useState<number | undefined>(focusVeg?.daystomaturity[0] || undefined);
+    const [dtmUpper, setDTMUpper] = useState<number | undefined>(focusVeg?.daystomaturity[1] || undefined);
+    const [privateData, setPrivateData] = useState(focusVeg?.privatedata || false);
 
     function generateHardinessButtons() {
         let hardinessButtonsArr = [];
         for (let i = 1; i <= 12; i++) {
-            hardinessButtonsArr.push(
-                <button type="button" key={i} className="hardiness-button" id={`hardiness-button-${i}`} onClick={() => toggleHardiness(i)}>{i}</button>
-            );
+            if (focusVeg?.hardiness.includes(i)) {
+                hardinessButtonsArr.push(
+                    <button type="button" key={i} className="hardiness-button active-button" id={`hardiness-button-${i}`} onClick={() => toggleHardiness(i)}>{i}</button>
+                );
+            } else {
+                hardinessButtonsArr.push(
+                    <button type="button" key={i} className="hardiness-button" id={`hardiness-button-${i}`} onClick={() => toggleHardiness(i)}>{i}</button>
+                );
+            };
         };
         return hardinessButtonsArr;
     };
@@ -69,7 +78,7 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
     const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
 
     async function addPlantPick(result: plantDataInterface) {
-        if (!isLoading) {
+        if (!isLoading && bedid) {
             const updatedseedbasket = [...plantPicks, {
                 ...result,
                 gridcolor: randomColor().hexString()
@@ -87,12 +96,13 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
         };
     };
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-
-        const growthConditionsArr = growthConditions.split(",");
-        const sowingMethodArr = sowingMethod.split(",");
-        const growthHabitArr = growthHabit.split(",");
+    function prepareDataForSubmission() {
+        let growthConditionsArr: string[] = [];
+        let sowingMethodArr: string[] = [];
+        let growthHabitArr: string[] = [];
+        if (typeof growthConditions === "string") growthConditionsArr = growthConditions.split(",");
+        if (typeof sowingMethod === "string") sowingMethodArr = sowingMethod.split(",");
+        if (typeof growthHabit === "string") growthHabitArr = growthHabit.split(",");
 
         let spacingArr = [];
         if (spacingInLower) spacingArr.push(spacingInLower);
@@ -103,6 +113,14 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
         let heightArr = [];
         if (heightLower) heightArr.push(heightLower);
         if (heightUpper) heightArr.push(heightUpper); 
+
+        return  { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr };
+    };
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+
+        const { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
 
         const reqOptions: RequestInit = {
             method: "POST",
@@ -116,7 +134,13 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
             const res = await req.json();
             if (req.ok) {
                 console.log(res);
-                addPlantPick(res);
+                if (bedid) {
+                    // if vegetable is added from a garden bed, add the newly created veg to the seedbasket
+                    addPlantPick(res);
+                } else if (setSeedContributions) {
+                    // if vegetable is added from the profile, update state with all the user's vegetables
+                    setSeedContributions(res);
+                };
                 
                 handleClose();
             } else {
@@ -127,15 +151,43 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
         };
     };
 
+    async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        const { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
+
+        const reqOptions: RequestInit = {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ name, description, hardiness, water, light, growthConditionsArr, lifecycle, plantingSzn, sowingMethodArr, depth, spacingArr, growthHabitArr, dtmArr, heightArr, fruitSize, privateData }),
+            credentials: "include"
+        };
+        
+        try {
+            const req = await fetch(`http://localhost:3000/update-veg-data/${focusVeg?.id}`, reqOptions);
+            const res = await req.json();
+            if (req.ok) {
+                if (setSeedContributions) setSeedContributions(res);
+                
+                handleClose();
+            } else {
+                throw new Error(res);
+            };
+        } catch(err) {
+            console.log(err.message);
+        };        
+    };
+
     function handleClose() {
         const createVegForm: HTMLDialogElement | null = document.querySelector(".create-veg-form");
         createVegForm?.close();
         setCreateVegVis(false);
+        if (setFocusVeg) setFocusVeg(undefined);
     };
  
     return (
         <dialog className="create-veg-form">
-            <form method="POST" onSubmit={handleSubmit}>
+            <form method="POST" onSubmit={focusVeg ? handleEdit : handleSubmit}>
                 <h2>Add a vegetable</h2>
                 <div>
                     <label htmlFor="name">Name</label>
@@ -154,30 +206,30 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
                     <fieldset className="water-container">
                         <legend>Water needs</legend>
                         <div>
-                            <input type="radio" name="water" id="low" value="Low" onChange={(e) => setWater(e.target.value)} />
+                            <input type="radio" name="water" id="low" value="Low" onChange={(e) => setWater(e.target.value)} checked={water === "Low"} />
                             <label htmlFor="low">Low</label>
                         </div>
                         <div>
-                            <input type="radio" name="water" id="average" value="Average" onChange={(e) => setWater(e.target.value)} />
+                            <input type="radio" name="water" id="average" value="Average" onChange={(e) => setWater(e.target.value)} checked={water === "Average"} />
                             <label htmlFor="average">Average</label>
                         </div>
                         <div>
-                            <input type="radio" name="water" id="high" value="High" onChange={(e) => setWater(e.target.value)} />
+                            <input type="radio" name="water" id="high" value="High" onChange={(e) => setWater(e.target.value)} checked={water === "High"} />
                             <label htmlFor="high">High</label>
                         </div>
                     </fieldset>
                     <fieldset className="light-container">
                         <legend>Light needs</legend>
                         <div>
-                            <input type="checkbox" name="light" id="full-shade" value="Full Shade" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} />
+                            <input type="checkbox" name="light" id="full-shade" value="Full Shade" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} checked={light.includes("Full Shade")} />
                             <label htmlFor="full-shade">Full shade</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="light" id="partial-shade" value="Partial Shade" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} />
+                            <input type="checkbox" name="light" id="partial-shade" value="Partial Shade" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} checked={light.includes("Partial Shade")} />
                             <label htmlFor="partial-shade">Partial shade</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="light" id="full-sun" value="Full Sun" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} />
+                            <input type="checkbox" name="light" id="full-sun" value="Full Sun" onChange={(e) => toggleCheckboxStringState(light, setLight, e.target.value)} checked={light.includes("Full Sun")} />
                             <label htmlFor="full-sun">Full sun</label>
                         </div>
                     </fieldset>
@@ -191,38 +243,38 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
                     <fieldset className="lifecycle-container">
                         <legend>Lifecycle</legend>
                         <div>
-                            <input type="radio" name="lifecycle" id="annual" value="Annual" onChange={(e) => setLifecycle(e.target.value)} />
+                            <input type="radio" name="lifecycle" id="annual" value="Annual" onChange={(e) => setLifecycle(e.target.value)} checked={lifecycle === "Annual"} />
                             <label htmlFor="annual">Annual</label>
                         </div>
                         <div>
-                            <input type="radio" name="lifecycle" id="biennial" value="Biennial" onChange={(e) => setLifecycle(e.target.value)} />
+                            <input type="radio" name="lifecycle" id="biennial" value="Biennial" onChange={(e) => setLifecycle(e.target.value)} checked={lifecycle === "Biennial"}  />
                             <label htmlFor="biennial">Biennial</label>
                         </div>
                         <div>
-                            <input type="radio" name="lifecycle" id="perennial" value="Perennial" onChange={(e) => setLifecycle(e.target.value)} />
+                            <input type="radio" name="lifecycle" id="perennial" value="Perennial" onChange={(e) => setLifecycle(e.target.value)} checked={lifecycle === "Perennial"}  />
                             <label htmlFor="perennial">Perennial</label>
                         </div>
                     </fieldset>
                     <fieldset className="planting-szn-container">
                         <legend>Planting season</legend>
                         <div>
-                            <input type="checkbox" name="plantingSzn" id="spring" value="Spring" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} />
+                            <input type="checkbox" name="plantingSzn" id="spring" value="Spring" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} checked={plantingSzn.includes("Spring")} />
                             <label htmlFor="spring">Spring</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="plantingSzn" id="summer" value="Summer" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} />
+                            <input type="checkbox" name="plantingSzn" id="summer" value="Summer" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} checked={plantingSzn.includes("Summer")} />
                             <label htmlFor="summer">Summer</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="plantingSzn" id="fall" value="Fall" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} />
+                            <input type="checkbox" name="plantingSzn" id="fall" value="Fall" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} checked={plantingSzn.includes("Fall")} />
                             <label htmlFor="fall">Fall</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="plantingSzn" id="warm-season" value="Warm Season" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} />
+                            <input type="checkbox" name="plantingSzn" id="warm-season" value="Warm Season" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} checked={plantingSzn.includes("Warm Season")} />
                             <label htmlFor="warm-season">Warm Season</label>
                         </div>
                         <div>
-                            <input type="checkbox" name="plantingSzn" id="cool-season" value="Cool Season" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} />
+                            <input type="checkbox" name="plantingSzn" id="cool-season" value="Cool Season" onChange={(e) => toggleCheckboxStringState(plantingSzn, setPlantingSzn, e.target.value)} checked={plantingSzn.includes("Cool Season")} />
                             <label htmlFor="cool-season">Cool Season</label>
                         </div>
                     </fieldset>
@@ -271,11 +323,14 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis }) {
                     </div>
                 </fieldset>
                 <div>
-                    <input type="checkbox" name="privateData" id="privateData" checked={privateData} onChange={() => setPrivateData(!privateData)} />
+                    <input type="checkbox" name="privateData" id="privateData" checked={privateData} onChange={() => setPrivateData(!privateData)} checked={privateData} />
                     <label htmlFor="privateData">Set to private?</label>
                 </div>
                 <button type="button" onClick={handleClose}>Close</button>
-                <button type="submit">Add to database</button>
+                {focusVeg ?
+                    <button type="submit">Update database entry</button> :
+                    <button type="submit">Add to database</button>
+                }
             </form>
         </dialog>
     );

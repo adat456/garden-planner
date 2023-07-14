@@ -1,7 +1,10 @@
 export interface gridMapInterface {
     num: string,
     selected: boolean,
-    walkway: boolean,
+    horizontalwalkway: boolean,
+    verticalwalkway: boolean,
+    customwalkway: boolean,
+    // walkway: boolean,
     plantId: number,
     plantName: string,
     gridColor: string
@@ -32,6 +35,7 @@ export interface bedDataInterface {
     hardiness: number,
     sunlight: string,
     soil: string[],
+    whole: boolean,
     length: number,
     width: number,
     gridmap: gridMapInterface[],
@@ -50,7 +54,7 @@ export interface bedDataInterface {
 
 export interface plantDataInterface {
     color: string,
-    daystomaturity: string[],
+    daystomaturity: number[],
     depth: string,
     description: string[] | string,
     fruitsize: string,
@@ -58,8 +62,8 @@ export interface plantDataInterface {
     growconditions: string[],
     // refers to appearance, e.g., compact, climbing
     growthhabit: string[],
-    hardiness: string[],
-    heightin: string[],
+    hardiness: number[],
+    heightin: number[],
     id: number,
     lifecycle: string,
     light: string[],
@@ -67,9 +71,10 @@ export interface plantDataInterface {
     plantcharac: string[],
     plantingseason: string[],
     sowingmethod: string[],
-    spacingin: string[],
+    spacingin: number[],
     water: string,
-    contributor?: string;
+    contributor?: string,
+    privatedata?: boolean
 };
 
 export interface plantPickDataInterface extends plantDataInterface {

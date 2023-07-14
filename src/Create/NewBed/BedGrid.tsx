@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useGetBedsQuery } from "../../app/apiSlice";
+import { bedDataInterface } from "../../app/interfaces";
 
 interface BedGridInterface {
     length: number,
@@ -10,10 +13,19 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
     const [arrowVis, setArrowVis] = useState(false);
     const [addPlot, setAddPlot] = useState(true);
 
-    // different classes for bed cells/plots: all should have .grid-cell; may also have .selected, .custom-walkway, .vertical-walkway, and .horizontal-walkway
+    const { bedid } = useParams();
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed as bedDataInterface;
+
+    // different classes for bed cells/plots: all should have .grid-cell; may also have .selected, .custom-walkway, or .vertical-walkway and/or .horizontal-walkway
 
     function toggleSelectedPlots(e: React.MouseEvent) {
         const plot = e.target as HTMLTableCellElement;
+        // prefer using className to explicitly spell out classes over classList.add/remove, so as to prevent plots from being both selected and walkways
         if (addPlot) {
             if (plot.classList.contains("selected")) {
                 plot.className = "grid-cell";
@@ -21,18 +33,19 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                 plot.className = "selected grid-cell";
             };
         } else {
-            if (plot.classList.contains("custom-walkway")) {
-                plot.className = "grid-cell";
+            // toggles walkway regardless of what kind (but will ultimately replace w/ custom)
+            if (plot.classList.contains("custom-walkway") || plot.classList.contains("horizontal-walkway") || plot.classList.contains("vertical-walkway")) {
+                plot.className = "grid-cell selected";
             } else {
                 plot.className = "custom-walkway grid-cell";
             };
         };
     };
 
-    function toggleWalkwayMarkerStyle(e: React.MouseEvent) {
-        const arrowCell = e.target as HTMLTableCellElement;
-        arrowCell.classList.toggle("clicked");
-    };
+    // function toggleWalkwayMarkerStyle(e: React.MouseEvent) {
+    //     const arrowCell = e.target as HTMLTableCellElement;
+    //     arrowCell.classList.toggle("clicked");
+    // };
 
     function toggleWalkwayRowPlacement(line: number, direction: string) {
         // grab all the grid cells in an array
@@ -54,32 +67,62 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
         });
         // then toggle the classes (need to be separate even though they have the same style, otherwise adding a horizontal walkway could interfere with a vertical walkway that was already placed)
         if (direction === "vertical") {
+            let dings = 0;
             lineCells.forEach(cell => {
-                if (cell.classList.contains("vertical-walkway")) {
-                    cell.className = "grid-cell";
-                } else {
-                    cell.className = "vertical-walkway grid-cell";
+                if (cell.classList.contains("vertical-walkway") || cell.classList.contains("custom-walkway")) {
+                    dings++;
                 };
             });
+            
+            if (dings < length) {
+                lineCells.forEach(cell => {
+                    cell.classList.add("vertical-walkway");
+                    cell.classList.remove("custom-walkway", "selected");
+                });
+            } else if (dings === length) {
+                lineCells.forEach(cell => {
+                    cell.classList.remove("vertical-walkway", "custom-walkway");
+                    if (whole) cell.classList.add("selected");
+                });
+            };
         };
         if (direction === "horizontal") {
+            let dings = 0;
             lineCells.forEach(cell => {
-                if (cell.classList.contains("horizontal-walkway")) {
-                    cell.className = "grid-cell";
-                } else {
-                    cell.className = "horizontal-walkway grid-cell";
+                if (cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")) {
+                    dings++;
                 };
             });
+            
+            if (dings < width) {
+                lineCells.forEach(cell => {
+                    cell.classList.add("horizontal-walkway");
+                    cell.classList.remove("custom-walkway", "selected");
+                });
+            } else if (dings === width) {
+                lineCells.forEach(cell => {
+                    cell.classList.remove("horizontal-walkway", "custom-walkway");
+                    if (whole) cell.classList.add("selected");
+                });
+            };
         };
+    };
+
+    function fillSpace(className: string) {
+        const allCells = [...document.querySelectorAll(".grid-cell")];
+        allCells.forEach(cell => {
+            if (!cell.classList.contains("selected") && !cell.classList.contains("horizontal-walkway") && !cell.classList.contains("vertical-walkway") && !cell.classList.contains("custom-walkway")) cell.classList.add(className);
+        });
     };
 
     function clearAllWalkways() {
         const allCells = [...document.querySelectorAll(".grid-cell")];
         allCells.forEach(cell => {
             cell.classList.remove("horizontal-walkway", "vertical-walkway", "custom-walkway");
+            if (whole) cell.classList.add("selected");
         });
-        const allMarkers = [...document.querySelectorAll(".arrow")];
-        allMarkers.forEach(marker => marker.classList.remove("clicked"));
+        // const allMarkers = [...document.querySelectorAll(".arrow")];
+        // allMarkers.forEach(marker => marker.classList.remove("clicked"));
     };
 
     function clearAllSelectedPlots() {
@@ -108,13 +151,13 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                 if (j === 0 && i >= 1) {
                     const width = widthCounter;
                     row.push(<div key={`${j}${i}`} className="arrow-cell">
-                        <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(width, "vertical");}} />
+                        <div key={i} className={arrowVis ? "arrow arrow-down" : "arrow arrow-down hidden"} onClick={(e) => {toggleWalkwayRowPlacement(width, "vertical");}} />
                     </div>);
                     widthCounter++;
                 } else if (j >= 1 && i === 0) {
                     const length = lengthCounter;
                     row.push(<div key={`${j}${i}`} className="arrow-cell">
-                        <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayMarkerStyle(e); toggleWalkwayRowPlacement(length, "horizontal");}} />
+                        <div key={i} className={arrowVis ? "arrow arrow-right" : "arrow arrow-right hidden"} onClick={(e) => {toggleWalkwayRowPlacement(length, "horizontal");}} />
                     </div>);
                     lengthCounter++;
                 // renders the very first cell w/ invisible borders
@@ -122,7 +165,22 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                     row.push(<div key={`${j}${i}`} className="arrow-cell" />);
                 // renders all other cells
                 } else {
-                    row.push(<div key={`${j}${i}`} className="grid-cell" id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
+                    let classes = "grid-cell ";
+                    if (bed) {
+                        const gridData = bed?.gridmap[counter - 1];
+
+                        if (gridData?.selected) classes += "selected ";
+
+                        if (gridData?.horizontalwalkway) classes += "horizontal-walkway ";
+                        if (gridData?.verticalwalkway) classes += "vertical-walkway ";
+                        if (gridData?.customwalkway) classes += "custom-walkway ";
+
+                        if (gridData?.plantId) classes += "planted";
+                    } else {
+                        // by default, all cell start off selected
+                        classes += "selected";
+                    };
+                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} onClick={toggleSelectedPlots}  />);
                     counter++;
                 };
             };
@@ -138,9 +196,13 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
     useEffect(() => {
         const allCells = [...document.querySelectorAll(".grid-cell")];
         if (whole) {
-            allCells.forEach(cell => cell.setAttribute("inert", "true"));
+            allCells.forEach(cell => {
+                cell.setAttribute("inert", "true");
+            });
         } else {
-            allCells.forEach(cell => cell.removeAttribute("inert"));
+            allCells.forEach(cell => {
+                cell.removeAttribute("inert");
+            });
         };
     }, [whole]);
 
@@ -157,16 +219,21 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
                 </div>
                 {whole ?
                     <div>
-                        <p>Add</p>
+                        <p>Toggle individual</p>
                         <button type="button" disabled>{addPlot ? "bed" : "walkway"}</button>
                         <p>cells</p>
                     </div> :
                     <div>
-                        <p>Add</p>
+                        <p>Toggle individual</p>
                         <button type="button" onClick={() => setAddPlot(!addPlot)}>{addPlot ? "bed" : "walkway"}</button>
                         <p>cells</p>
                     </div>
                 }
+                <div>
+                    <p>Fill empty space with:</p>
+                    <button type="button" onClick={() => fillSpace("custom-walkway")}>walkway cells</button>
+                    <button type="button" onClick={() => fillSpace("selected")}>bed cells</button>
+                </div>
                 <div>
                     <p>Clear all:</p>
                     <button type="button" onClick={clearAllWalkways}>walkway cells</button>

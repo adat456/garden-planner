@@ -12,6 +12,7 @@ import BedSharingGroup from "./Share/Group";
 import EventsPage from "./Share/Events/EventsPage";
 import BedExplorationPage from "./Explore/BedExplorationPage";
 import MembersPage from "./Share/Members/MembersPage";
+import ProfilePage from "./Profile/ProfilePage";
 
 function App() {
   // just indicattes whther or not it is connected--may be deleted later
@@ -41,7 +42,7 @@ function App() {
             <Route path=":bedid/members" element={<MembersPage />} />
           </Route>
           <Route path="explore" element={<BedExplorationPage />} />
-          <Route path="profile" />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { useGetBedsQuery, useUpdateGridMapMutation } from "../app/apiSlice";
-import { bedDataInterface, plantPickDataInterface, gridMapInterface } from "../app/interfaces";
+import { plantPickDataInterface, gridMapInterface } from "../app/interfaces";
 
 interface bedPlantingGridInterface {
     curPlantPick: plantPickDataInterface | null,
@@ -33,8 +33,8 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     let classes = "grid-cell ";
                     const gridData = bed?.gridmap[counter - 1];
                     if (gridData.selected) classes += "selected ";
-                    if (gridData.walkway) classes += "walkway ";
-                    if (!gridData.selected && !gridData.walkway) classes += "away";
+                    if (gridData.horizontalwalkway || gridData.verticalwalkway || gridData.customwalkway) classes += "walkway ";
+                    if (!gridData.selected && !gridData.horizontalwalkway && !gridData.verticalwalkway && !gridData.customwalkway) classes += "away";
                     if (gridData.plantId) classes += "planted";
                     
                     row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridData.plantName} style={{backgroundColor: gridData.gridColor}} onClick={togglePlant} />);       
@@ -87,7 +87,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             gridColor: "",
                         });
                         if (gridMapCopy && bed?.id) {
-                            updateBedData(gridMapCopy, bed.id, true)
+                            updateBedData(gridMapCopy, bed.id)
                         }; 
                     };
                 } else {
@@ -106,7 +106,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             gridColor: curPlantPick.gridcolor,
                         });
                         if (gridMapCopy && bed?.id) {
-                            updateBedData(gridMapCopy, bed.id, true)
+                            updateBedData(gridMapCopy, bed.id)
                         }; 
                     };
                 };
@@ -127,7 +127,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                         gridColor: curPlantPick.gridcolor
                     });
                     if (gridMapCopy && bed?.id) {
-                        updateBedData(gridMapCopy, bed.id, true)
+                        updateBedData(gridMapCopy, bed.id)
                     }; 
                 };
             };
@@ -159,14 +159,16 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
             return ({
                 num: grid.num,
                 selected: grid.selected,
-                walkway: grid.walkway,
+                horizontalwalkway: grid.horizontalwalkway,
+                verticalwalkway: grid.verticalwalkway,
+                customwalkway: grid.customwalkway,
                 plantId: 0,
                 plantName: "",
                 gridColor: ""
             });
         });
         if (clearedGridMap && bed?.id) {
-            updateBedData(clearedGridMap, bed.id, true)
+            updateBedData(clearedGridMap, bed.id)
         };    
     };
 
