@@ -136,6 +136,34 @@ export interface eventInterface {
     tags: string[],
 };
 
+export interface postInterface {
+    id: number,
+    bedid: number,
+    authorid: number,
+    authorusername: string,
+    authorname: string,
+    posted: Date,
+    edited: Date,
+    title: string,
+    content: string,
+    likes: number[],
+    dislikes: number[],
+};
+
+export interface commentInterface {
+    id: number,
+    postid: number,
+    responseorder: number[],
+    authorid: number,
+    authorusername: string,
+    authorname: string,
+    posted: Date,
+    edited: Date,
+    content: string,
+    likes: number[],
+    dislikes: number[],
+};
+
 export interface colorObjInterface {
     hex: string,
     hsl: {

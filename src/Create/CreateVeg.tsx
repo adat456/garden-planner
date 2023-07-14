@@ -130,10 +130,10 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
         };
         
         try {
-            const req = await fetch("http://localhost:3000/save-veg-data", reqOptions);
+            // parameter changes depending on whether the created vegetable or all of the vegetables should be returned
+            const req = await fetch(`http://localhost:3000/save-veg-data/${bedid && !setSeedContributions ? "single" : "all"}`, reqOptions);
             const res = await req.json();
             if (req.ok) {
-                console.log(res);
                 if (bedid) {
                     // if vegetable is added from a garden bed, add the newly created veg to the seedbasket
                     addPlantPick(res);

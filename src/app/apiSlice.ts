@@ -8,7 +8,7 @@ export const apiSlice = createApi({
         },
         credentials: "include",
     }),
-    tagTypes: ["user", "beds", "notifications", "events"],
+    tagTypes: ["user", "beds", "notifications", "events", "posts"],
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data",
@@ -135,6 +135,19 @@ export const apiSlice = createApi({
                 body: data.body
             }),
             invalidatesTags: [ "events", "beds" ]
+        }),
+        //////// BULLETIN /////////////
+        getPosts: builder.query({
+            query: data => `/pull-posts/${data}`,
+            providesTags: [ "posts" ]
+        }),
+        addPost: builder.mutation({
+            query: data => ({
+                url: `/add-post/${data.bedid}`,
+                method: "POST",
+                body: data.post
+            }),
+            invalidatesTags: [ "posts" ]
         })
     })
 });
@@ -160,6 +173,9 @@ export const {
     useAddEventMutation,
     useDeleteEventMutation,
     useDeleteTagMutation,
+
+    useGetPostsQuery,
+    useAddPostMutation,
 
     util
 } = apiSlice;
