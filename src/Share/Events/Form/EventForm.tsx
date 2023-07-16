@@ -26,6 +26,8 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const [ eventDesc, setEventDesc ] = useState(currentEvent?.eventdesc || "");
     const [ eventLocation, setEventLocation ] = useState(currentEvent?.eventlocation || "");
     const [ eventPublic, setEventPublic ] = useState<boolean>(currentEvent?.eventpublic || false);
+    const [ rsvpNeeded, setRsvpNeeded ] = useState(currentEvent?.rsvpneeded || false);
+    const [ rsvpDate, setRsvpDate ] = useState<Date | null>(currentEvent?.rsvpdate || "");
     const [ participantSearch, setParticipantSearch ] = useState("");
     const [ participantSearchResults, setParticipantSearchResults ] = useState<eventParticipantsInterface[]>([]);
     const [ eventParticipants, setEventParticipants ] = useState<eventParticipantsInterface[]>(currentEvent?.eventparticipants || []); 
@@ -123,7 +125,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         creatorName: `${user?.firstname} ${user?.lastname}`,
                         eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
                         eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, tags
+                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, tags, rsvpNeeded, rsvpDate
                     },
                 }).unwrap();
             } catch(err) {
@@ -220,7 +222,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
             <button type="button" onClick={handleBackToOverview}>Back to overview</button>
             <form method="POST" onSubmit={!currentEvent ? handleCreateEvent : undefined}>
                 <h3>Create new event</h3>
-                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} />
+                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} rsvpNeeded={rsvpNeeded} setRsvpNeeded={setRsvpNeeded} rsvpDate={rsvpDate} setRsvpDate={setRsvpDate}participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} eventDate={eventDate} />
                 <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} /> 
                 <EventTags tags={tags} setTags={setTags} currentEvent={currentEvent} />
                 <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>

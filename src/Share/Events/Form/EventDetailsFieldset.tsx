@@ -11,15 +11,20 @@ interface eventDetailsFieldsetInterface {
     setEventLocation: React.Dispatch<React.SetStateAction<string>>,
     eventPublic: boolean,
     setEventPublic: React.Dispatch<React.SetStateAction<boolean>>,
+    rsvpNeeded: boolean,
+    setRsvpNeeded: React.Dispatch<React.SetStateAction<boolean>>,
+    rsvpDate: Date | null,
+    setRsvpDate: React.Dispatch<React.SetStateAction<Date | null>>,
     participantSearch: string,
     setParticipantSearch: React.Dispatch<React.SetStateAction<string>>,
     participantSearchResults: eventParticipantInterface[],
     setParticipantSearchResults: React.Dispatch<React.SetStateAction<eventParticipantInterface[]>>,
     eventParticipants: eventParticipantInterface[],
     setEventParticipants: React.Dispatch<React.SetStateAction<eventParticipantInterface[]>>,
+    eventDate: Date[],
 };
 
-const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({ eventName, setEventName, eventDesc, setEventDesc, eventLocation, setEventLocation, eventPublic, setEventPublic, participantSearch, setParticipantSearch, participantSearchResults, setParticipantSearchResults, eventParticipants, setEventParticipants}) {
+const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({ eventName, setEventName, eventDesc, setEventDesc, eventLocation, setEventLocation, eventPublic, setEventPublic, rsvpNeeded, setRsvpNeeded, rsvpDate, setRsvpDate, participantSearch, setParticipantSearch, participantSearchResults, setParticipantSearchResults, eventParticipants, setEventParticipants, eventDate}) {
     
     const { bedid } = useParams();
     const bedObject = useGetBedsQuery(undefined, {
@@ -39,6 +44,11 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
         setEventPublic(!eventPublic);
     };
 
+    function handleRSVP() {
+        if (!rsvpNeeded) setRsvpDate("");
+        setRsvpNeeded(!rsvpNeeded);
+    };
+    
     function handleParticipantSearchChange(e: React.FormEvent<HTMLInputElement>) {
         const input = e.target as HTMLInputElement;
         setParticipantSearch(input.value);
@@ -111,6 +121,16 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
                     {generateParticipantSearchResults()}
                 </>: 
                 null
+            }
+            <div>
+                <input type="checkbox" id="rsvpNeeded" checked={rsvpNeeded} onChange={handleRSVP} />
+                <label htmlFor="rsvpNeeded">RSVP needed</label>
+            </div>
+            {rsvpNeeded ?
+                <div>
+                    <label htmlFor="rsvpDate">Require RSVPs by:</label>
+                    <input type="date" id="rsvpDate" value={rsvpDate} min={eventDate[0]} onChange={(e) => setRsvpDate(e.target.value)} />
+                </div> : null
             }
         </>
     );
