@@ -3,10 +3,10 @@ import { Link, useParams} from "react-router-dom";
 import { useGetPostsQuery } from "../../app/apiSlice";
 import { postInterface } from "../../app/interfaces";
 import PostPreview from "./PostPreview";
-import NewPost from "./NewPost";
+import AddEditPost from "./AddEditPost";
 
 const BulletinLatest: React.FC = function() {
-    const [ newPostVis, setNewPostVis ] = useState(false);
+    const [ AddEditPostVis, setAddEditPostVis ] = useState(false);
 
     const { bedid } = useParams();
 
@@ -27,11 +27,11 @@ const BulletinLatest: React.FC = function() {
     };
 
     useEffect(() => {
-        if (newPostVis) {
-            const newPostForm: HTMLDialogElement | null = document.querySelector(".new-post-form");
-            newPostForm?.showModal();
+        if (AddEditPostVis) {
+            const AddEditPostForm: HTMLDialogElement | null = document.querySelector(".new-post-form");
+            AddEditPostForm?.showModal();
         }
-    }, [newPostVis]);
+    }, [AddEditPostVis]);
 
     return (
         <>
@@ -40,10 +40,10 @@ const BulletinLatest: React.FC = function() {
                 <ul>
                     {generateLatestPosts()}
                 </ul>
-                <button type="button" onClick={() => setNewPostVis(true)}>Add new post</button>
+                <button type="button" onClick={() => setAddEditPostVis(true)}>Add new post</button>
                 <Link to={`/share/${bedid}/bulletin`}>See all bulletin posts and announcements</Link>
             </section>
-            {newPostVis ? <NewPost setNewPostVis={setNewPostVis} /> : null}
+            {AddEditPostVis ? <AddEditPost setAddEditPostVis={setAddEditPostVis} /> : null}
         </>
     );
 };

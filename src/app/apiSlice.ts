@@ -149,6 +149,21 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "posts" ]
         }),
+        updatePost: builder.mutation({
+            query: data => ({
+                url: `/update-post/${data.postid}`,
+                method: "PATCH",
+                body: data.content
+            }),
+            invalidatesTags: [ "posts" ]
+        }),
+        deletePost: builder.mutation({
+            query: data => ({
+                url: `/delete-post/${data}`,
+                method: "DELETE"
+            }),
+            invalidatesTags: [ "posts" ]
+        }),
         updateReactions: builder.mutation({
             query: data => ({
                 url: `/update-reactions/${data.table}/${data.id}`,
@@ -156,6 +171,10 @@ export const apiSlice = createApi({
                 body: data.reaction
             }),
             invalidatesTags: [ "posts", "comments" ]
+        }),
+        getComments: builder.query({
+            query: data => `/pull-comments/${data}`,
+            providesTags: [ "comments" ]
         }),
         addComment: builder.mutation({
             query: data => ({
@@ -165,6 +184,21 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "comments" ]
         }),
+        updateComment: builder.mutation({
+            query: data => ({
+                url: `/update-comment/${data.commentid}`,
+                method: "PATCH",
+                body: data.content
+            }),
+            invalidatesTags: [ "comments" ]
+        }),
+        deleteComment: builder.mutation({
+            query: data => ({
+                url: `/delete-comment/${data}`,
+                method: "DELETE"
+            }),
+            invalidatesTags: [ "comments" ]
+        })
     })
 });
 
@@ -192,8 +226,14 @@ export const {
 
     useGetPostsQuery,
     useAddPostMutation,
+    useUpdatePostMutation,
+    useDeletePostMutation,
     useUpdateReactionsMutation,
+
+    useGetCommentsQuery,
     useAddCommentMutation,
+    useUpdateCommentMutation,
+    useDeleteCommentMutation,
 
     util
 } = apiSlice;

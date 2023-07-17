@@ -125,6 +125,9 @@ export interface eventInterface {
     eventlocation: string,
     eventpublic: boolean,
     eventparticipants?: eventParticipantInterface[],
+    rsvpneeded: boolean,
+    rsvpdate: Date,
+    rsvpsreceived: number[],
     eventstarttime: string,
     eventendtime: string,
     eventdate: string[],
@@ -162,6 +165,10 @@ export interface commentInterface {
     content: string,
     likes: number[],
     dislikes: number[],
+};
+
+export interface commentTreeInterface extends commentInterface {
+    level: number;
 };
 
 export interface colorObjInterface {

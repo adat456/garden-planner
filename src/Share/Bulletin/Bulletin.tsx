@@ -3,10 +3,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useGetPostsQuery } from "../../app/apiSlice";
 import { postInterface } from "../../app/interfaces";
 import PostPreview from "./PostPreview";
-import NewPost from "./NewPost";
+import AddEditPost from "./AddEditPost";
 
 const Bulletin: React.FC = function() {
-    const [ newPostVis, setNewPostVis ] = useState(false);
+    const [ AddEditPostVis, setAddEditPostVis ] = useState(false);
 
     const { bedid } = useParams();
 
@@ -26,11 +26,11 @@ const Bulletin: React.FC = function() {
     };
 
     useEffect(() => {
-        if (newPostVis) {
-            const newPostForm: HTMLDialogElement | null = document.querySelector(".new-post-form");
-            newPostForm?.showModal();
+        if (AddEditPostVis) {
+            const AddEditPostForm: HTMLDialogElement | null = document.querySelector(".new-post-form");
+            AddEditPostForm?.showModal();
         }
-    }, [newPostVis]);
+    }, [AddEditPostVis]);
 
     return (
         <>
@@ -40,9 +40,9 @@ const Bulletin: React.FC = function() {
                 <ul>
                     {generatePosts()}
                 </ul>
-                <button type="button" onClick={() => setNewPostVis(true)}>Add new post</button>
+                <button type="button" onClick={() => setAddEditPostVis(true)}>Add new post</button>
             </div>
-            {newPostVis ? <NewPost setNewPostVis={setNewPostVis} /> : null}
+            {AddEditPostVis ? <AddEditPost setAddEditPostVis={setAddEditPostVis} /> : null}
         </>
     )
 };
