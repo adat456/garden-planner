@@ -12,6 +12,7 @@ interface newPostInterface {
 const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }) {
     const [ title, setTitle ] = useState(post?.title || "");
     const [ content, setContent ] = useState(post?.content || "");
+    const [ pinned, setPinned ] = useState(post?.pinned || false);
     const [ confirmDeleteVis, setConfirmDeleteVis ] = useState(false);
 
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
             try {
                 await addPost({
                     bedid,
-                    post: { title, content, id }
+                    post: { title, content, pinned, id }
                 });
             } catch(err) {
                 console.error("Unable to add post: ", err.message);
@@ -46,7 +47,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
             try {
                 await updatePost({
                     postid: post?.id,
-                    content: { title, content }
+                    content: { title, content, pinned }
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to update comment: ", err.message);
@@ -85,6 +86,10 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                 <div>
                     <label htmlFor="content">Body</label>
                     <textarea name="content" id="content" cols={30} rows={10} value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+                </div>
+                <div>
+                    <input type="checkbox" name="pinned" id="pinned" checked={pinned} onChange={() => setPinned(!pinned)} />
+                    <label htmlFor="pinned">Pin this post to top of bulletin</label>
                 </div>
                 <button type="button" onClick={handleClose}>Close</button>
                 {!post ?

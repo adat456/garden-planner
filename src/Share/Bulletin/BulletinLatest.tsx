@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams} from "react-router-dom";
 import { useGetPostsQuery } from "../../app/apiSlice";
 import { postInterface } from "../../app/interfaces";
@@ -12,18 +12,10 @@ const BulletinLatest: React.FC = function() {
 
     const { data } = useGetPostsQuery(bedid);
     const posts = data as postInterface[];
-    const sortedLatestPosts = useMemo(() => {
-        const sortedPosts = posts?.slice();
-        sortedPosts?.sort((a, b) => {
-            return new Date(a.posted) - new Date(b.posted);
-        });
-        const firstFivePosts = sortedPosts?.slice(0, 5);
-        return firstFivePosts;
-    }, [posts]);
 
     function generateLatestPosts() {
-        const posts = sortedLatestPosts?.map(post => <PostPreview key={post.id} post={post} />);
-        return posts;
+        const latestPosts = posts?.slice(0, 5).map(post => <PostPreview key={post.id} post={post} />);
+        return latestPosts;
     };
 
     useEffect(() => {

@@ -151,6 +151,7 @@ export interface postInterface {
     content: string,
     likes: number[],
     dislikes: number[],
+    pinned: boolean,
 };
 
 export interface commentInterface {

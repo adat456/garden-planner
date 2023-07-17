@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
+import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
 import Comment from "./Comment";
 import AddEditPost from "./AddEditPost";
@@ -24,6 +24,7 @@ const Post: React.FC = function() {
     const { data: commentsData, isLoading } = useGetCommentsQuery(post?.id);
     const comments = commentsData as commentTreeInterface[];
 
+    const [ updatePost, { isLoading: updatePostIsLoading } ] = useUpdatePostMutation();
     const [ updateReactions, { isLoading: updateReactionsIsLoading } ] = useUpdateReactionsMutation();
     const [ addComment, { isLoading: addCommentIsLoading } ] = useAddCommentMutation();
 
@@ -36,6 +37,23 @@ const Post: React.FC = function() {
             </div>
         ));
         return generatedComments;
+    };
+
+    async function togglePinned() {
+        if (!updatePostIsLoading) {
+            try {
+                await updatePost({
+                    postid: post?.id,
+                    content: {
+                        title: post?.title,
+                        content: post?.content,
+                        pinned: !post?.pinned
+                    },
+                }).unwrap();
+            } catch(err) {
+                console.error("Unable to toggle pinning of this post: ", err.message);
+            };
+        };
     };
 
     async function postComment(e: React.FormEvent<HTMLFormElement>) {
@@ -112,7 +130,13 @@ const Post: React.FC = function() {
             <div>
                 <Link to={`/share/${bedid}/bulletin`}>Return to bulletin</Link>
                 <h1>{post?.title}</h1>
-                <button type="button" onClick={() => setAddEditPostVis(true)}>Edit post</button>
+                {user?.id === post?.authorid ?
+                    <>
+                        <button type="button" onClick={() => setAddEditPostVis(true)}>Edit post</button>
+                        <button type="button" onClick={togglePinned}>{post?.pinned ? "Unpin" : "Pin"}</button>
+                    </>
+                    : null
+                }
                 <p>{`Posted on ${post?.posted.toString().slice(0, 10)} by ${post?.authorname}`}</p>
                 <p>{`${post?.content}`}</p>
                 <div>
