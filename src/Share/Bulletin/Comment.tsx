@@ -4,6 +4,8 @@ import { commentInterface, userInterface } from "../../app/interfaces";
 import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
 
 const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
+    const [ likes, setLikes ] = useState(comment.likes);
+    const [ dislikes, setDislikes ] = useState(comment.dislikes);
     const [ updateCommentVis, setUpdateCommentVis ] = useState(false);
     const [ updateCommentContent, setUpdateCommentContent ] = useState(comment.content);
     const [ addCommentVis, setAddCommentVis ] = useState(false);
@@ -12,49 +14,52 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     const { data } = useGetUserQuery(undefined);
     const user = data as userInterface;
 
-    const [ updateReactions, { isLoading: updateReactionsIsLoading } ] = useUpdateReactionsMutation();
     const [ addComment, { isLoading: addCommentIsLoading } ] = useAddCommentMutation();
     const [ updateComment, { isLoading: updateCommentIsLoading } ]  = useUpdateCommentMutation();
     const [ deleteComment, { isLoading: deleteCommentIsLoading } ]  = useDeleteCommentMutation();
 
-    async function updateReaction(type: string) {
-        if (type === "like" && !updateReactionsIsLoading) {
+    // opted against making this an rtk mutation in favor of manually sending PATCH requests
+    async function handleUpdateReactions(type: string) {
+        if (type === "like") {
             try {
                 let updatedLikes: number[] = [];
-                if (comment.likes.includes(user?.id)) {
-                    updatedLikes = comment.likes.filter(id => id !== user.id);
+                if (likes.includes(user?.id)) {
+                    updatedLikes = likes.filter(id => id !== user.id);
                 } else {
-                    updatedLikes = [...comment.likes, user.id]
+                    updatedLikes = [...likes, user.id]
                 };
 
-                await updateReactions({
-                    table: "comments",
-                    id: comment.id,
-                    reaction: {
-                        likes: updatedLikes
-                    }
-                }).unwrap();
+                const reqOptions: RequestInist = {
+                    method: "PATCH",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ likes: updatedLikes }),
+                    credentials: "include"
+                }
+                const req = await fetch(`http://localhost:3000/update-reactions/comments/${comment.id}`, reqOptions);
+                if (req.ok) setLikes(updatedLikes);
+
             } catch(err) {
                 console.error("Unable to update likes: ", err.message);
             };
         };
 
-        if (type === "dislike" && !updateReactionsIsLoading) {
+        if (type === "dislike") {
             try {
                 let updatedDislikes: number[] = [];
-                if (comment?.dislikes.includes(user?.id)) {
-                    updatedDislikes = comment.dislikes.filter(id => id !== user.id);
+                if (dislikes.includes(user?.id)) {
+                    updatedDislikes = dislikes.filter(id => id !== user.id);
                 } else {
-                    updatedDislikes = [...comment.dislikes, user.id]
+                    updatedDislikes = [...dislikes, user.id]
                 };
 
-                await updateReactions({
-                    table: "comments",
-                    id: comment.id,
-                    reaction: {
-                        dislikes: updatedDislikes
-                    }
-                }).unwrap();
+                const reqOptions: RequestInist = {
+                    method: "PATCH",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dislikes: updatedDislikes }),
+                    credentials: "include"
+                }
+                const req = await fetch(`http://localhost:3000/update-reactions/comments/${comment.id}`, reqOptions);
+                if (req.ok) setDislikes(updatedDislikes);
             } catch(err) {
                 console.error("Unable to update dislikes: ", err.message);
             };
@@ -119,10 +124,10 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                     <p>{comment.content}</p>
                     <p>{`Posted on ${comment.posted.toString().slice(0, 10)} by ${comment.authorname}`}</p>
                     <div>
-                        <button type="button" onClick={() => updateReaction("like")}>{comment.likes.includes(user.id) ? "Unlike this comment" : "Like this comment"}</button>
-                        <p>{comment.likes.length}</p>
-                        <button type="button" onClick={() => updateReaction("dislike")}>{comment.dislikes.includes(user.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
-                        <p>{comment.dislikes.length}</p>
+                        <button type="button" onClick={() => handleUpdateReactions("like")}>{likes.includes(user.id) ? "Unlike this comment" : "Like this comment"}</button>
+                        <p>{likes.length}</p>
+                        <button type="button" onClick={() => handleUpdateReactions("dislike")}>{dislikes.includes(user.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
+                        <p>{dislikes.length}</p>
                     </div>
                     <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>
 

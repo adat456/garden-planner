@@ -70,8 +70,8 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
     };
 
     async function handleClose() {
-        const newPostForm: HTMLDialogElement | null = document.querySelector(".new-post-form");
-        newPostForm?.close();
+        const addEditPostForm: HTMLDialogElement | null = document.querySelector(".add-edit-post-form");
+        addEditPostForm?.close();
         setAddEditPostVis(false);
     };
 
