@@ -6,6 +6,7 @@ import { useGetUserQuery } from "../app/apiSlice";
 import { util } from "../app/apiSlice";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
+import Tools from "./Tools";
 
 const LoggedInWrapper: React.FC = function({ isConnected }) {
     const [ newNotif, setNewNotif ] = useState("");
@@ -51,6 +52,7 @@ const LoggedInWrapper: React.FC = function({ isConnected }) {
                 </nav>
                 <Notifications newNotif={newNotif} />
                 <p>{`Socket connection: ${isConnected}`}</p>
+                <Tools />
             </header>
             <main>
                 <Outlet />
