@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface frostDates {
     ten: string,
     thirty: string,
     fifty: string
+};
+
+interface weatherData {
+    type: string,
+    temp_min: number,
+    temp_max: number,
+    temp: number,
+    temp_feels_like: number,
+    humidity: number,
+    wind_speed: number,
 };
 
 const Tools: React.FC = function() {
@@ -15,6 +25,9 @@ const Tools: React.FC = function() {
     const [ threshold, setThreshold ] = useState("");
     const [ springDates, setSpringDates ] = useState<frostDates | null>(null);
     const [ fallDates, setFallDates ] = useState<frostDates | null>(null);
+    const [ weather, setWeather ] = useState<weatherData | null>(null);
+    const [ weatherLastUpdated, setWeatherLastUpdated ] = useState("");
+    const [ tempConversion, setTempConversion ] = useState("F");
 
     function pullCoords() {
         function handleSuccess(position) {
@@ -79,15 +92,83 @@ const Tools: React.FC = function() {
         } catch(err) {
             console.error("Unable to retrieve frost date: ", err.message);
         };
-        
     };
+
+    async function pullCurrentWeather() {
+        if (coords) {
+            try {
+                const req = await fetch(`http://localhost:3000/pull-weather/${coords.latitude}/${coords.longitude}`, { credentials: "include" });
+                const res = await req.json();
+                setWeather(res);
+            } catch(err) {
+                console.error("Unable to obtain current weather: ", err.message);
+            };
+        };
+    };
+
+    function convertFromKelvin(kelvinNum: number, tempConversion: string) {
+        if (tempConversion === "C") {
+            return Math.round(kelvinNum - 273);
+        };
+        if (tempConversion === "F") {
+            return Math.round((1.8 * (kelvinNum - 273)) + 32);
+        };
+    };
+
+    useEffect(() => {
+        if (coords) return;
+        pullCoords();
+    }, [])
+
+    const TEN_MIN_MS = 600000;
+    useEffect(() => {
+        pullCurrentWeather();
+
+        const dateTimeArr = new Date().toLocaleString().split(",");
+        const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
+        setWeatherLastUpdated(time);
+
+        const interval = setInterval(() => {
+            pullCurrentWeather();
+
+            const dateTimeArr = new Date().toLocaleString().split(",");
+            const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
+            setWeatherLastUpdated(time);
+        }, TEN_MIN_MS);
+
+        return () => clearInterval(interval);
+    }, [coords]);
 
     return (
         <section>
             <h2>Garden Tools</h2>
-            <button type="button" onClick={pullCoords}>Obtain coordinates</button>
+
             <p>{`Latitude: ${coords?.latitude}`}</p>
             <p>{`Longitude: ${coords?.longitude}`}</p>
+
+            
+            <section>
+                <p>{`Weather last updated ${weatherLastUpdated}`}</p>
+                <button type="button" onClick={pullCurrentWeather}>Refresh current weather</button>
+                <div>
+                    <div>
+                        <input type="radio" name="tempConversion" id="F" checked={tempConversion === "F"} onChange={() => setTempConversion("F")} />
+                        <label htmlFor="F">Fahrenheit</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="tempConversion" id="C" checked={tempConversion === "C"} onChange={() => setTempConversion("C")}  />
+                        <label htmlFor="C">Celsius</label>
+                    </div>
+                </div>
+                <div>
+                    <h3>Current forecast</h3>
+                    <p>{weather?.type}</p>
+                    <p>{`${convertFromKelvin(weather?.temp, tempConversion)} ${tempConversion}, feels like ${convertFromKelvin(weather?.temp_feels_like, tempConversion)} ${tempConversion}`}</p>
+                    <p>{`Min: ${convertFromKelvin(weather?.temp_min, tempConversion)} ${tempConversion}`}</p>
+                    <p>{`Min: ${convertFromKelvin(weather?.temp_max, tempConversion)} ${tempConversion}`}</p>
+                    <p>{`Humidity: ${weather?.humidity}%`}</p>
+                </div>
+            </section>
 
             <div>
                 <div>
@@ -102,6 +183,7 @@ const Tools: React.FC = function() {
                     <input type="radio" name="threshold" id="24" onChange={() => setThreshold("24")} />
                     <label htmlFor="24">Severe freeze (24F) - "heavy damage to most garden plants"</label>
                 </div>
+                <p>Distinctions and descriptions from "https://www.almanac.com/gardening/frostdates"</p>
             </div>
 
             <button type="button" onClick={() => pullFrostDates("spring")}>Pull spring frost dates</button>
