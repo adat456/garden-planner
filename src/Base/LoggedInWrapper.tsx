@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
-import { useGetUserQuery, useGetNotificationsQuery, util } from "../app/apiSlice";
+import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, util } from "../app/apiSlice";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";
@@ -12,7 +12,8 @@ const LoggedInWrapper: React.FC = function() {
     const { data: userResult, error } = useGetUserQuery(undefined);
     const user = userResult as userInterface;
     const { refetch: refetchNotifications } = useGetNotificationsQuery(undefined);
-
+    const { refetch: refetchBeds } = useGetBedsQuery(undefined);
+    
     const navigate = useNavigate();
     useEffect(() => {
         console.log(error?.data);
@@ -24,11 +25,12 @@ const LoggedInWrapper: React.FC = function() {
     useEffect(() => {
         socket.on("hello", (arg) => console.log(arg));
 
-        async function updateNotifications() {
-            console.log("New notification incoming.");
+        async function updateNotifications(arg: string) {
+            console.log(arg);
             await refetchNotifications();
+            if (arg === "memberconfirmation") await refetchBeds;
         };
-        socket.on(`notifications-${user?.id}`, updateNotifications);
+        socket.on(`notifications-${user?.id}`, arg => updateNotifications(arg));
         
         return () => {
             socket.off(`notifications-${user?.id}`, updateNotifications)

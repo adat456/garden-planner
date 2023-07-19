@@ -103,9 +103,9 @@ export interface notificationInterface {
     dispatched: string,
     acknowledged: boolean,
     // enum? like "invite"?
-    type: "invite" | "acceptance" | "rsvpinvite" | "rsvpacceptance",
+    type: "memberinvite" | "memberconfirmation" | "rsvpinvite" | "rsvpconfirmation",
     bedid?: number,
-    eventid?: number
+    eventid?: string,
 };
 
 export interface eventParticipantInterface {
@@ -115,7 +115,7 @@ export interface eventParticipantInterface {
 };
 
 export interface eventInterface {
-    id: number,
+    id: string,
     bedid: number,
     creatorid: number,
     creatorname: string,

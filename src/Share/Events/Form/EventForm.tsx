@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetUserQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation } from "../../../app/apiSlice";
-import { userInterface, eventInterface } from "../../../app/interfaces";
+import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
+import { userInterface, eventInterface, bedDataInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
 import EventTags from "./EventTags";
@@ -48,9 +48,16 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const user = userResult.data as userInterface;
     const eventsResult = useGetEventsQuery(bedid);
     const events = eventsResult?.data as eventInterface[];
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed as bedDataInterface;
 
     const [ addEvent, { isLoading: addEventIsLoading } ] = useAddEventMutation();
     const [ deleteEvent, { isLoading: deleteEventIsLoading } ] = useDeleteEventMutation();
+    const [ addNotification, { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
 
     // where interval is the number of days between repeating events, e.g., 7, 14, 28, and single refers to whether the event is a single or multi day affair
     function generateRepeatingDates(interval: number, repeatTillDate: Date, arr: Date[][], single: boolean) {
@@ -107,7 +114,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     };
 
     async function createEvent(eventDates: Date[], repeatId?: string) {
-        if (!addEventIsLoading) {
+        if (!addEventIsLoading && !addNotificationIsLoading) {
             const preppedEventDate = eventDates.map(date => {
                 if (date) {
                     return date.toString().slice(0, 15);
@@ -115,11 +122,13 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                     return "";
                 };
             });
+            const id = nanoid();
 
             try {
                 await addEvent({
                     bedid,
                     event: {
+                        id,
                         creatorId: user?.id,
                         creatorUsername: user?.username,
                         creatorName: `${user?.firstname} ${user?.lastname}`,
@@ -128,6 +137,22 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, tags, rsvpNeeded, rsvpDate
                     },
                 }).unwrap();
+
+                if (rsvpNeeded && eventParticipants.length > 0) {
+                    eventParticipants.forEach(async participant => {
+                        await addNotification({
+                            senderid: user?.id,
+                            sendername: `${user?.firstname} ${user?.lastname}`,
+                            senderusername: user?.username,
+                            recipientid: participant.id,
+                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
+                            dispatched: new Date().toISOString().slice(0, 10),
+                            acknowledged: false,
+                            type: "rsvpinvite",
+                            eventid: id
+                        });
+                    });
+                };
             } catch(err) {
                 console.error("Unable to add event: ", err.message);
             };
