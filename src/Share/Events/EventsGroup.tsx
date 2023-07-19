@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetUserQuery, useGetEventsQuery } from "../../app/apiSlice";
-import { eventInterface, userInterface } from "../../app/interfaces";
+import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery } from "../../app/apiSlice";
+import { bedDataInterface, eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
 
@@ -10,7 +10,13 @@ const EventsGroup: React.FC = function() {
     const [ eventFormVis, setEventFormVis ] = useState(false);
     const [ currentEvent, setCurrentEvent ] = useState<eventInterface | null>(null);
 
-    let { bedid } = useParams();
+    const { bedid } = useParams();
+    const bedObject = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data }) => ({
+            bed: data?.find(bed => bed.id === Number(bedid))
+        }),
+    });
+    const bed = bedObject.bed as bedDataInterface;
 
     const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
@@ -19,13 +25,22 @@ const EventsGroup: React.FC = function() {
     const events = eventsResult?.data as eventInterface[];
     const sortedFilteredEvents = useMemo(() => {
         const filteredEvents = events?.filter(event => {
+            // will show event if you are the event creator or if the event is public
             if (event?.creatorid === user?.id) return event;
-            if (event?.eventpublic === true) return event;
+            if (event?.eventpublic === "public") return event;
 
+            // but if the event is only open to all members or some members, need to check if your id is on a list first
             let returningEvent;
-            event?.eventparticipants?.forEach(participant => {
-                if (participant.id === user?.id) returningEvent = event;
-            });
+            if (event?.eventpublic === "allmembers") {
+                bed?.members.forEach(member => {
+                    if (member.id === user?.id) returningEvent = event;
+                });
+            };
+            if (event?.eventpublic === "somemembers") {
+                event?.eventparticipants?.forEach(participant => {
+                    if (participant.id === user?.id) returningEvent = event;
+                });
+            };
             return returningEvent;
         });
         const sortedEvents = filteredEvents?.slice();

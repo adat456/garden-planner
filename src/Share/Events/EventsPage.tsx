@@ -30,13 +30,22 @@ const EventsPage: React.FC = function() {
     const events = eventsResult?.data as eventInterface[];
     const prelimEvents = useMemo(() => {
         const filteredEvents = events?.filter(event => {
+            // will show event if you are the event creator or if the event is public
             if (event?.creatorid === user?.id) return event;
-            if (event?.eventpublic === true) return event;
+            if (event?.eventpublic === "public") return event;
 
+            // but if the event is only open to all members or some members, need to check if your id is on a list first
             let returningEvent;
-            event?.eventparticipants?.forEach(participant => {
-                if (participant.id === user?.id) returningEvent = event;
-            });
+            if (event?.eventpublic === "allmembers") {
+                bed?.members.forEach(member => {
+                    if (member.id === user?.id) returningEvent = event;
+                });
+            };
+            if (event?.eventpublic === "somemembers") {
+                event?.eventparticipants?.forEach(participant => {
+                    if (participant.id === user?.id) returningEvent = event;
+                });
+            };
             return returningEvent;
         });
         const sortedEvents = filteredEvents?.slice();

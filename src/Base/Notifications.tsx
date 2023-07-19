@@ -12,7 +12,7 @@ const Notifications: React.FC = function() {
     const [ deleteNotification, { isLoading: deleteNotificationIsLoading } ]  = useDeleteNotificationMutation();
 
     const unreadNotifications: number = notifications?.reduce((sum, notification) => {
-        if (!notification.acknowledged) {
+        if (!notification.read) {
             return (sum + 1);
         } else {
             return sum;
@@ -32,7 +32,6 @@ const Notifications: React.FC = function() {
         return text;
     };
 
-    
 
     function generateNotifications() {
         let notificationsArr;
@@ -41,21 +40,30 @@ const Notifications: React.FC = function() {
                 <li key={notification.id}>
                     <p>{notification.dispatched.slice(0, 10)}</p>
                     <p>{notification.message}</p>
+
                     {notification.type === "memberinvite" ? 
                         <>
-                            <button type="button" onClick={() => handleConfirmInvite(notification)}>Become a member</button> 
+                            {notification.responded ?
+                                <p>Member confirmation sent.</p>:
+                                <button type="button" onClick={() => handleConfirmInvite(notification)}>Become a member</button> 
+                            }
                             <button type="button">See garden bed</button>
                         </>
                         : null
                     }
+
                     {notification.type === "rsvpinvite" ?
                         <>
-                            <button type="button" onClick={() => handleConfirmInvite(notification)}>Send RSVP</button>
+                            {notification.responded ?
+                                <p>RSVP sent.</p> :
+                                <button type="button" onClick={() => handleConfirmInvite(notification)}>Send RSVP</button>
+                            }
                             <button type="button">See event details</button>
                         </>
                         : null
                     }
-                    <button type="button" onClick={() => handleToggleAcknowledged(notification)}>{notification.acknowledged ? "Mark as unread" : "Mark as read"}</button>
+
+                    <button type="button" onClick={() => handleReadnRespond(notification.id, !notification.read)}>{notification.read ? "Mark as unread" : "Mark as read"}</button>
                     <button type="button" onClick={() => handleDelete(notification.id)}>Delete</button>
                 </li>
             ));
@@ -66,10 +74,6 @@ const Notifications: React.FC = function() {
     async function handleConfirmInvite(notification: notificationInterface) {
         if (!addNotificationIsLoading && !updateNotificationIsLoading) {
             try {
-                if (!notification.acknowledged) {
-                    await handleToggleAcknowledged(notification);
-                };
-
                 if (notification.type === "memberinvite") {
                     const req = await fetch(`http://localhost:3000/get-bed-name-by-id/${notification.bedid}`, { credentials: "include" });
                     const res = await req.json();
@@ -81,10 +85,11 @@ const Notifications: React.FC = function() {
                         recipientid: notification.senderid,
                         message: `${user.firstname} ${user.lastname} is now a member of ${res}.`,
                         dispatched: new Date().toISOString().slice(0, 10),
-                        acknowledged: false,
                         type: "memberconfirmation",
                         bedid: notification.bedid
                     }).unwrap();
+
+                    await handleReadnRespond(notification.id, true, true);
                 };
 
                 if (notification.type === "rsvpinvite") {
@@ -98,10 +103,11 @@ const Notifications: React.FC = function() {
                         recipientid: notification.senderid,
                         message: `${user.firstname} ${user.lastname} has RSVP'd to ${res}.`,
                         dispatched: new Date().toISOString().slice(0, 10),
-                        acknowledged: false,
                         type: "rsvpconfirmation",
                         eventid: notification.eventid
                     }).unwrap();
+
+                    await handleReadnRespond(notification.id, true, true);
                 };
             } catch(err) {
                 console.error("Unable to accept invite: ", err.message);
@@ -109,24 +115,25 @@ const Notifications: React.FC = function() {
         };
     };
 
-    async function handleToggleAcknowledged(notification: notificationInterface) {
+    async function handleReadnRespond(notifid: number, read: boolean, responded?: boolean) {
         if (!updateNotificationIsLoading) {
             try {
-                await updateNotification({
-                    notifid: notification.id,
-                    acknowledged: !notification.acknowledged
-                }).unwrap();
+                if (responded) {
+                    await updateNotification({ notifid, read, responded }).unwrap();
+                } else {
+                    await updateNotification({ notifid, read }).unwrap();
+                };
             } catch(err) {
                 console.error("Unable to update notification: ", err.message);
             };
         };
     };
-    function handleAcknowledgeAll() {
+    function handleReadAll() {
         notifications.forEach(async (notification) => {
             try {
                 await updateNotification({
                     notifid: notification.id,
-                    acknowledged: true
+                    read: true
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to update notification: ", err.message);
@@ -152,7 +159,7 @@ const Notifications: React.FC = function() {
     return (
         <div>
             <p>{unreadNotificationsText()}</p>
-            <button type="button" onClick={handleAcknowledgeAll}>Mark all as read</button>
+            <button type="button" onClick={handleReadAll}>Mark all as read</button>
             <button type="button" onClick={handleDeleteAll}>Delete all</button>
             <ul>
                 {generateNotifications()}

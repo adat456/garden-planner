@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
-import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, util } from "../app/apiSlice";
+import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery, util } from "../app/apiSlice";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";

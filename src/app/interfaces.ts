@@ -101,7 +101,8 @@ export interface notificationInterface {
     recipientid: number,
     message: string,
     dispatched: string,
-    acknowledged: boolean,
+    read: boolean,
+    responded: boolean,
     // enum? like "invite"?
     type: "memberinvite" | "memberconfirmation" | "rsvpinvite" | "rsvpconfirmation",
     bedid?: number,
@@ -123,7 +124,7 @@ export interface eventInterface {
     eventname: string,
     eventdesc: string,
     eventlocation: string,
-    eventpublic: boolean,
+    eventpublic: "public" | "allmembers" | "somemembers",
     eventparticipants?: eventParticipantInterface[],
     rsvpneeded: boolean,
     rsvpdate: Date,

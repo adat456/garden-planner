@@ -9,8 +9,8 @@ interface eventDetailsFieldsetInterface {
     setEventDesc: React.Dispatch<React.SetStateAction<string>>,
     eventLocation: string,
     setEventLocation: React.Dispatch<React.SetStateAction<string>>,
-    eventPublic: boolean,
-    setEventPublic: React.Dispatch<React.SetStateAction<boolean>>,
+    eventPublic: string,
+    setEventPublic: React.Dispatch<React.SetStateAction<string>>,
     rsvpNeeded: boolean,
     setRsvpNeeded: React.Dispatch<React.SetStateAction<boolean>>,
     rsvpDate: Date | null,
@@ -34,14 +34,14 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
     });
     const bed = bedObject.bed as bedDataInterface;
 
-    function handleEventPublic() {
-        if (!eventPublic) {
+    function handleEventPublic(value: string) {
+        if (value === "public" || value === "allmembers") {
             setParticipantSearch("");
             setParticipantSearchResults([]);
             setEventParticipants([]);
         };
 
-        setEventPublic(!eventPublic);
+        setEventPublic(value);
     };
 
     function handleRSVP() {
@@ -107,10 +107,21 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
                 <input type="text" id="eventLocation" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
             </div>
             <div>
-                <input type="checkbox" id="eventPublic" checked={eventPublic} onChange={handleEventPublic} />
-                <label htmlFor="eventPublic">Open to the public</label>
+                <div>
+                    <input type="radio" name="eventPublic" id="public" checked={eventPublic === "public" ? true : false} onChange={() => handleEventPublic("public")} />
+                    <label htmlFor="public">Open to the public</label>
+                </div>
+                <div>
+                    <input type="radio" name="eventPublic" id="allmembers" checked={eventPublic === "allmembers" ? true : false} onChange={() => handleEventPublic("allmembers")} />
+                    <label htmlFor="allmembers">Open to all members</label>
+                </div>
+                <div>
+                    <input type="radio" name="eventPublic" id="somemembers" checked={eventPublic === "somemembers" ? true : false} onChange={() => handleEventPublic("somemembers")} />
+                    <label htmlFor="somemembers">Open to certain members</label>
+                </div>
             </div>
-            {!eventPublic ?
+            
+            {eventPublic === "somemembers" ?
                 <>
                     <h4>Added participants</h4>
                     {generateParticipants()}

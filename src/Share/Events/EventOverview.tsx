@@ -11,13 +11,23 @@ interface eventOverviewInterface {
 const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
     const [ deleteEvent, { isLoading } ] = useDeleteEventMutation();
 
-    let participants;
-    if (currentEvent?.eventpublic) {
-        participants = "This event is open to the public."
-    } else {
-        const participantsArr = currentEvent?.eventparticipants?.map(participant => participant.name);
-        const participantsString = participantsArr?.join(", ");
-        participants = `This event is only open to the following members: ${participantsString}.`
+    let participantStatement;
+    if (currentEvent?.eventpublic === "public") {
+        participantStatement = "This event is open to the public.";
+    } else if (currentEvent?.eventpublic === "allmembers") {
+        participantStatement = "This event is open to all members.";
+    } else if (currentEvent?.eventpublic === "somemembers") {
+        participantStatement = "This event is only open to the following members:"
+    };
+
+    function generateParticipantList() {
+        const participantList = currentEvent?.eventparticipants?.map(participant => {
+            console.log(currentEvent);
+            console.log(participant.id);
+            console.log(currentEvent?.rsvpsreceived.includes(participant.id));
+            return (<li>{`${participant.name} ${currentEvent?.rsvpsreceived.includes(participant.id) ? "[RSVP'd]" : ""}`}</li>);
+        });
+        return participantList;
     };
 
     function handleCloseEventOverview() {
@@ -61,7 +71,13 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             <p>{`${currentEvent?.eventstarttime} ${currentEvent?.eventendtime ? `- ${currentEvent?.eventendtime}` : ""}`}</p>
             <p>{currentEvent?.eventdesc}</p>
             <p>{`Location: ${currentEvent?.eventlocation}`}</p>
-            <p>{participants}</p>
+            <p>{participantStatement}</p>
+            {currentEvent?.eventpublic === "somemembers" ?
+                <ul>
+                    {generateParticipantList()}
+                </ul>
+                : null
+            }
             <p>{currentEvent?.tags}</p>
 
             <div>

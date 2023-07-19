@@ -93,7 +93,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/update-notification/${data.notifid}`,
                 method: "PATCH",
-                body: data,
+                body: {read: data.read, responded: data.responded},
             }),
             invalidatesTags: [ "notifications" ]
         }),

@@ -96,7 +96,6 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
                     recipientid: member.id,
                     message: `${user.firstname} ${user.lastname} invites you to join ${bed.name}`,
                     dispatched: new Date().toISOString().slice(0, 10),
-                    acknowledged: false,
                     type: "memberinvite",
                     bedid: bed?.id
                 }).unwrap();

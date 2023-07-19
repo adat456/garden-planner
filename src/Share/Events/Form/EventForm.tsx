@@ -25,7 +25,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const [ eventName, setEventName ] = useState(currentEvent?.eventname || "");
     const [ eventDesc, setEventDesc ] = useState(currentEvent?.eventdesc || "");
     const [ eventLocation, setEventLocation ] = useState(currentEvent?.eventlocation || "");
-    const [ eventPublic, setEventPublic ] = useState<boolean>(currentEvent?.eventpublic || false);
+    const [ eventPublic, setEventPublic ] = useState<string>(currentEvent?.eventpublic || "allmembers");
     const [ rsvpNeeded, setRsvpNeeded ] = useState(currentEvent?.rsvpneeded || false);
     const [ rsvpDate, setRsvpDate ] = useState<Date | null>(currentEvent?.rsvpdate || "");
     const [ participantSearch, setParticipantSearch ] = useState("");
@@ -134,11 +134,29 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         creatorName: `${user?.firstname} ${user?.lastname}`,
                         eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
                         eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, tags, rsvpNeeded, rsvpDate
+                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, rsvpNeeded, rsvpDate,
+                        tags: rsvpNeeded ? ["RSVP", ...tags] : tags
                     },
                 }).unwrap();
 
-                if (rsvpNeeded && eventParticipants.length > 0) {
+                // send notifications to all members
+                if (rsvpNeeded && eventPublic === "allmembers") {
+                    bed?.members.forEach(async member => {
+                        await addNotification({
+                            senderid: user?.id,
+                            sendername: `${user?.firstname} ${user?.lastname}`,
+                            senderusername: user?.username,
+                            recipientid: member.id,
+                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
+                            dispatched: new Date().toISOString().slice(0, 10),
+                            type: "rsvpinvite",
+                            eventid: id
+                        });
+                    });
+                };
+
+                // send notifications only to invited members
+                if (rsvpNeeded && eventPublic === "somemembers" && eventParticipants.length > 0) {
                     eventParticipants.forEach(async participant => {
                         await addNotification({
                             senderid: user?.id,
@@ -147,7 +165,6 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                             recipientid: participant.id,
                             message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
                             dispatched: new Date().toISOString().slice(0, 10),
-                            acknowledged: false,
                             type: "rsvpinvite",
                             eventid: id
                         });
