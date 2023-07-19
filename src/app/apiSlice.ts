@@ -16,10 +16,7 @@ export const apiSlice = createApi({
         }),
         getBeds: builder.query({
             query: () => "/pull-beds-data",
-            providesTags: (result, error, arg) => [
-                "beds",
-                ...result.map(bed => ({ type: "beds", id: bed.id }))
-            ],
+            providesTags: [ "beds" ]
         }),
         createBed: builder.mutation({
             query: data => ({
@@ -51,7 +48,7 @@ export const apiSlice = createApi({
                 method: "PATCH",
                 body: data.seedbasket
             }),
-            invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid}]
+            invalidatesTags: [ "beds" ]
         }),
         updateGridMap: builder.mutation({
             query: data => ({
@@ -59,7 +56,7 @@ export const apiSlice = createApi({
                 method: "PATCH",
                 body: data.gridmap
             }),
-            invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid}]
+            invalidatesTags: [ "beds" ]
         }),
         updateRoles: builder.mutation({
             query: data => ({
@@ -67,7 +64,7 @@ export const apiSlice = createApi({
                 method: "PATCH",
                 body: data.roles
             }),
-            invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid }]
+            invalidatesTags: [ "beds" ]
         }),
         updateMembers: builder.mutation({
             query: data => ({
@@ -75,7 +72,7 @@ export const apiSlice = createApi({
                 method: "PATCH",
                 body: data.members
             }),
-            invalidatesTags: (result, error, arg) => [{ type: "beds", id: arg.bedid }]
+            invalidatesTags: [ "beds" ]
         }),
         // notifications
         getNotifications: builder.query({

@@ -1,38 +1,44 @@
-import { useEffect, useState } from "react";
-import { Outlet, NavLink, Link } from "react-router-dom";
-import Socket from "../app/socket";
+import { useEffect } from "react";
+import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
-import { useGetUserQuery } from "../app/apiSlice";
-import { util } from "../app/apiSlice";
+import { useGetUserQuery, useGetNotificationsQuery, util } from "../app/apiSlice";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";
+import { isJWTInvalid } from "../app/helpers";
 
-const LoggedInWrapper: React.FC = function({ isConnected }) {
-    const [ newNotif, setNewNotif ] = useState("");
+const LoggedInWrapper: React.FC = function() {
+    const { data: userResult, error } = useGetUserQuery(undefined);
+    const user = userResult as userInterface;
+    const { refetch: refetchNotifications } = useGetNotificationsQuery(undefined);
 
-    const userResult = useGetUserQuery();
-    const user = userResult.data as userInterface;
-
+    const navigate = useNavigate();
     useEffect(() => {
-        if (!isConnected) Socket.connect();
+        console.log(error?.data);
+        if (!user && isJWTInvalid(error?.data)) navigate("/sign-in");
+    }, [error]);
 
-        function notifHandler() {
-            setNewNotif(new Date().toString());
+    const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
+    const socket = io(URL);
+    useEffect(() => {
+        socket.on("hello", (arg) => console.log(arg));
+
+        async function updateNotifications() {
+            console.log("New notification incoming.");
+            await refetchNotifications();
         };
-
-        Socket.on(`notifications-${user?.id}`, notifHandler);
+        socket.on(`notifications-${user?.id}`, updateNotifications);
         
         return () => {
-            Socket.off(`notifications-${user?.id}`, notifHandler);
-            // Socket.disconnect();
+            socket.off(`notifications-${user?.id}`, updateNotifications)
         };
-    }, [Socket]);
+    }, [socket]);
 
     const dispatch = useDispatch();
     async function handleLogOut() {
         try {
-            await dispatch(util.resetApiState());
+            dispatch(util.resetApiState());
         } catch(err) {
             console.error("Unable to clear API data: ", err.message)
         };
@@ -46,12 +52,11 @@ const LoggedInWrapper: React.FC = function({ isConnected }) {
                     <NavLink to="share">SHARE</NavLink>
                     <NavLink to="explore">EXPLORE</NavLink>
                     <NavLink to="profile">PROFILE</NavLink>
-                    {userResult.isSuccess ?
+                    {user ?
                         <Link to="sign-in" onClick={handleLogOut}>LOG OUT</Link> : null
                     }
                 </nav>
-                <Notifications newNotif={newNotif} />
-                <p>{`Socket connection: ${isConnected}`}</p>
+                <Notifications />
                 <Tools />
             </header>
             <main>

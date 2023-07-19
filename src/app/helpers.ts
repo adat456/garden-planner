@@ -57,10 +57,7 @@ export function handleVisToggle(e) {
     };
 }; 
 
-export function isJWTInvalid(err) {
-    let message = "";
-    if (err instanceof Error) {
-        if (err.message === "JWT blacklisted." || err.message === "JWT is invalid." || err.message === "No JWT found.") message = err.message;
-    };
-    return message;
+export function isJWTInvalid(data: string) {
+    if (data === "JWT blacklisted." || data === "JWT is invalid." || data === "No JWT found.") return true;
+    
 };

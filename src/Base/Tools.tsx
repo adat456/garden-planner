@@ -120,24 +120,24 @@ const Tools: React.FC = function() {
         pullCoords();
     }, [])
 
-    const TEN_MIN_MS = 600000;
-    useEffect(() => {
-        pullCurrentWeather();
+    // const TEN_MIN_MS = 600000;
+    // useEffect(() => {
+    //     pullCurrentWeather();
 
-        const dateTimeArr = new Date().toLocaleString().split(",");
-        const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
-        setWeatherLastUpdated(time);
+    //     const dateTimeArr = new Date().toLocaleString().split(",");
+    //     const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
+    //     setWeatherLastUpdated(time);
 
-        const interval = setInterval(() => {
-            pullCurrentWeather();
+    //     const interval = setInterval(() => {
+    //         pullCurrentWeather();
 
-            const dateTimeArr = new Date().toLocaleString().split(",");
-            const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
-            setWeatherLastUpdated(time);
-        }, TEN_MIN_MS);
+    //         const dateTimeArr = new Date().toLocaleString().split(",");
+    //         const time = dateTimeArr[1].slice(0, -6) + " " + dateTimeArr[1].slice(-2);
+    //         setWeatherLastUpdated(time);
+    //     }, TEN_MIN_MS);
 
-        return () => clearInterval(interval);
-    }, [coords]);
+    //     return () => clearInterval(interval);
+    // }, [coords]);
 
     return (
         <section>
