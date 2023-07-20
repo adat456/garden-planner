@@ -27,7 +27,8 @@ export interface membersInterface {
     // just the role id, not the entire role interface
     role: string,
     invitedate: string,
-    status: "pending" | "final",
+    status: "pending" | "accepted" | "rejected",
+    // status: "pending" | "final",
     finaldate: string | undefined
 };
 

@@ -134,8 +134,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         creatorName: `${user?.firstname} ${user?.lastname}`,
                         eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
                         eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, rsvpNeeded, rsvpDate,
-                        tags: rsvpNeeded ? ["RSVP", ...tags] : tags
+                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, rsvpNeeded, rsvpDate, tags
                     },
                 }).unwrap();
 
@@ -150,6 +149,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                             message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
                             dispatched: new Date().toISOString().slice(0, 10),
                             type: "rsvpinvite",
+                            bedid: bed?.id,
                             eventid: id
                         });
                     });
@@ -166,6 +166,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                             message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
                             dispatched: new Date().toISOString().slice(0, 10),
                             type: "rsvpinvite",
+                            bedid: bed?.id,
                             eventid: id
                         });
                     });

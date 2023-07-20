@@ -1,4 +1,5 @@
-import { useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
+import { useGetUserQuery, useGetEventsQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
+import { useNavigate } from "react-router-dom";
 import { notificationInterface, userInterface } from "../app/interfaces";
 
 const Notifications: React.FC = function() {
@@ -10,6 +11,8 @@ const Notifications: React.FC = function() {
     const [ addNotification, { isLoading: addNotificationIsLoading } ]  = useAddNotificationMutation();
     const [ updateNotification, { isLoading: updateNotificationIsLoading } ]  = useUpdateNotificationMutation();
     const [ deleteNotification, { isLoading: deleteNotificationIsLoading } ]  = useDeleteNotificationMutation();
+
+    const navigate = useNavigate();
 
     const unreadNotifications: number = notifications?.reduce((sum, notification) => {
         if (!notification.read) {
@@ -32,7 +35,6 @@ const Notifications: React.FC = function() {
         return text;
     };
 
-
     function generateNotifications() {
         let notificationsArr;
         if (notifications) {
@@ -47,7 +49,7 @@ const Notifications: React.FC = function() {
                                 <p>Member confirmation sent.</p>:
                                 <button type="button" onClick={() => handleConfirmInvite(notification)}>Become a member</button> 
                             }
-                            <button type="button">See garden bed</button>
+                            <button type="button" onClick={() => navigate(`/share/${notification.bedid}`, {state: {senderid: notification.senderid}})}>See garden bed</button>
                         </>
                         : null
                     }
@@ -58,12 +60,12 @@ const Notifications: React.FC = function() {
                                 <p>RSVP sent.</p> :
                                 <button type="button" onClick={() => handleConfirmInvite(notification)}>Send RSVP</button>
                             }
-                            <button type="button">See event details</button>
+                            <button type="button" onClick={() => navigate(`/share/${notification.bedid}/events`, {state: {eventid: notification.eventid}})}>See event details</button>
                         </>
                         : null
                     }
 
-                    <button type="button" onClick={() => handleReadnRespond(notification.id, !notification.read)}>{notification.read ? "Mark as unread" : "Mark as read"}</button>
+                    <button type="button" onClick={() => handleReadnRespondStatus(notification.id, !notification.read)}>{notification.read ? "Mark as unread" : "Mark as read"}</button>
                     <button type="button" onClick={() => handleDelete(notification.id)}>Delete</button>
                 </li>
             ));
@@ -89,7 +91,7 @@ const Notifications: React.FC = function() {
                         bedid: notification.bedid
                     }).unwrap();
 
-                    await handleReadnRespond(notification.id, true, true);
+                    await handleReadnRespondStatus(notification.id, true, true);
                 };
 
                 if (notification.type === "rsvpinvite") {
@@ -107,7 +109,7 @@ const Notifications: React.FC = function() {
                         eventid: notification.eventid
                     }).unwrap();
 
-                    await handleReadnRespond(notification.id, true, true);
+                    await handleReadnRespondStatus(notification.id, true, true);
                 };
             } catch(err) {
                 console.error("Unable to accept invite: ", err.message);
@@ -115,7 +117,7 @@ const Notifications: React.FC = function() {
         };
     };
 
-    async function handleReadnRespond(notifid: number, read: boolean, responded?: boolean) {
+    async function handleReadnRespondStatus(notifid: number, read: boolean, responded?: boolean) {
         if (!updateNotificationIsLoading) {
             try {
                 if (responded) {

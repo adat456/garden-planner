@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
@@ -15,6 +15,7 @@ const EventsPage: React.FC = function() {
     const [ processedEvents, setProcessedEvents ] = useState<eventInterface[]>([]);
 
     let { bedid } = useParams();
+    const location = useLocation();
 
     const userResult = useGetUserQuery(undefined);
     const user = userResult.data as userInterface;
@@ -137,6 +138,18 @@ const EventsPage: React.FC = function() {
             console.log(currentEvent);
         };
     }, [eventFormVis, eventOverviewVis]);
+
+    // if an rsvp notification directed the user to the events page, then look in location for the eventid and get the matching event to populate and open the overview
+    useEffect(() => {
+        if (location.state && events) {
+            const eventid = location.state.eventid;
+            const matchingEvent = events?.find(event => event.id === eventid);
+            if (matchingEvent) {
+                setCurrentEvent(matchingEvent);
+                setEventOverviewVis(true);
+            };
+        };
+    }, [events]);
 
     return (
         <section>

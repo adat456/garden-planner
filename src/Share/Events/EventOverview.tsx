@@ -1,5 +1,5 @@
-import { eventInterface } from "../../app/interfaces";
-import { useDeleteEventMutation } from "../../app/apiSlice";
+import { eventInterface, notificationInterface, userInterface } from "../../app/interfaces";
+import { useGetUserQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
 
 interface eventOverviewInterface {
     setEventFormVis: React.Dispatch<React.SetStateAction<boolean>>,
@@ -9,7 +9,14 @@ interface eventOverviewInterface {
 };
 
 const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
-    const [ deleteEvent, { isLoading } ] = useDeleteEventMutation();
+    const [ deleteEvent, { isLoading: deleteEventIsLoading } ] = useDeleteEventMutation();
+    const { data: userData } = useGetUserQuery(undefined);
+    const user = userData as userInterface;
+    const { data: notificationsData } = useGetNotificationsQuery(undefined);
+    const notifications = notificationsData as notificationInterface[];
+    const [ addNotification,  { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
+    const [ updateNotification, { isLoading: updateNotificationIsLoading } ] = useUpdateNotificationMutation();
+
 
     let participantStatement;
     if (currentEvent?.eventpublic === "public") {
@@ -41,7 +48,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
     };
 
     async function handleDeleteEvent(repeatid: string | undefined = undefined) {
-        if (currentEvent && !isLoading) {
+        if (currentEvent && !deleteEventIsLoading) {
             try {
                 if (repeatid) {
                     await deleteEvent({
@@ -64,6 +71,43 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
         setCurrentEvent(null);
     };
 
+    async function handleRSVP() {
+        if (currentEvent?.rsvpsreceived.includes(user?.id)) {
+            console.log("You've already RSVP'd.");
+            return;
+        };
+        try {
+            if (!updateNotificationIsLoading && !addNotificationIsLoading) {
+                // first send an rsvp'd notification to the event creator
+                await addNotification({
+                    senderid: user.id,
+                    sendername: `${user.firstname} ${user.lastname}`,
+                    senderusername: user.username,
+                    recipientid: currentEvent?.creatorid,
+                    message: `${user.firstname} ${user.lastname} has RSVP'd to ${currentEvent?.eventname}.`,
+                    dispatched: new Date().toISOString().slice(0, 10),
+                    type: "rsvpconfirmation",
+                    eventid: currentEvent?.id
+                }).unwrap();
+    
+                // then, if the user did receive an rsvpinvite notification for this event, mark that as read and responded
+                let matchingNotif: notificationInterface | null = null;
+                notifications?.forEach(notif => {
+                    if (notif.eventid === currentEvent?.id && notif.type === "rsvpinvite") matchingNotif = notif;
+                });
+                if (matchingNotif) {
+                    await updateNotification({ 
+                        notifid: matchingNotif?.id, 
+                        read: true, 
+                        responded: true 
+                    }).unwrap();
+                };
+            };
+        } catch(err) {
+            console.error("Unable to RSVP to event: ", err.message);
+        };
+    };
+
     return (
         <dialog className="event-overview">
             <h3>{currentEvent?.eventname}</h3>
@@ -76,6 +120,10 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                 <ul>
                     {generateParticipantList()}
                 </ul>
+                : null
+            }
+            {currentEvent?.rsvpneeded ?
+                <button type="button" onClick={handleRSVP}>RSVP</button>
                 : null
             }
             <p>{currentEvent?.tags}</p>

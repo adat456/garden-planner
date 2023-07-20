@@ -28,6 +28,7 @@ const LoggedInWrapper: React.FC = function() {
         async function updateNotifications(arg: string) {
             console.log(arg);
             await refetchNotifications();
+            if (arg === "memberinvite") refetchBeds;
             if (arg === "memberconfirmation") await refetchBeds;
         };
         socket.on(`notifications-${user?.id}`, arg => updateNotifications(arg));
