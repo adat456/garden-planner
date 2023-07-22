@@ -46,8 +46,10 @@ export interface bedDataInterface {
     public: boolean,
     created: string,
     username: string,
-    numhearts: number,
-    numcopies: number,
+    // an array of user IDs because user should be able to see if they liked it, and can only like once
+    numhearts: number[],
+    // also an array of user IDs; user can copy multiple times and add their user ID multiple times --> helps to name the number of the copy
+    numcopies: number[],
     members: membersInterface[],
     roles: rolesInterface[],
     eventtags: string[]
@@ -59,9 +61,7 @@ export interface plantDataInterface {
     depth: string,
     description: string[] | string,
     fruitsize: string,
-    // refers to tolerances, e.g., cold tolerant
     growconditions: string[],
-    // refers to appearance, e.g., compact, climbing
     growthhabit: string[],
     hardiness: number[],
     heightin: number[],
@@ -89,9 +89,6 @@ export interface userInterface {
     email: string,
     username: string,
     board_ids: number[],
-    added_veg_data: number[],
-    favorited_beds: number[],
-    copied_beds: number[]
 };
 
 export interface notificationInterface {
@@ -132,12 +129,12 @@ export interface eventInterface {
     rsvpsreceived: number[],
     eventstarttime: string,
     eventendtime: string,
-    eventdate: string[],
+    eventdate: Date[],
     repeating: boolean,
-    // if repeating events are generated, they will have unique numeric ids (created by SERIAL in postgresql) but the same string repeatid (generated once with the nanoid import in the EventForm component)
+    // if repeating events are generated, they will have unique ids but the same string repeatid (generated once with the nanoid import in the EventForm component)
     repeatid?: string,
     repeatevery?: "weekly" | "biweekly" | "monthly",
-    repeattill?: string,
+    repeattill?: Date,
     tags: string[],
 };
 

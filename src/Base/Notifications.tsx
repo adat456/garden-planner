@@ -1,4 +1,5 @@
 import { useGetUserQuery, useGetEventsQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
+import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { notificationInterface, userInterface } from "../app/interfaces";
 
@@ -86,7 +87,7 @@ const Notifications: React.FC = function() {
                         senderusername: user.username,
                         recipientid: notification.senderid,
                         message: `${user.firstname} ${user.lastname} is now a member of ${res}.`,
-                        dispatched: new Date().toISOString().slice(0, 10),
+                        dispatched: format(new Date(), 'MM/dd/yyyy'),
                         type: "memberconfirmation",
                         bedid: notification.bedid
                     }).unwrap();
@@ -104,7 +105,7 @@ const Notifications: React.FC = function() {
                         senderusername: user.username,
                         recipientid: notification.senderid,
                         message: `${user.firstname} ${user.lastname} has RSVP'd to ${res}.`,
-                        dispatched: new Date().toISOString().slice(0, 10),
+                        dispatched: format(new Date(), 'MM/dd/yyyy'),
                         type: "rsvpconfirmation",
                         eventid: notification.eventid
                     }).unwrap();

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import Calendar from "react-calendar";
+import { format, add } from "date-fns";
 
 interface eventTimingFieldsetInterface {
     eventDate: Date[],
@@ -24,26 +26,19 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
         setRepeating(!repeating);
     };
 
-    // const repeatTillDate = new Date(eventDate[0].getDate() + 1).toISOString().slice(0, 10);
-    const repeatTillDate = new Date(eventDate[0]);
-    repeatTillDate.setDate(repeatTillDate.getDate() + 1);
-    const repeatTillString = repeatTillDate.toISOString().slice(0, 10);
-
     return (
         <fieldset>
-            <legend>Time</legend>
+            <legend>Time*</legend>
             <Calendar value={eventDate} onChange={setEventDate} selectRange={true} allowPartialRange={true} minDate={new Date()} maxDate={new Date(2025, 1, 1)} minDetail="year" showNeighboringMonth={false} nextLabel="month>>" next2Label="year>>" prevLabel="<<month" prev2Label="<<year" />
-            <p>{`Start date: ${eventDate[0]}`}</p>
-            <p>{`End date: ${eventDate[1]}`}</p>
             <fieldset>
-                <legend>Hours</legend>
+                <legend>Hours*</legend>
                 <div>
                     <label htmlFor="start-time" className="hidden">Start time</label>
-                    <input type="time" id="start-time" value={eventStartTime} onChange={(e) => setEventStartTime(e.target.value)} /> 
+                    <input type="time" id="start-time" value={eventStartTime} onChange={(e) => setEventStartTime(e.target.value)} required /> 
                 </div> :
                 <div>
                     <label htmlFor="end-time" className="hidden">End time</label>
-                    <input type="time" id="end-time" value={eventEndTime} onChange={(e) => setEventEndTime(e.target.value)} /> 
+                    <input type="time" id="end-time" value={eventEndTime} onChange={(e) => setEventEndTime(e.target.value)} required /> 
                 </div>
             </fieldset>
             <div>
@@ -61,7 +56,7 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
                     </select>
                     <div>
                         <label htmlFor="repeat-till">Repeat till:</label>
-                        <input type="date" id="repeat-till" min={repeatTillString} value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
+                        <input type="date" id="repeat-till" min={format(add(new Date(eventDate[0]), {days: repeatEvery === "weekly" ? 7 : repeatEvery === "biweekly" ? 14 : repeatEvery === "monthly" ? 28 : 1}), 'yyyy-MM-dd')} value={repeatTill} onChange={(e) => setRepeatTill(e.target.value)} />
                     </div>
                 </> : null
             }

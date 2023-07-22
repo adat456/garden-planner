@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
+import EventPreview from "./EventPreview";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
 
@@ -114,15 +115,7 @@ const EventsPage: React.FC = function() {
 
     function generateEvents(events: eventInterface[]) {
         const eventsArr = events?.map(event => (
-            <li key={event.id}>
-                <p>{`Event id: ${event.id}`}</p>
-                <p>{`Repeat id: ${event.repeatid}`}</p>
-                <h3>{event.eventname}</h3>
-                <p>{`Located at: ${event.eventlocation}`}</p>
-                <p>{`${event.eventdate[0]} ${event.eventdate[1] ? `- ${event.eventdate[1]}` : ""}`}</p>
-                <p>{`${event.eventstarttime} ${event.eventendtime ? `- ${event.eventendtime}` : ""}`}</p>
-                <button type="button" onClick={() => {setCurrentEvent(event); setEventOverviewVis(true)}}>View event details</button>
-            </li>
+            <EventPreview key={event.id} event={event} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} />
         ));
         return eventsArr;
     };

@@ -17,19 +17,19 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
     const [lifecycle, setLifecycle] = useState(focusVeg?.lifecycle || "");
     const [plantingSzn, setPlantingSzn] = useState<string[]>(focusVeg?.plantingseason || []);
     const [fruitSize, setFruitSize] = useState(focusVeg?.fruitsize || "");
-    const [growthHabit, setGrowthHabit] = useState(focusVeg?.growthhabit || "");
-    const [growthConditions, setGrowthConditions] = useState(focusVeg?.growconditions || "");
-    const [sowingMethod, setSowingMethod] = useState(focusVeg?.sowingmethod || "");
+    const [growthHabit, setGrowthHabit] = useState(focusVeg?.growthhabit?.join(", ") || "");
+    const [growthConditions, setGrowthConditions] = useState(focusVeg?.growconditions?.join(", ") || "");
+    const [sowingMethod, setSowingMethod] = useState(focusVeg?.sowingmethod?.join(", ") || "");
     const [light, setLight] = useState<string[]>(focusVeg?.light || []);
     const [depth, setDepth] = useState(focusVeg?.depth || "");
-    const [heightLower, setHeightLower] = useState<number | undefined>(focusVeg?.heightin[0] || undefined);
-    const [heightUpper, setHeightUpper] = useState<number | undefined>(focusVeg?.heightin[1] || undefined);
-    const [spacingInLower, setSpacingInLower] = useState<number | undefined>(focusVeg?.spacingin[0] || undefined);
-    const [spacingInUpper, setSpacingInUpper] = useState<number | undefined>(focusVeg?.spacingin[1] || undefined);
+    const [heightLower, setHeightLower] = useState<number | undefined>(focusVeg?.heightin?.[0] || undefined);
+    const [heightUpper, setHeightUpper] = useState<number | undefined>(focusVeg?.heightin?.[1] || undefined);
+    const [spacingInLower, setSpacingInLower] = useState<number | undefined>(focusVeg?.spacingin?.[0] || undefined);
+    const [spacingInUpper, setSpacingInUpper] = useState<number | undefined>(focusVeg?.spacingin?.[1] || undefined);
     const [water, setWater] = useState(focusVeg?.water || "");
     const [hardiness, setHardiness] = useState<number[]>(focusVeg?.hardiness || []);
-    const [dtmLower, setDTMLower] = useState<number | undefined>(focusVeg?.daystomaturity[0] || undefined);
-    const [dtmUpper, setDTMUpper] = useState<number | undefined>(focusVeg?.daystomaturity[1] || undefined);
+    const [dtmLower, setDTMLower] = useState<number | undefined>(focusVeg?.daystomaturity?.[0] || undefined);
+    const [dtmUpper, setDTMUpper] = useState<number | undefined>(focusVeg?.daystomaturity?.[1] || undefined);
     const [privateData, setPrivateData] = useState(focusVeg?.privatedata || false);
 
     function generateHardinessButtons() {
@@ -97,12 +97,12 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
     };
 
     function prepareDataForSubmission() {
-        let growthConditionsArr: string[] = [];
-        let sowingMethodArr: string[] = [];
-        let growthHabitArr: string[] = [];
-        if (typeof growthConditions === "string") growthConditionsArr = growthConditions.split(",");
-        if (typeof sowingMethod === "string") sowingMethodArr = sowingMethod.split(",");
-        if (typeof growthHabit === "string") growthHabitArr = growthHabit.split(",");
+        // let growthConditionsArr: string[] = [];
+        // let sowingMethodArr: string[] = [];
+        // let growthHabitArr: string[] = [];
+        // if (typeof growthConditions === "string") growthConditionsArr = growthConditions.split(",");
+        // if (typeof sowingMethod === "string") sowingMethodArr = sowingMethod.split(",");
+        // if (typeof growthHabit === "string") growthHabitArr = growthHabit.split(",");
 
         let spacingArr = [];
         if (spacingInLower) spacingArr.push(spacingInLower);
@@ -114,18 +114,19 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
         if (heightLower) heightArr.push(heightLower);
         if (heightUpper) heightArr.push(heightUpper); 
 
-        return  { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr };
+        // return  { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr };
+        return  { spacingArr, dtmArr, heightArr };
     };
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        const { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
+        const { spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
 
         const reqOptions: RequestInit = {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ name, description, hardiness, water, light, growthConditionsArr, lifecycle, plantingSzn, sowingMethodArr, depth, spacingArr, growthHabitArr, dtmArr, heightArr, fruitSize, privateData }),
+            body: JSON.stringify({ name, description, hardiness, water, light, growthConditions, lifecycle, plantingSzn, sowingMethod, depth, spacingArr, growthHabit, dtmArr, heightArr, fruitSize, privateData }),
             credentials: "include"
         };
         
@@ -154,14 +155,16 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
     async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const { growthConditionsArr, sowingMethodArr, growthHabitArr, spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
+        const { spacingArr, dtmArr, heightArr } = prepareDataForSubmission();
 
         const reqOptions: RequestInit = {
             method: "PATCH",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ name, description, hardiness, water, light, growthConditionsArr, lifecycle, plantingSzn, sowingMethodArr, depth, spacingArr, growthHabitArr, dtmArr, heightArr, fruitSize, privateData }),
+            body: JSON.stringify({ name, description, hardiness, water, light, growthConditions, lifecycle, plantingSzn, sowingMethod, depth, spacingArr, growthHabit, dtmArr, heightArr, fruitSize, privateData }),
             credentials: "include"
         };
+
+        console.log(reqOptions.body);
         
         try {
             const req = await fetch(`http://localhost:3000/update-veg-data/${focusVeg?.id}`, reqOptions);
@@ -289,9 +292,9 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
                     <div>
                         <label htmlFor="spacingInLower">Spacing (in inches)</label>
                         <div>
-                            <input type="number" id="spacingInLower" value={spacingInLower} onChange={(e) => setSpacingInLower(Number(e.target.value))} placeholder="18"/>
+                            <input type="number" id="spacingInLower" min={0} value={spacingInLower} onChange={(e) => setSpacingInLower(Number(e.target.value))} placeholder="18"/>
                             <label htmlFor="spacingInUpper">-</label>
-                            <input type="number" id="spacingInUpper" value={spacingInUpper} onChange={(e) => setSpacingInUpper(Number(e.target.value))} placeholder="24"/>
+                            <input type="number" id="spacingInUpper" min={0} value={spacingInUpper} onChange={(e) => setSpacingInUpper(Number(e.target.value))} placeholder="24"/>
                         </div>
                     </div>
                     <div>
@@ -304,17 +307,17 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
                     <div>
                         <label htmlFor="dtmLower">Days to maturity</label>
                         <div>
-                            <input type="number" id="dtmLower" value={dtmLower} onChange={(e) => setDTMLower(Number(e.target.value))} placeholder="30"/>
+                            <input type="number" id="dtmLower" min={0} value={dtmLower} onChange={(e) => setDTMLower(Number(e.target.value))} placeholder="30"/>
                             <label htmlFor="dtmUpper">-</label>
-                            <input type="number" id="dtmUpper" value={dtmUpper} onChange={(e) => setDTMUpper(Number(e.target.value))} placeholder="45"/>
+                            <input type="number" id="dtmUpper" min={0} value={dtmUpper} onChange={(e) => setDTMUpper(Number(e.target.value))} placeholder="45"/>
                         </div>
                     </div>
                     <div>
                         <label htmlFor="heightLower">Height (in inches)</label>
                         <div>
-                            <input type="number" id="heightLower" value={heightLower} onChange={(e) => setHeightLower(Number(e.target.value))} placeholder="8"/>
+                            <input type="number" id="heightLower" min={0} value={heightLower} onChange={(e) => setHeightLower(Number(e.target.value))} placeholder="8"/>
                             <label htmlFor="heightUpper">-</label>
-                            <input type="number" id="heightUpper" value={heightUpper} onChange={(e) => setHeightUpper(Number(e.target.value))} placeholder="12"/>
+                            <input type="number" id="heightUpper" min={0} value={heightUpper} onChange={(e) => setHeightUpper(Number(e.target.value))} placeholder="12"/>
                         </div>
                     </div>
                     <div>
@@ -323,7 +326,7 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
                     </div>
                 </fieldset>
                 <div>
-                    <input type="checkbox" name="privateData" id="privateData" checked={privateData} onChange={() => setPrivateData(!privateData)} checked={privateData} />
+                    <input type="checkbox" name="privateData" id="privateData" checked={privateData} onChange={() => setPrivateData(!privateData)} />
                     <label htmlFor="privateData">Set to private?</label>
                 </div>
                 <button type="button" onClick={handleClose}>Close</button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { format } from "date-fns";
 import { useGetBedsQuery, useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
 
@@ -50,7 +51,7 @@ const BedSharingGroup: React.FC = function() {
                     senderusername: user.username,
                     recipientid: matchingNotif?.senderid,
                     message: `${user.firstname} ${user.lastname} is now a member of ${bed.name}.`,
-                    dispatched: new Date().toISOString().slice(0, 10),
+                    dispatched: format(new Date(), 'MM/dd/yyyy'),
                     type: "memberconfirmation",
                     bedid: bed.id
                 }).unwrap();

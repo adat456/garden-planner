@@ -30,12 +30,12 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                 await addPost({
                     bedid,
                     post: { title, content, pinned, id }
-                });
-            } catch(err) {
-                console.error("Unable to add post: ", err.message);
-            } finally {
+                }).unwrap();
+
                 navigate(`/share/${bedid}/bulletin/${id}`);
                 handleClose();
+            } catch(err) {
+                console.error("Unable to add post: ", err.data);
             };
         };
     };
@@ -49,10 +49,10 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                     postid: post?.id,
                     content: { title, content, pinned }
                 }).unwrap();
-            } catch(err) {
-                console.error("Unable to update comment: ", err.message);
-            } finally {
+
                 handleClose();
+            } catch(err) {
+                console.error("Unable to update comment: ", err.data);
             };
         };
     };
@@ -61,11 +61,11 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
         if (!deletePostIsLoading) {
             try {
                 await deletePost(post?.id).unwrap();
-            } catch(err) {
-                console.error("Unable to delete comment: ", err.message);
-            } finally {
+
                 navigate(`/share/${bedid}/bulletin`)
                 handleClose();
+            } catch(err) {
+                console.error("Unable to delete comment: ", err.data);
             };
         };
     };
@@ -85,7 +85,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                 </div>
                 <div>
                     <label htmlFor="content">Body</label>
-                    <textarea name="content" id="content" cols={30} rows={10} value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+                    <textarea name="content" id="content" cols={30} rows={10} value={content} onChange={(e) => setContent(e.target.value)} required></textarea>
                 </div>
                 <div>
                     <input type="checkbox" name="pinned" id="pinned" checked={pinned} onChange={() => setPinned(!pinned)} />

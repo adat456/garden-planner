@@ -1,5 +1,6 @@
 import { eventInterface, notificationInterface, userInterface } from "../../app/interfaces";
 import { useGetUserQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
+import { prepEventDateForDisplay, convert24to12, prepHyphenatedDateForDisplay} from "../../app/helpers";
 
 interface eventOverviewInterface {
     setEventFormVis: React.Dispatch<React.SetStateAction<boolean>>,
@@ -29,9 +30,6 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
 
     function generateParticipantList() {
         const participantList = currentEvent?.eventparticipants?.map(participant => {
-            console.log(currentEvent);
-            console.log(participant.id);
-            console.log(currentEvent?.rsvpsreceived.includes(participant.id));
             return (<li>{`${participant.name} ${currentEvent?.rsvpsreceived.includes(participant.id) ? "[RSVP'd]" : ""}`}</li>);
         });
         return participantList;
@@ -47,7 +45,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
         setEventFormVis(true);
     };
 
-    async function handleDeleteEvent(repeatid: string | undefined = undefined) {
+    async function handleDeleteEvent(repeatid: string | null = null) {
         if (currentEvent && !deleteEventIsLoading) {
             try {
                 if (repeatid) {
@@ -63,7 +61,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                     }).unwrap();
                 };
             } catch(err) {
-                console.error("Unable to delete event(s): ", err.message);
+                console.error("Unable to delete event(s): ", err.data);
             };
         };
 
@@ -104,15 +102,15 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                 };
             };
         } catch(err) {
-            console.error("Unable to RSVP to event: ", err.message);
+            console.error("Unable to RSVP to event: ", err.data);
         };
     };
 
     return (
         <dialog className="event-overview">
             <h3>{currentEvent?.eventname}</h3>
-            <p>{`${currentEvent?.eventdate[0]} ${currentEvent?.eventdate[1] ? `- ${currentEvent?.eventdate[1]}` : ""}`}</p>
-            <p>{`${currentEvent?.eventstarttime} ${currentEvent?.eventendtime ? `- ${currentEvent?.eventendtime}` : ""}`}</p>
+            <p>{`${prepEventDateForDisplay(currentEvent?.eventdate[0])} ${currentEvent?.eventdate[1] ? `- ${prepEventDateForDisplay(currentEvent?.eventdate[1])}` : ""}`}</p>
+            <p>{`${currentEvent?.eventstarttime ? `${convert24to12(currentEvent?.eventstarttime)}` : ""} ${currentEvent?.eventendtime ? `- ${convert24to12(currentEvent?.eventendtime)}` : ""}`}</p>
             <p>{currentEvent?.eventdesc}</p>
             <p>{`Location: ${currentEvent?.eventlocation}`}</p>
             <p>{participantStatement}</p>
@@ -123,7 +121,10 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                 : null
             }
             {currentEvent?.rsvpneeded ?
-                <button type="button" onClick={handleRSVP}>RSVP</button>
+                <>
+                    <p>{`Please RSVP by ${prepHyphenatedDateForDisplay(currentEvent?.rsvpdate)}.`}</p>
+                    <button type="button" onClick={handleRSVP}>RSVP</button>
+                </>
                 : null
             }
             <p>{currentEvent?.tags}</p>
@@ -131,7 +132,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             <div>
                 <button type="button" onClick={() => {handleCloseEventOverview(); setCurrentEvent(null)}}>Close</button>
                 <button type="button" onClick={handleOpenEventForm}>Edit</button>
-                <button type="button" onClick={() => handleDeleteEvent(undefined)}>Delete</button>
+                <button type="button" onClick={() => handleDeleteEvent(null)}>Delete</button>
                 {currentEvent?.repeating ? <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button> : null}
             </div>
         </dialog>

@@ -1,6 +1,7 @@
 import { isAlphanumeric, isEmail } from "validator";
+import { format } from "date-fns";
 
-// SIGN UP FORM VALIDATIONS
+/// SIGN UP FORM VALIDATIONS ///
 // for strings that are just required
 export let validateReqString: (input: HTMLInputElement, msgSetter: React.Dispatch<React.SetStateAction<string>>) => void = function(input, msgSetter) {
     if (input.validity.valueMissing) {
@@ -47,6 +48,19 @@ export let validateCred: (input: HTMLInputElement, msgSetter: React.Dispatch<Rea
     };
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function handleVisToggle(e) {
     const fieldId = e.currentTarget.getAttribute("data-id");
     const field = document.querySelector(`#${fieldId}`);
@@ -59,5 +73,32 @@ export function handleVisToggle(e) {
 
 export function isJWTInvalid(data: string) {
     if (data === "JWT blacklisted." || data === "JWT is invalid." || data === "No JWT found.") return true;
-    
+};
+
+/// DATETIME FORMATTING ///
+// used for converting any kind of extended Date object, especially event dates
+export function prepEventDateForDisplay(eventDate: Date) {
+    if (eventDate) {
+        return format(new Date(eventDate), 'MM/dd/yyyy');
+    } else {
+        return "";
+    };
+};
+
+// used for RSVP due dates (and potentially repeat till dates) that are formatted like this YYYY-MM-DD
+export function prepHyphenatedDateForDisplay(date: Date) {
+    if (date) {
+        const replacedHyphensDate = new Date(date.toString().replace(/-/g, '/'));
+        const mmddyyyyDate = format(new Date(replacedHyphensDate), 'MM/dd/yyyy');
+        return mmddyyyyDate;
+    };
+};
+
+// used for all times
+export function convert24to12(time: string) {
+    const suffix = Number(time.slice(0, 2)) >= 12 ? "PM" : "AM";
+    const hours = ((Number(time.slice(0, 2)) + 11) % 12 + 1);
+    const minutes = time.slice(2, 5);
+    const timeString = `${hours}${minutes} ${suffix}`;
+    return timeString;
 };

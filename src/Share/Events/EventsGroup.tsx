@@ -4,6 +4,7 @@ import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery } from "../../app/a
 import { bedDataInterface, eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
+import EventPreview from "./EventPreview";
 
 const EventsGroup: React.FC = function() {
     const [ eventOverviewVis, setEventOverviewVis ] = useState(false);
@@ -53,15 +54,7 @@ const EventsGroup: React.FC = function() {
 
     function generateEvents() {
         const eventsArr = sortedFilteredEvents?.map(event => (
-            <li key={event.id}>
-                <p>{`Event id: ${event.id}`}</p>
-                <p>{`Repeat id: ${event.repeatid}`}</p>
-                <h3>{event.eventname}</h3>
-                <p>{`Located at: ${event.eventlocation}`}</p>
-                <p>{`${event.eventdate[0]} ${event.eventdate[1] ? `- ${event.eventdate[1]}` : ""}`}</p>
-                <p>{`${event.eventstarttime} ${event.eventendtime ? `- ${event.eventendtime}` : ""}`}</p>
-                <button type="button" onClick={() => {setCurrentEvent(event); setEventOverviewVis(true)}}>View event details</button>
-            </li>
+            <EventPreview key={event.id} event={event} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} />
         ));
         return eventsArr;
     };

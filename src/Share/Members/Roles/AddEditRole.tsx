@@ -72,7 +72,7 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
     async function handleAddRole(e: React.FormEvent) {
         e.preventDefault();
 
-        if (title && !isLoading && existingRoles) {
+        if (!isLoading && existingRoles) {
             try {
                 await updateRoles({
                     // necessary to generate a string id here (rather than allowing postgresql to generate a serial number id) because it will be added as JSON object to a single column

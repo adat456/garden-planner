@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
+import { format, differenceInDays } from "date-fns";
+import { prepEventDateForDisplay, prepHyphenatedDateForDisplay } from "../../../app/helpers";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
 import { userInterface, eventInterface, bedDataInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
@@ -61,8 +63,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
     // where interval is the number of days between repeating events, e.g., 7, 14, 28, and single refers to whether the event is a single or multi day affair
     function generateRepeatingDates(interval: number, repeatTillDate: Date, arr: Date[][], single: boolean) {
-        const timeDifference = repeatTillDate.getTime() - new Date(eventDate[0]).getTime();
-        const dayDifference = timeDifference / (1000 * 3600 * 24);
+        const dayDifference = differenceInDays(new Date(repeatTillDate), new Date(eventDate[0])) + 1;
         const numTimeIntervals = Math.floor(dayDifference / interval);
 
         // adding the appropriate number of days to each date/set of dates based on the iteration number
@@ -113,15 +114,8 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         return repeatingDatesArr;
     };
 
-    async function createEvent(eventDates: Date[], repeatId?: string) {
+    async function createEvent(eventDate: Date[], repeatId?: string) {
         if (!addEventIsLoading && !addNotificationIsLoading) {
-            const preppedEventDate = eventDates.map(date => {
-                if (date) {
-                    return date.toString().slice(0, 15);
-                } else {
-                    return "";
-                };
-            });
             const id = nanoid();
 
             try {
@@ -133,21 +127,20 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                         creatorUsername: user?.username,
                         creatorName: `${user?.firstname} ${user?.lastname}`,
                         eventName, eventDesc, eventLocation, eventPublic, eventParticipants,
-                        eventDate: preppedEventDate,
-                        eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, rsvpNeeded, rsvpDate, tags
+                        eventDate, eventStartTime, eventEndTime, repeating, repeatEvery, repeatTill, repeatId, rsvpNeeded, rsvpDate, tags
                     },
                 }).unwrap();
 
                 // send notifications to all members
                 if (rsvpNeeded && eventPublic === "allmembers") {
                     bed?.members.forEach(async member => {
-                        await addNotification({
+                         await addNotification({
                             senderid: user?.id,
                             sendername: `${user?.firstname} ${user?.lastname}`,
                             senderusername: user?.username,
                             recipientid: member.id,
-                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
-                            dispatched: new Date().toISOString().slice(0, 10),
+                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate.map(date => prepEventDateForDisplay(date))}. Please RSVP by ${prepHyphenatedDateForDisplay(rsvpDate)}.`,
+                            dispatched: format(new Date(), 'MM/dd/yyyy'),
                             type: "rsvpinvite",
                             bedid: bed?.id,
                             eventid: id
@@ -164,7 +157,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                             senderusername: user?.username,
                             recipientid: participant.id,
                             message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
-                            dispatched: new Date().toISOString().slice(0, 10),
+                            dispatched: format(new Date(), 'MM/dd/yyyy'),
                             type: "rsvpinvite",
                             bedid: bed?.id,
                             eventid: id
@@ -172,7 +165,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                     });
                 };
             } catch(err) {
-                console.error("Unable to add event: ", err.message);
+                console.error("Unable to add event: ", err.data);
             };
         };
     };
@@ -191,8 +184,8 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
             });
         };
 
-        handleCloseEventForm();
-        setCurrentEvent(null);
+        // handleCloseEventForm();
+        // setCurrentEvent(null);
     };
 
     // unlike other updates, below functions actually just create new events and delete the outdated ones (appears to be a more straightforward solution, especially if the repeating status, repeat till, and/or repeat every inputs are edited)

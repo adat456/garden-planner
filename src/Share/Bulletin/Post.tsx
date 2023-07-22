@@ -51,7 +51,7 @@ const Post: React.FC = function() {
                     },
                 }).unwrap();
             } catch(err) {
-                console.error("Unable to toggle pinning of this post: ", err.message);
+                console.error("Unable to toggle pinning of this post: ", err.data);
             };
         };
     };
@@ -66,7 +66,7 @@ const Post: React.FC = function() {
                     comment: { content, id: nanoid() }
                 }).unwrap();
             } catch(err) {
-                console.error("Unable to add comment: ", err.message);
+                console.error("Unable to add comment: ", err.data);
             } finally {
                 setContent("");
                 setAddCommentVis(false);
@@ -92,7 +92,7 @@ const Post: React.FC = function() {
                     }
                 }).unwrap();
             } catch(err) {
-                console.error("Unable to update likes: ", err.message);
+                console.error("Unable to update likes: ", err.data);
             };
         };
 
@@ -113,7 +113,7 @@ const Post: React.FC = function() {
                     }
                 }).unwrap();
             } catch(err) {
-                console.error("Unable to update dislikes: ", err.message);
+                console.error("Unable to update dislikes: ", err.data);
             };
         };
     };

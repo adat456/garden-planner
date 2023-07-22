@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
+import { format } from "date-fns";
 import { useGetBedsQuery } from "../../../app/apiSlice";
-import { eventParticipantInterface, bedDataInterface } from "../../../app/interfaces";
+import { bedDataInterface, eventParticipantInterface } from "../../../app/interfaces";
 
 interface eventDetailsFieldsetInterface {
     eventName: string,
@@ -75,7 +76,7 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
         return results;
     };
     function addParticipant(id: number, name: string, username: string) {
-        setEventParticipants([...eventParticipants, { id, name, username }]);
+        setEventParticipants([...eventParticipants, {id, name, username} ]);
     };
 
     function generateParticipants() {
@@ -95,16 +96,16 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
     return (
         <>
             <div>
-                <label htmlFor="eventName">Name</label>
-                <input type="text" id="eventName" value={eventName} onChange={(e) => setEventName(e.target.value)} />
+                <label htmlFor="eventName">Name*</label>
+                <input type="text" id="eventName" value={eventName} onChange={(e) => setEventName(e.target.value)} required />
             </div>
             <div>
                 <label htmlFor="eventDesc">Description</label>
                 <textarea id="eventDesc" value={eventDesc} onChange={(e) => setEventDesc(e.target.value)} />
             </div>
             <div>
-                <label htmlFor="eventLocation">Location</label>
-                <input type="text" id="eventLocation" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
+                <label htmlFor="eventLocation">Location*</label>
+                <input type="text" id="eventLocation" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} required />
             </div>
             <div>
                 <div>
@@ -140,7 +141,7 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
             {rsvpNeeded ?
                 <div>
                     <label htmlFor="rsvpDate">Require RSVPs by:</label>
-                    <input type="date" id="rsvpDate" value={rsvpDate} min={eventDate[0]} onChange={(e) => setRsvpDate(e.target.value)} />
+                    <input type="date" id="rsvpDate" value={rsvpDate} min={format(new Date(), 'yyyy-MM-dd')} max={format(new Date(eventDate[0]), 'yyyy-MM-dd')} onChange={(e) => setRsvpDate(e.target.value)} />
                 </div> : null
             }
         </>

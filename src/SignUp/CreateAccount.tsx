@@ -71,7 +71,7 @@ const CreateAccount: React.FC = function() {
         const reqOptions: RequestInit = {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ firstName, lastName, email, username, password }),
+            body: JSON.stringify({ firstName, lastName, email, username, password, confirmPassword }),
             credentials: "include"
         };
         try {
@@ -80,8 +80,6 @@ const CreateAccount: React.FC = function() {
             if (req.ok) {
                 console.log(message);
                 navigate("/create");
-            } else {
-                throw new Error(message);
             };
         } catch(err) {
             console.log(err);
