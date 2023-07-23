@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { commentInterface, userInterface } from "../../app/interfaces";
 import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
+import { validatePostInput } from "../../app/helpers";
 
 const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     const [ likes, setLikes ] = useState(comment.likes);
     const [ dislikes, setDislikes ] = useState(comment.dislikes);
     const [ updateCommentVis, setUpdateCommentVis ] = useState(false);
     const [ updateCommentContent, setUpdateCommentContent ] = useState(comment.content);
+    const [ updateCommentErrMsg, setUpdateCommentErrMsg ] = useState("");
     const [ addCommentVis, setAddCommentVis ] = useState(false);
     const [ addCommentContent, setAddCommentContent ] = useState("");
+    const [ addCommentErrMsg, setAddCommentErrMsg ] = useState("");
+
+    const updateCommentInputRef = useRef<HTMLInputElement>(null);
+    const updateCommentFormRef = useRef<HTMLFormElement>(null);
+    const addCommentInputRef = useRef<HTMLInputElement>(null);
+    const addCommentFormRef = useRef<HTMLFormElement>(null);
 
     const { data } = useGetUserQuery(undefined);
     const user = data as userInterface;
@@ -69,17 +77,21 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     async function handleUpdateComment(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (updateCommentContent && !updateCommentIsLoading) {
+        if (!updateCommentIsLoading) {
+            validatePostInput(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);
+            if (!updateCommentFormRef.current?.checkValidity()) return;
+
             try {
                 await updateComment({
                     commentid: comment.id,
                     content: { content: updateCommentContent }
                 }).unwrap();
-            } catch(err) {
-                console.error("Unable to update comment: ", err.message);
-            } finally {
+
                 setUpdateCommentContent("");
                 setUpdateCommentVis(false);
+            } catch(err) {
+                console.error("Unable to update comment: ", err.message);
+                if (err.data instanceof Array) displayExpressValidatorErrMsgs(err.data, "updateComment");
             };
         };
     };
@@ -97,19 +109,36 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     async function handleAddComment(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (addCommentContent && !addCommentIsLoading) {
+        if (!addCommentIsLoading) {
+            validatePostInput(addCommentInputRef?.current, 500, setAddCommentErrMsg);
+            if (!addCommentFormRef.current?.checkValidity()) return;
+
             try {
                 await addComment({
                     postid: comment.id,
                     comment: { content: addCommentContent, id: nanoid() }
                 }).unwrap();
-            } catch(err) {
-                console.error("Unable to add comment: ", err.message);
-            } finally {
+
                 setAddCommentContent("");
                 setAddCommentVis(false);
+            } catch(err) {
+                console.error("Unable to add comment: ", err.data);
+                if (err.data instanceof Array) displayExpressValidatorErrMsgs(err.data, "addComment");
             };
         };
+    };
+
+    function displayExpressValidatorErrMsgs(errorArr: {field: string, msg: string}[], field: string) {
+        errorArr.forEach(error => {
+            if (field === "updateComment") {
+                setUpdateCommentErrMsg(error.msg);
+                updateCommentInputRef.current?.setCustomValidity(error.msg);
+            };
+            if (field === "addComment") {
+                setAddCommentErrMsg(error.msg);
+                addCommentInputRef.current?.setCustomValidity(error.msg);
+            };
+        });
     };
 
     return (
@@ -132,17 +161,29 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                     <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>
 
                     {addCommentVis ?
-                        <form method="POST" onSubmit={handleAddComment}>
+                        <form method="POST" ref={addCommentFormRef} onSubmit={handleAddComment} noValidate>
                             <label htmlFor="content" />
-                            <textarea name="content" id="content" cols={30} rows={10} value={addCommentContent} onChange={(e) => setAddCommentContent(e.target.value)}></textarea>
+                            {addCommentErrMsg ? 
+                                <div className="error-msg">
+                                    <p>{addCommentErrMsg}</p> 
+                                </div>
+                                : null
+                            }
+                            <textarea name="content" id="content" ref={addCommentInputRef} maxLength={500} cols={30} rows={10} value={addCommentContent} onChange={(e) => {setAddCommentContent(e.target.value); validatePostInput(addCommentInputRef?.current, 500, setAddCommentErrMsg);}} required />
                             <button type="submit">Post</button>
                         </form> : 
                         null
                     }
                 </> :
-                <form method="POST" onSubmit={handleUpdateComment}>
+                <form method="POST" ref={updateCommentFormRef} onSubmit={handleUpdateComment} noValidate>
                     <label htmlFor="content" />
-                    <textarea name="content" id="content" cols={30} rows={10} value={updateCommentContent} onChange={(e) => setUpdateCommentContent(e.target.value)}></textarea>
+                    {updateCommentErrMsg ? 
+                        <div className="error-msg">
+                            <p>{updateCommentErrMsg}</p> 
+                        </div>
+                        : null
+                    }
+                    <textarea name="content" id="content" ref={updateCommentInputRef} maxLength={500} cols={30} rows={10} value={updateCommentContent} onChange={(e) => {setUpdateCommentContent(e.target.value); validatePostInput(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);}} required />
                     <button type="submit">Update</button>
                     <button type="button" onClick={handleDeleteComment}>Delete</button>
                 </form> 

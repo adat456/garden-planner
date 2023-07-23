@@ -69,7 +69,7 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
         const reqOptions: RequestInit = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ numCopies, bed, created: new Date().toLocaleDateString() }),
+            body: JSON.stringify({ numCopies, bed, created: new Date().toISOString().slice(0, 10) }),
             credentials: "include"
         };
 

@@ -1,17 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
+import { validatePostInput } from "../../app/helpers";
 import Comment from "./Comment";
 import AddEditPost from "./AddEditPost";
 
 const Post: React.FC = function() {
     const [ addCommentVis, setAddCommentVis ] = useState(false);
     const [ content, setContent ] = useState("");
+    const [ contentErrMsg, setContentErrMsg ] = useState("");
     const [ addEditPostVis, setAddEditPostVis ] = useState(false);
 
     const { bedid, postid } = useParams();
+
+    const contentRef = useRef<HTMLInputElement>(null);
+    const addCommentFormRef = useRef<HTMLFormElement>(null);
 
     const postObject = useGetPostsQuery(bedid, {
         selectFromResult: ({ data }) => ({
@@ -59,19 +64,32 @@ const Post: React.FC = function() {
     async function postComment(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (content && !addCommentIsLoading) {
+        if (!addCommentIsLoading) {
+            validatePostInput(contentRef?.current, 500, setContentErrMsg);
+            if (!addCommentFormRef.current?.checkValidity()) return;
+
             try {
                 await addComment({
                     postid: post.id,
                     comment: { content, id: nanoid() }
                 }).unwrap();
-            } catch(err) {
-                console.error("Unable to add comment: ", err.data);
-            } finally {
+
                 setContent("");
                 setAddCommentVis(false);
+            } catch(err) {
+                console.error("Unable to add comment: ", err.data);
+                if (err.data instanceof Array) displayExpressValidatorErrMsgs(err.data);
             };
         };
+    };
+
+    function displayExpressValidatorErrMsgs(errorArr: {field: string, msg: string}[]) {
+        errorArr.forEach(error => {
+            if (error.field === "content") {
+                setContentErrMsg(error.msg);
+                contentRef.current?.setCustomValidity(error.msg);
+            };
+        });
     };
 
     async function updateReaction(type: string) {
@@ -156,9 +174,15 @@ const Post: React.FC = function() {
                 <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>
 
                 {addCommentVis ?
-                    <form method="POST" onSubmit={postComment}>
+                    <form method="POST" ref={addCommentFormRef} onSubmit={postComment} noValidate>
                         <label htmlFor="content" />
-                        <textarea name="content" id="content" cols={30} rows={10} value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+                        {contentErrMsg ? 
+                            <div className="error-msg">
+                                <p>{contentErrMsg}</p> 
+                            </div>
+                            : null
+                        }
+                        <textarea name="content" id="content" ref={contentRef} maxLength={500} cols={30} rows={10} value={content} onChange={(e) => {setContent(e.target.value); validatePostInput(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
                         <button type="submit">Post</button>
                     </form> : null
                 }

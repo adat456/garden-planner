@@ -48,12 +48,23 @@ export let validateCred: (input: HTMLInputElement, msgSetter: React.Dispatch<Rea
     };
 };
 
+/// POST/COMMENT FORM VALIDATIONS ///
+export const validatePostInput: (input: HTMLInputElement | null, length: number, msgSetter: React.Dispatch<React.SetStateAction<string>>) => void = function(input, length, msgSetter) {
+    if (!input) return;
 
-
-
-
-
-
+    if (input.validity.valueMissing) {
+        msgSetter("Required.");
+        input.setCustomValidity("Required.");
+        return;
+    } else if (input.validity.tooLong) {
+        msgSetter(`Must be no longer than ${length} characters.`);
+        input.setCustomValidity(`Must be no longer than ${length} characters.`);
+        return;
+    } else {
+        msgSetter("");
+        input.setCustomValidity("");
+    };
+};
 
 
 
