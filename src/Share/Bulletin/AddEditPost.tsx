@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } from "../../app/apiSlice";
 import { postInterface } from "../../app/interfaces";
-import { validatePostInput } from "../../app/helpers";
+import { validateRequiredInputLength } from "../../app/helpers";
 
 interface newPostInterface {
     setAddEditPostVis: React.Dispatch<React.SetStateAction<boolean>>,
@@ -33,8 +33,8 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
 
         if (!addPostIsLoading) {
             // validation takes place both before adding/updating posts, and whenever the input changes (see onChange event handlers)
-            validatePostInput(titleRef?.current, 50, setTitleErrMsg);
-            validatePostInput(contentRef?.current, 500, setContentErrMsg);
+            validateRequiredInputLength(titleRef?.current, 50, setTitleErrMsg);
+            validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);
             // if anything in the form is invalid, exit this function
             if (!formRef?.current?.checkValidity()) return;
 
@@ -58,8 +58,8 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
         e.preventDefault();
 
         if (!updatePostIsLoading) {
-            validatePostInput(titleRef?.current, 50, setTitleErrMsg);
-            validatePostInput(contentRef?.current, 500, setContentErrMsg);
+            validateRequiredInputLength(titleRef?.current, 50, setTitleErrMsg);
+            validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);
             if (!formRef?.current?.checkValidity()) return;
 
             try {
@@ -119,7 +119,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                         </div>
                         : null
                     }
-                    <input type="text" name="title" id="title" maxLength={50} ref={titleRef} value={title} onChange={(e) => {setTitle(e.target.value); validatePostInput(titleRef?.current, 50, setTitleErrMsg);}} required />
+                    <input type="text" name="title" id="title" maxLength={50} ref={titleRef} value={title} onChange={(e) => {setTitle(e.target.value); validateRequiredInputLength(titleRef?.current, 50, setTitleErrMsg);}} required />
                 </div>
                 <div>
                     <label htmlFor="content">Body*</label>
@@ -129,7 +129,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                         </div>
                         : null
                     }
-                    <textarea name="content" id="content" maxLength={500} cols={30} rows={10} ref={contentRef} value={content} onChange={(e) => {setContent(e.target.value); validatePostInput(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
+                    <textarea name="content" id="content" maxLength={500} cols={30} rows={10} ref={contentRef} value={content} onChange={(e) => {setContent(e.target.value); validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
                 </div>
                 <div>
                     <input type="checkbox" name="pinned" id="pinned" checked={pinned} onChange={() => setPinned(!pinned)} />

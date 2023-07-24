@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { commentInterface, userInterface } from "../../app/interfaces";
 import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
-import { validatePostInput } from "../../app/helpers";
+import { validateRequiredInputLength } from "../../app/helpers";
 
 const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     const [ likes, setLikes ] = useState(comment.likes);
@@ -78,7 +78,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
         e.preventDefault();
 
         if (!updateCommentIsLoading) {
-            validatePostInput(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);
+            validateRequiredInputLength(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);
             if (!updateCommentFormRef.current?.checkValidity()) return;
 
             try {
@@ -110,7 +110,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
         e.preventDefault();
 
         if (!addCommentIsLoading) {
-            validatePostInput(addCommentInputRef?.current, 500, setAddCommentErrMsg);
+            validateRequiredInputLength(addCommentInputRef?.current, 500, setAddCommentErrMsg);
             if (!addCommentFormRef.current?.checkValidity()) return;
 
             try {
@@ -169,7 +169,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                                 </div>
                                 : null
                             }
-                            <textarea name="content" id="content" ref={addCommentInputRef} maxLength={500} cols={30} rows={10} value={addCommentContent} onChange={(e) => {setAddCommentContent(e.target.value); validatePostInput(addCommentInputRef?.current, 500, setAddCommentErrMsg);}} required />
+                            <textarea name="content" id="content" ref={addCommentInputRef} maxLength={500} cols={30} rows={10} value={addCommentContent} onChange={(e) => {setAddCommentContent(e.target.value); validateRequiredInputLength(addCommentInputRef?.current, 500, setAddCommentErrMsg);}} required />
                             <button type="submit">Post</button>
                         </form> : 
                         null
@@ -183,7 +183,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                         </div>
                         : null
                     }
-                    <textarea name="content" id="content" ref={updateCommentInputRef} maxLength={500} cols={30} rows={10} value={updateCommentContent} onChange={(e) => {setUpdateCommentContent(e.target.value); validatePostInput(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);}} required />
+                    <textarea name="content" id="content" ref={updateCommentInputRef} maxLength={500} cols={30} rows={10} value={updateCommentContent} onChange={(e) => {setUpdateCommentContent(e.target.value); validateRequiredInputLength(updateCommentInputRef?.current, 500, setUpdateCommentErrMsg);}} required />
                     <button type="submit">Update</button>
                     <button type="button" onClick={handleDeleteComment}>Delete</button>
                 </form> 

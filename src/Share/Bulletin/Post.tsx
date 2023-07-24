@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
-import { validatePostInput } from "../../app/helpers";
+import { validateRequiredInputLength } from "../../app/helpers";
 import Comment from "./Comment";
 import AddEditPost from "./AddEditPost";
 
@@ -65,7 +65,7 @@ const Post: React.FC = function() {
         e.preventDefault();
 
         if (!addCommentIsLoading) {
-            validatePostInput(contentRef?.current, 500, setContentErrMsg);
+            validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);
             if (!addCommentFormRef.current?.checkValidity()) return;
 
             try {
@@ -182,7 +182,7 @@ const Post: React.FC = function() {
                             </div>
                             : null
                         }
-                        <textarea name="content" id="content" ref={contentRef} maxLength={500} cols={30} rows={10} value={content} onChange={(e) => {setContent(e.target.value); validatePostInput(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
+                        <textarea name="content" id="content" ref={contentRef} maxLength={500} cols={30} rows={10} value={content} onChange={(e) => {setContent(e.target.value); validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
                         <button type="submit">Post</button>
                     </form> : null
                 }

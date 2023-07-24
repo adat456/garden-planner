@@ -48,13 +48,13 @@ export let validateCred: (input: HTMLInputElement, msgSetter: React.Dispatch<Rea
     };
 };
 
-/// POST/COMMENT FORM VALIDATIONS ///
-export const validatePostInput: (input: HTMLInputElement | null, length: number, msgSetter: React.Dispatch<React.SetStateAction<string>>) => void = function(input, length, msgSetter) {
+/// POST/COMMENT FORM , ROLE FORM VALIDATIONS ///
+export const validateRequiredInputLength: (input: HTMLInputElement | null, length: number, msgSetter: React.Dispatch<React.SetStateAction<string>>) => void = function(input, length, msgSetter) {
     if (!input) return;
 
-    if (input.validity.valueMissing) {
-        msgSetter("Required.");
-        input.setCustomValidity("Required.");
+    if (input.value.trim() === "") {
+        msgSetter("Must be 1-25 characters without whitespace.");
+        input.setCustomValidity("Must be 1-25 characters without whitespace.");
         return;
     } else if (input.validity.tooLong) {
         msgSetter(`Must be no longer than ${length} characters.`);
@@ -65,6 +65,9 @@ export const validatePostInput: (input: HTMLInputElement | null, length: number,
         input.setCustomValidity("");
     };
 };
+
+
+
 
 
 
