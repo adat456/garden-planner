@@ -81,7 +81,7 @@ const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags, curren
             <p>{errMessage}</p>
             <div>
                 <label htmlFor="new-tag">Create new tag</label>
-                <input type="text" id="new-tag" value={newTag} onChange={handleChange} />
+                <input type="text" id="new-tag" maxLength={15} value={newTag} onChange={handleChange} />
                 <button type="button" onClick={handleAddNewTag}>Add</button>
             </div>
             {generateTagOptions()}

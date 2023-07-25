@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
 import { format, differenceInDays } from "date-fns";
 import { prepEventDateForDisplay, prepHyphenatedDateForDisplay } from "../../../app/helpers";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
-import { userInterface, eventInterface, bedDataInterface } from "../../../app/interfaces";
+import { userInterface, eventInterface, bedDataInterface, membersInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
 import EventTags from "./EventTags";
@@ -42,7 +42,13 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const [ repeating, setRepeating ] = useState(currentEvent?.repeating || false);
     const [ repeatEvery, setRepeatEvery ] = useState<string>(currentEvent?.repeatevery || "");
     const [ repeatTill, setRepeatTill ] = useState(currentEvent?.repeattill || "");
-    const [ tags, setTags ] = useState<string[]>(currentEvent?.tags || [])
+    const [ tags, setTags ] = useState<string[]>(currentEvent?.tags || []);
+
+    const [ submitTrigger, setSubmitTrigger ] = useState(0);
+    const [ errMsgs, setErrMsgs ] = useState<{field: string, msg: string}[]>([]);
+
+    const formRef = useRef<HTMLFormElement>(null);
+    
 
     const { bedid } = useParams();
 
@@ -114,15 +120,16 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
         return repeatingDatesArr;
     };
 
-    async function createEvent(eventDate: Date[], repeatId?: string) {
-        if (!addEventIsLoading && !addNotificationIsLoading) {
-            const id = nanoid();
-
+    async function createEvent(eventId: string, eventDate: Date[], repeatId?: string) {
+        if (!addEventIsLoading) {
             try {
+                setSubmitTrigger(submitTrigger + 1);
+                if (!formRef.current?.checkValidity()) throw new Error("Some fields are no good!");
+
                 await addEvent({
                     bedid,
                     event: {
-                        id,
+                        id: eventId,
                         creatorId: user?.id,
                         creatorUsername: user?.username,
                         creatorName: `${user?.firstname} ${user?.lastname}`,
@@ -131,41 +138,31 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                     },
                 }).unwrap();
 
-                // send notifications to all members
-                if (rsvpNeeded && eventPublic === "allmembers") {
-                    bed?.members.forEach(async member => {
-                         await addNotification({
-                            senderid: user?.id,
-                            sendername: `${user?.firstname} ${user?.lastname}`,
-                            senderusername: user?.username,
-                            recipientid: member.id,
-                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate.map(date => prepEventDateForDisplay(date))}. Please RSVP by ${prepHyphenatedDateForDisplay(rsvpDate)}.`,
-                            dispatched: format(new Date(), 'MM/dd/yyyy'),
-                            type: "rsvpinvite",
-                            bedid: bed?.id,
-                            eventid: id
-                        });
-                    });
-                };
-
-                // send notifications only to invited members
-                if (rsvpNeeded && eventPublic === "somemembers" && eventParticipants.length > 0) {
-                    eventParticipants.forEach(async participant => {
-                        await addNotification({
-                            senderid: user?.id,
-                            sendername: `${user?.firstname} ${user?.lastname}`,
-                            senderusername: user?.username,
-                            recipientid: participant.id,
-                            message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
-                            dispatched: format(new Date(), 'MM/dd/yyyy'),
-                            type: "rsvpinvite",
-                            bedid: bed?.id,
-                            eventid: id
-                        });
-                    });
-                };
+                handleCloseEventForm();
+                setCurrentEvent(null);
             } catch(err) {
-                console.error("Unable to add event: ", err.data);
+                if (err.message) console.error("Unable to add event: ", err.message);
+                if (err.data) setErrMsgs(err.data);
+            };
+        };
+    };
+
+    async function sendNotification(eventId: string, inviteeId: number) {
+        if (!addNotificationIsLoading) {
+            try {
+                await addNotification({
+                    senderid: user?.id,
+                    sendername: `${user?.firstname} ${user?.lastname}`,
+                    senderusername: user?.username,
+                    recipientid: inviteeId,
+                    message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
+                    dispatched: format(new Date(), 'MM/dd/yyyy'),
+                    type: "rsvpinvite",
+                    bedid: bed?.id,
+                    eventid: eventId
+                });
+            } catch(err) {
+                console.log(err.data);
             };
         };
     };
@@ -173,32 +170,57 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     async function handleCreateEvent(e?: React.FormEvent<HTMLFormElement>) {
         e?.preventDefault();
 
-        if (!repeating) {
-            createEvent(eventDate);
-        };        
-        if (repeating && repeatEvery && repeatTill) {
-            const repeatingDatesArr = generateRepeatingDatesCircumstantially();
-            const repeatId = nanoid();
-            repeatingDatesArr.forEach(async (dateArr) => {
-                createEvent(dateArr, repeatId);
-            });
-        };
+        try {
+            if (!repeating) {
+                const eventId = nanoid();
+                createEvent(eventId, eventDate);
 
-        // handleCloseEventForm();
-        // setCurrentEvent(null);
+                if (rsvpNeeded && eventPublic === "allmembers") {
+                    bed?.members.forEach(async member => sendNotification(eventId, member.id));
+                };
+                if (rsvpNeeded && eventPublic === "somemembers" && eventParticipants.length > 0) {
+                    eventParticipants.forEach(async participant => sendNotification(eventId, participant.id));
+                };
+            };        
+
+            if (repeating) {
+                const repeatingDatesArr = generateRepeatingDatesCircumstantially();
+                if (repeatingDatesArr.length == 0) {
+                    setSubmitTrigger(submitTrigger + 1);
+                    if (!formRef.current?.checkValidity()) throw new Error("Some fields are no good!");
+                };
+
+                const repeatId = nanoid();
+                repeatingDatesArr.forEach(async (dateArr) => {
+                    const eventId = nanoid();
+                    createEvent(eventId, dateArr, repeatId);
+
+                    if (rsvpNeeded && eventPublic === "allmembers") {
+                        bed?.members.forEach(async member => sendNotification(eventId, member.id));
+                    };
+                    if (rsvpNeeded && eventPublic === "somemembers" && eventParticipants.length > 0) {
+                        eventParticipants.forEach(async participant => sendNotification(eventId, participant.id));
+                    };
+                });
+            };
+        } catch(err) {
+            console.error("weh");
+        };
     };
 
     // unlike other updates, below functions actually just create new events and delete the outdated ones (appears to be a more straightforward solution, especially if the repeating status, repeat till, and/or repeat every inputs are edited)
     async function handleUpdateEvent() {
         // same code as in handleCreateEvent, except without the closing of the form and the nullifying of the current event
         if (!repeating) {
-            createEvent(eventDate);
+            const eventId = nanoid();
+            createEvent(eventId, eventDate);
         };  
         if (repeating && repeatEvery && repeatTill) {
             const repeatingDatesArr = generateRepeatingDatesCircumstantially();
             const repeatId = nanoid();
             repeatingDatesArr.forEach(async (dateArr) => {
-                createEvent(dateArr, repeatId);
+                const eventId = nanoid();
+                createEvent(eventId, dateArr, repeatId);
             });
         };
 
@@ -256,11 +278,11 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     return (
         <dialog className="event-form">
             <button type="button" onClick={handleBackToOverview}>Back to overview</button>
-            <form method="POST" onSubmit={!currentEvent ? handleCreateEvent : undefined}>
+            <form method="POST" ref={formRef} onSubmit={!currentEvent ? handleCreateEvent : undefined} noValidate>
                 <h3>Create new event</h3>
-                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} rsvpNeeded={rsvpNeeded} setRsvpNeeded={setRsvpNeeded} rsvpDate={rsvpDate} setRsvpDate={setRsvpDate}participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} eventDate={eventDate} />
-                <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} /> 
-                <EventTags tags={tags} setTags={setTags} currentEvent={currentEvent} />
+                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} rsvpNeeded={rsvpNeeded} setRsvpNeeded={setRsvpNeeded} rsvpDate={rsvpDate} setRsvpDate={setRsvpDate}participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} eventDate={eventDate} submitTrigger={submitTrigger} errMsgs={errMsgs} />
+                <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} submitTrigger={submitTrigger} errMsgs={errMsgs} /> 
+                <EventTags tags={tags} setTags={setTags} currentEvent={currentEvent} submitTrigger={submitTrigger} errMsgs={errMsgs} />
                 <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>
                 {currentEvent?
                     <>

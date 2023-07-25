@@ -150,7 +150,7 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
         <dialog className="add-edit-role-form">
             <form method="POST" ref={formRef} onSubmit={focusRole ? handleEditRole : handleAddRole} noValidate>
                 <div>
-                    <label htmlFor="title">Title</label>
+                    <label htmlFor="title">Title*</label>
                     {titleErrMsg ? 
                         <div className="error-msg">
                             <p>{titleErrMsg}</p> 
