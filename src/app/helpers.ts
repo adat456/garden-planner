@@ -49,20 +49,23 @@ export let validateCred: (input: HTMLInputElement, msgSetter: React.Dispatch<Rea
 };
 
 /// POST/COMMENT FORM , ROLE FORM VALIDATIONS ///
-export const validateRequiredInputLength: (input: HTMLInputElement | null, length: number, msgSetter: React.Dispatch<React.SetStateAction<string>>) => void = function(input, length, msgSetter) {
-    if (!input) return;
+// returns a boolean (helpful in certain occasions) in addition to setting an error message
+// returns false if invalid and true if valid
+export const validateRequiredInputLength: (input: HTMLInputElement | null, length: number, msgSetter: React.Dispatch<React.SetStateAction<string>>) => boolean = function(input, length, msgSetter) {
+    if (!input) return false;
 
     if (input.value.trim() === "") {
         msgSetter("Must be 1-25 characters without whitespace.");
         input.setCustomValidity("Must be 1-25 characters without whitespace.");
-        return;
+        return false;
     } else if (input.validity.tooLong) {
         msgSetter(`Must be no longer than ${length} characters.`);
         input.setCustomValidity(`Must be no longer than ${length} characters.`);
-        return;
+        return false;
     } else {
         msgSetter("");
         input.setCustomValidity("");
+        return true;
     };
 };
 

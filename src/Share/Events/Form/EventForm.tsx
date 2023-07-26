@@ -49,7 +49,6 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
     const formRef = useRef<HTMLFormElement>(null);
     
-
     const { bedid } = useParams();
 
     const userResult = useGetUserQuery(undefined);

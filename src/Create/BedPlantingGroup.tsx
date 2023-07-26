@@ -4,7 +4,7 @@ import { useGetBedsQuery } from "../app/apiSlice";
 import { plantPickDataInterface } from "../app/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
-import CreateVeg from "./CreateVeg";
+import CreateVeg from "./CreateVeg/CreateVeg";
 import PlantSearch from './PlantSearch/PlantSearch';
 
 const BedPlantingGroup: React.FC = function() {

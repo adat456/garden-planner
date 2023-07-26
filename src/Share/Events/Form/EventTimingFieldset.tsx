@@ -44,6 +44,7 @@ const EventTimingFieldset: React.FC<eventTimingFieldsetInterface> = function({ e
         setRepeating(!repeating);
     };
 
+    /// VALIDATION ///
     function validateEventDates() {
         let errMsgs = "";
         // validate that start date is on/after today

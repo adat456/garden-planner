@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { plantDataInterface } from "../app/interfaces";
-import CreateVeg from "../Create/CreateVeg";
+import CreateVeg from "../Create/CreateVeg/CreateVeg";
 
 const ProfilePage: React.FC = function() {
     const [ seedContributions, setSeedContributions ] = useState<plantDataInterface[]>([])
