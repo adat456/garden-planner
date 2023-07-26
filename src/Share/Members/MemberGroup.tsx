@@ -24,7 +24,7 @@ const MemberGroup: React.FC = function() {
 
     function generateMembers() {
         let membersArr;
-        let filteredMembers = existingMembers?.filter(member => member.status === "final");
+        let filteredMembers = existingMembers?.filter(member => member.status === "accepted");
         filteredMembers = filteredMembers?.slice(0, 5);
         membersArr = filteredMembers?.map(member => (
             <li key={member.id}>

@@ -25,16 +25,15 @@ const LoggedInWrapper: React.FC = function() {
     useEffect(() => {
         socket.on("hello", (arg) => console.log(arg));
 
-        async function updateNotifications(arg: string) {
-            console.log(arg);
-            await refetchNotifications();
-            if (arg === "memberinvite") refetchBeds;
-            if (arg === "memberconfirmation") await refetchBeds;
+        // may not need arg
+        async function updateAll(arg: string) {
+            refetchNotifications();
+            refetchBeds();
         };
-        socket.on(`notifications-${user?.id}`, arg => updateNotifications(arg));
+        socket.on(`notifications-${user?.id}`, arg => updateAll(arg));
         
         return () => {
-            socket.off(`notifications-${user?.id}`, updateNotifications)
+            socket.off(`notifications-${user?.id}`, updateAll)
         };
     }, [socket]);
 

@@ -88,16 +88,16 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
                     ],
                     bedid
                 }).unwrap();
-
+                
                 await addNotification({
                     senderid: user.id,
                     sendername: `${user.firstname} ${user.lastname}`,
                     senderusername: user.username,
                     recipientid: member.id,
-                    message: `${user.firstname} ${user.lastname} invites you to join ${bed.name}`,
                     dispatched: new Date().toISOString().slice(0, 10),
                     type: "memberinvite",
-                    bedid: bed?.id
+                    bedid: bed?.id,
+                    bedname: bed?.name
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to add member: ", err.message);

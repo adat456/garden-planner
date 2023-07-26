@@ -10,7 +10,9 @@ import MemberGroup from "./Members/MemberGroup";
 import BulletinLatest from "./Bulletin/BulletinLatest";
 
 const BedSharingGroup: React.FC = function() {
-    const [ isMember, setIsMember ] = useState(false);
+    // "member", "pending", "nonmember" 
+    // different from status in member interface, which is either "accepted" or "pending"
+    const [ memberStatus, setMemberStatus ] = useState("");
 
     const { bedid } = useParams();
     const bedObject = useGetBedsQuery(undefined, {
@@ -22,7 +24,7 @@ const BedSharingGroup: React.FC = function() {
     const refetchBedData = bedObject.refetch;
     const { data: userData } = useGetUserQuery(undefined);
     const user = userData as userInterface;
-    const { data: notificationsData, refetch: refetchNotificationsData } = useGetNotificationsQuery(undefined);
+    const { data: notificationsData } = useGetNotificationsQuery(undefined);
     const notifications = notificationsData as notificationInterface[];
 
     const [ addNotification,  { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
@@ -30,40 +32,49 @@ const BedSharingGroup: React.FC = function() {
 
     useEffect(() => {
         if (bed && user) {
-            if (bed?.username === user?.username) setIsMember(true);
-            bed?.members.forEach(member => {
-                if (member.id === user?.id && member.status === "accepted") setIsMember(true);
-            });
+            if (bed?.username === user?.username) {
+                setMemberStatus("member");
+                return;
+            };
+
+            const memberEquivalent = bed?.members.find(member => member.id === user?.id);
+            if (memberEquivalent) {
+                if (memberEquivalent.status === "accepted") setMemberStatus("member");
+                if (memberEquivalent.status === "pending") setMemberStatus("pending");
+            } else {
+                setMemberStatus("nonmember");
+            };
         };
+        if (!bed) setMemberStatus("nonmember");
     }, [bed, user]);
 
     async function handleAcceptInvite() {
-        let matchingNotif;
+        let matchingNotif: notificationInterface | null = null;
         notifications?.forEach(notif => {
             if (notif.bedid === bed?.id && notif.type === "memberinvite") matchingNotif = notif;
         });
 
-        if (!addNotificationIsLoading && matchingNotif &&!updateNotificationIsLoading) {
+        if (matchingNotif && !addNotificationIsLoading && !updateNotificationIsLoading) {
             try {
+                // send notification back informing of accepted invite
                 await addNotification({
                     senderid: user.id,
                     sendername: `${user.firstname} ${user.lastname}`,
                     senderusername: user.username,
                     recipientid: matchingNotif?.senderid,
-                    message: `${user.firstname} ${user.lastname} is now a member of ${bed.name}.`,
-                    dispatched: format(new Date(), 'MM/dd/yyyy'),
+                    dispatched: new Date().toISOString().slice(0, 10),
                     type: "memberconfirmation",
-                    bedid: bed.id
+                    bedid: bed.id,
+                    bedname: bed.name
                 }).unwrap();
-
+                // update matching notification's read and responded statuses
                 await updateNotification({
                     notifid: matchingNotif.id,
                     read: true,
-                    responded: true,
+                    responded: "confirmation",
                 }).unwrap();
-
-                await refetchNotificationsData;
-                await refetchBedData;
+                // refetch to show all bed data now
+                refetchBedData();
             } catch(err) {
                 console.error("Unable to accept member invitation: ", err.message);
             };
@@ -71,34 +82,52 @@ const BedSharingGroup: React.FC = function() {
     };
 
     async function handleRejectInvite() {
-        let matchingNotif;
+        let matchingNotif: notificationInterface | null = null;
         notifications?.forEach(notif => {
             if (notif.bedid === bed?.id && notif.type === "memberinvite") matchingNotif = notif;
         });
 
-        if (!updateNotificationIsLoading && matchingNotif) {
+        if (matchingNotif && !updateNotificationIsLoading && !addNotificationIsLoading) {
             try {
+                // send notification back informing of declined invite
+                await addNotification({
+                    senderid: user.id,
+                    sendername: `${user.firstname} ${user.lastname}`,
+                    senderusername: user.username,
+                    recipientid: matchingNotif?.senderid,
+                    dispatched: new Date().toISOString().slice(0, 10),
+                    type: "memberrejection",
+                    bedid: bed.id,
+                    bedname: bed.name
+                }).unwrap();
+
+                // update matching notification's read and responded statuses
                 await updateNotification({
                     notifid: matchingNotif.id,
                     read: true,
-                    responded: true,
+                    responded: "rejection",
                 }).unwrap();
-            } catch(err) {
 
+                // refetch to display message that user does not have permission
+                refetchBedData();
+            } catch(err) {
+                console.error("Unable to decline member invitation: ", err.message);
             }; 
         };     
     };
 
     return (
         <div>
-            {isMember ?
+            {memberStatus === "member" ?
                 <>
                     <h1>{bed?.name}</h1>
                     <EventsGroup />
                     <Grid bedData={bed} />
                     <MemberGroup />
                     <BulletinLatest />
-                </> :
+                </> : null
+            }
+            {memberStatus === "pending" ?
                 <>
                     <div>
                         <p>You have received an invitation to become a member of this garden.</p>
@@ -107,10 +136,13 @@ const BedSharingGroup: React.FC = function() {
                     </div>
                     <h1>{bed?.name}</h1>
                     <Grid bedData={bed} />
-                    <MemberGroup />
-                </>
+                </> : null
             }
-            
+            {memberStatus === "nonmember" ?
+                <div>
+                    <p>You do not have permission to view this garden.</p>
+                </div> : null
+            }
         </div>
     );
 };

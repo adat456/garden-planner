@@ -25,7 +25,7 @@ const MembersPage: React.FC = function() {
             membersArr = filteredMembers?.map(member => (
                 <Member key={member.id} member={member} />
             ));
-        } else if (status === "final") {
+        } else if (status === "accepted") {
             const filteredMembers = existingMembers?.filter(member => member.status === status);
             membersArr = filteredMembers?.map(member => (
                 <Member key={member.id} member={member} />
@@ -41,7 +41,7 @@ const MembersPage: React.FC = function() {
             <section>
                 <h3>Current</h3>
                 <ul>
-                    {generateMembers("final")}
+                    {generateMembers("accepted")}
                 </ul>
             </section>
             <section>

@@ -27,8 +27,7 @@ export interface membersInterface {
     // just the role id, not the entire role interface
     role: string,
     invitedate: string,
-    status: "pending" | "accepted" | "rejected",
-    // status: "pending" | "final",
+    status: "pending" | "accepted" ,
     finaldate: string | undefined
 };
 
@@ -97,14 +96,17 @@ export interface notificationInterface {
     sendername: string,
     senderusername: string,
     recipientid: number,
-    message: string,
     dispatched: string,
     read: boolean,
-    responded: boolean,
-    // enum? like "invite"?
-    type: "memberinvite" | "memberconfirmation" | "rsvpinvite" | "rsvpconfirmation",
+    // "" empty string for has not responded/pending (false), "confirmation" or "rejection" for responded (true)
+    responded: "" | "confirmation" | "rejection",
+    type: "memberinvite" | "memberconfirmation" | "memberrejection" | "rsvpinvite" | "rsvpconfirmation",
     bedid?: number,
+    bedname?: string,
     eventid?: string,
+    eventname?: string,
+    eventdate?: Date[],
+    rsvpdate?: Date,
 };
 
 export interface eventParticipantInterface {
