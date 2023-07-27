@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 import { membersInterface } from "../../app/interfaces";
 import Member from "./Member";
 import UserSearch from "./UserSearch";
@@ -11,12 +12,9 @@ const MembersPage: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const existingMembers = bedObject.bed?.members as membersInterface[];
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingMembers = bed?.members as membersInterface[];
 
     function generateMembers(status: string) {
         let membersArr;

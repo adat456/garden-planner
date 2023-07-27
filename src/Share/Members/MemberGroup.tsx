@@ -1,17 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
-import { bedDataInterface } from "../../app/interfaces";
+import { useWrapRTKQuery } from "../../app/customHooks";
+import { bedDataInterface, membersInterface } from "../../app/interfaces";
 
 const MemberGroup: React.FC = function() {
     const { bedid } = useParams();
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject?.bed as bedDataInterface;
-    const existingMembers = bed?.members;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingMembers = bed?.members as membersInterface[];
 
     // rather than storing the entire role interface/object in member details, only the role id is stored. although the role title must then be pulled from the list of bed roles in order to be displayed, the limited redundancy means that any future changes to the role (e.g., title edits, deletion) are automatically reflected among the members
     function findRoleTitle(roleId: string) {

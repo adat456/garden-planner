@@ -1,24 +1,17 @@
 import { useEffect } from "react";
-import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 import { io } from "socket.io-client";
-import { useDispatch } from "react-redux";
-import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery, util } from "../app/apiSlice";
+import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery } from "../app/apiSlice";
+import { useWrapRTKQuery } from "../app/customHooks";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";
-import { isJWTInvalid } from "../app/helpers";
 
 const LoggedInWrapper: React.FC = function() {
-    const { data: userResult, error } = useGetUserQuery(undefined);
-    const user = userResult as userInterface;
-    const { refetch: refetchNotifications } = useGetNotificationsQuery(undefined);
-    const { refetch: refetchBeds } = useGetBedsQuery(undefined);
-    
-    const navigate = useNavigate();
-    useEffect(() => {
-        console.log(error?.data);
-        if (!user && isJWTInvalid(error?.data)) navigate("/sign-in");
-    }, [error]);
+    const { data: userData } = useWrapRTKQuery(useGetUserQuery);
+    const user = userData as userInterface;
+    const { refetch: refetchNotifications } = useWrapRTKQuery(useGetNotificationsQuery);
+    const { refetch: refetchBeds } = useWrapRTKQuery(useGetBedsQuery);
 
     const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
     const socket = io(URL);
@@ -37,12 +30,17 @@ const LoggedInWrapper: React.FC = function() {
         };
     }, [socket]);
 
-    const dispatch = useDispatch();
     async function handleLogOut() {
         try {
-            dispatch(util.resetApiState());
+            const req = await fetch("http://localhost:3000/users/log-out", { credentials: "include" });
+            const res = await req.json();
+            if (req.ok) {
+                console.log(res);
+            } else {
+                throw new Error(res);
+            };
         } catch(err) {
-            console.error("Unable to clear API data: ", err.message)
+            console.error("Unable to invalidate JWT: ", err.message)
         };
     };
 

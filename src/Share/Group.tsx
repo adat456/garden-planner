@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { useGetBedsQuery, useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
 
 import Grid from "./Grid";
@@ -15,20 +16,15 @@ const BedSharingGroup: React.FC = function() {
     const [ memberStatus, setMemberStatus ] = useState("");
 
     const { bedid } = useParams();
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
-    const refetchBedData = bedObject.refetch;
-    const { data: userData } = useGetUserQuery(undefined);
+    const { data: bedObject, refetch: refetchBedData } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
-    const { data: notificationsData } = useGetNotificationsQuery(undefined);
+    const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = notificationsData as notificationInterface[];
 
-    const [ addNotification,  { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
-    const [ updateNotification, { isLoading: updateNotificationIsLoading } ] = useUpdateNotificationMutation();
+    const { mutation: addNotification,  isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
+    const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
 
     useEffect(() => {
         if (bed && user) {

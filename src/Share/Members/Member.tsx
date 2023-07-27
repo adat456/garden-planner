@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { bedDataInterface, membersInterface } from "../../app/interfaces";
 import { useUpdateMembersMutation, useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 
 interface memberInterface {
     member: membersInterface
@@ -13,15 +14,11 @@ const Member: React.FC<memberInterface> = function({ member }) {
 
     const { bedid } = useParams();
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
-    const existingMembers = bedObject.bed?.members as membersInterface[];
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingMembers = bed?.members as membersInterface[];
 
-    const [ updateMembers, { isLoading } ] = useUpdateMembersMutation();
+    const { mutation: updateMembers, isLoading } = useWrapRTKMutation(useUpdateMembersMutation);
 
     function findRoleTitle(id: string) {
         let roleTitle = null;

@@ -73,6 +73,7 @@ const roles = [
 ];
 
 import { useUpdateRolesMutation, useGetBedsQuery } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
 import { useParams } from "react-router-dom";
 import { rolesInterface } from "../../../app/interfaces";
 import { nanoid } from "@reduxjs/toolkit";
@@ -80,14 +81,11 @@ import { nanoid } from "@reduxjs/toolkit";
 const ExampleRoles: React.FC = function() {
     let { bedid } = useParams();
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const existingRoles = bedObject.bed?.roles as rolesInterface[];
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingRoles = bed?.roles;
 
-    const [ updateRoles, { isLoading }] = useUpdateRolesMutation();
+    const { mutation: updateRoles, isLoading } = useWrapRTKMutation(useUpdateRolesMutation);
 
     function generateExampleRoles() {
         const rolesArr = roles.map(role => (

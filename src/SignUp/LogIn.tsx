@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { validateCred, handleVisToggle } from "../app/helpers";
+import { util } from "../app/apiSlice";
 
 const LogIn: React.FC = function() {
     const [ username, setUsername ] = useState("");
@@ -9,6 +11,8 @@ const LogIn: React.FC = function() {
     const [ passwordErr, setPasswordErr ] = useState("");
 
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const input = e.target;
@@ -44,6 +48,17 @@ const LogIn: React.FC = function() {
             console.log(err);
         };
     };
+
+    useEffect(() => {
+        async function handleLogOut() {
+            try {
+                dispatch(util.resetApiState());
+            } catch(err) {
+                console.error("Unable to clear API data: ", err.message)
+            };
+        };
+        handleLogOut();
+    }, []);
 
     return (
         <form method="POST" className="login-form" onSubmit={handleSubmit} noValidate>

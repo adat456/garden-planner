@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetUserQuery, useGetBedsQuery } from "../app/apiSlice";
+import { useWrapRTKQuery } from "../app/customHooks";
 import { isJWTInvalid } from "../app/helpers";
 import { bedDataInterface, userInterface } from "../app/interfaces";
 
@@ -14,9 +15,9 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
 
     const navigate = useNavigate();
 
-    const { data } = useGetUserQuery(undefined);
+    const { data } = useWrapRTKQuery(useGetUserQuery);
     const user = data as userInterface;
-    const { refetch: refetchUsersBeds } = useGetBedsQuery(undefined);
+    const { refetch: refetchUsersBeds } = useWrapRTKQuery(useGetBedsQuery);
 
     function createBedGrid() {
         let bedInnards = [];
@@ -61,7 +62,11 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
                 throw new Error(res);
             };
         } catch(err) {
-            console.log(err.message);
+            if (isJWTInvalid(err.message)) {
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+            };
         };
     };
 
@@ -83,7 +88,11 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
                 throw new Error(res);
             };
         } catch(err) {
-            console.log(err.message);
+            if (isJWTInvalid(err.message)) {
+                navigate("/sign-in");
+            } else {
+                console.log(err.message);
+            };
         };
     };
 

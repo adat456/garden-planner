@@ -5,6 +5,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import { format, differenceInDays } from "date-fns";
 import { prepEventDateForDisplay, prepHyphenatedDateForDisplay } from "../../../app/helpers";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
 import { userInterface, eventInterface, bedDataInterface, membersInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
@@ -51,20 +52,16 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     
     const { bedid } = useParams();
 
-    const userResult = useGetUserQuery(undefined);
-    const user = userResult.data as userInterface;
-    const eventsResult = useGetEventsQuery(bedid);
-    const events = eventsResult?.data as eventInterface[];
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
+    const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
+    const user = userResult as userInterface;
+    const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery, bedid);
+    const events = eventsResult as eventInterface[];
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
 
-    const [ addEvent, { isLoading: addEventIsLoading } ] = useAddEventMutation();
-    const [ deleteEvent, { isLoading: deleteEventIsLoading } ] = useDeleteEventMutation();
-    const [ addNotification, { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
+    const { mutation: addEvent, isLoading: addEventIsLoading } = useWrapRTKMutation(useAddEventMutation);
+    const { mutation: deleteEvent, isLoading: deleteEventIsLoading } = useWrapRTKMutation(useDeleteEventMutation);
+    const { mutation: addNotification, isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
 
     // where interval is the number of days between repeating events, e.g., 7, 14, 28, and single refers to whether the event is a single or multi day affair
     function generateRepeatingDates(interval: number, repeatTillDate: Date, arr: Date[][], single: boolean) {
@@ -155,10 +152,13 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                     senderusername: user?.username,
                     recipientid: inviteeId,
                     message: `${user?.firstname} ${user?.lastname} with ${bed?.name} is hosting ${eventName} on ${eventDate}. Please RSVP by ${rsvpDate}.`,
-                    dispatched: format(new Date(), 'MM/dd/yyyy'),
+                    dispatched: new Date().toISOString().slice(0, 10),
                     type: "rsvpinvite",
                     bedid: bed?.id,
-                    eventid: eventId
+                    eventid: eventId,
+                    eventname: eventName,
+                    eventdate: eventDate,
+                    rsvpdate: rsvpDate,
                 });
             } catch(err) {
                 console.log(err.data);

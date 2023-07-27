@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { plantDataInterface } from "../../app/interfaces";
 import { useGetUserQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 
 interface PlantSortFilterInterface {
     finalSearchResults: plantDataInterface[] | string,
@@ -22,7 +23,7 @@ const PlantSortFilter: React.FC<PlantSortFilterInterface> = function({ finalSear
     // either ascending or descending
     const [ ascending, setAscending ] = useState(true);
 
-    const { data: user } = useGetUserQuery();
+    const { data: user } = useWrapRTKQuery(useGetUserQuery);
     const username = user?.username;
 
     function generateHardinessButtons() {

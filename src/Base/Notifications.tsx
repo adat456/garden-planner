@@ -1,13 +1,15 @@
+import { useEffect } from "react";
 import {  useGetNotificationsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
 import { notificationInterface } from "../app/interfaces";
+import { useWrapRTKQuery, useWrapRTKMutation } from "../app/customHooks";
 import SingleNotification from "./SingleNotification";
 
 const Notifications: React.FC = function() {
-    const { data } = useGetNotificationsQuery(undefined);
+    const { data } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = data as notificationInterface[];
 
-    const [ updateNotification, { isLoading: updateNotificationIsLoading } ]  = useUpdateNotificationMutation();
-    const [ deleteNotification, { isLoading: deleteNotificationIsLoading } ]  = useDeleteNotificationMutation();
+    const { mutation: updateNotification, isLoading: updateNotificationIsLoading }  = useWrapRTKMutation(useUpdateNotificationMutation);
+    const { mutation: deleteNotification, isLoading: deleteNotificationIsLoading } = useWrapRTKMutation(useDeleteNotificationMutation);
 
     const unreadNotifications: number = notifications?.reduce((sum, notification) => {
         if (!notification.read) {

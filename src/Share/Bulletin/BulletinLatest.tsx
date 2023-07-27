@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams} from "react-router-dom";
 import { useGetPostsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface } from "../../app/interfaces";
 import PostPreview from "./PostPreview";
 import AddEditPost from "./AddEditPost";
@@ -10,7 +11,7 @@ const BulletinLatest: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const { data } = useGetPostsQuery(bedid);
+    const { data } = useWrapRTKQuery(useGetPostsQuery, bedid);
     const posts = data as postInterface[];
 
     function generateLatestPosts() {

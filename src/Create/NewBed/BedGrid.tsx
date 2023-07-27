@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 import { bedDataInterface } from "../../app/interfaces";
 
 interface BedGridInterface {
@@ -14,12 +15,8 @@ const BedGrid: React.FC<BedGridInterface> = function({length, width, whole}) {
     const [addPlot, setAddPlot] = useState(true);
 
     const { bedid } = useParams();
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
 
     // different classes for bed cells/plots: all should have .grid-cell; may also have .selected, .custom-walkway, or .vertical-walkway and/or .horizontal-walkway
 

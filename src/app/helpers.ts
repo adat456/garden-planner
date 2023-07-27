@@ -88,7 +88,11 @@ export function handleVisToggle(e) {
 }; 
 
 export function isJWTInvalid(data: string) {
-    if (data === "JWT blacklisted." || data === "JWT is invalid." || data === "No JWT found.") return true;
+    if (data === "JWT blacklisted." || data === "JWT is invalid." || data === "No JWT found.") {
+        return true;
+    } else {
+        return false;
+    };
 };
 
 /// DATETIME FORMATTING ///

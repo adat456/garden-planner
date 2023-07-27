@@ -4,6 +4,7 @@ import ExampleRoles from "./ExampleRoles";
 import AddedRole from "./AddedRole";
 import { rolesInterface } from "../../../app/interfaces";
 import { useGetBedsQuery } from "../../../app/apiSlice";
+import { useWrapRTKQuery } from "../../../app/customHooks";
 
 interface RoleGroupInterface {
     bedid: string | undefined,
@@ -14,12 +15,9 @@ const RoleGroup: React.FC<RoleGroupInterface> = function({ bedid }) {
     const [ exampleRolesVis, setExampleRolesVis ] = useState(false);
     const [ focusRole, setFocusRole ] = useState<rolesInterface | null>(null);
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const existingRoles = bedObject.bed?.roles as rolesInterface[];
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingRoles = bed?.roles;
 
     function generateExistingRoles() {
         let rolesArr;

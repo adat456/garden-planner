@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
 import Comment from "./Comment";
@@ -18,20 +19,16 @@ const Post: React.FC = function() {
     const contentRef = useRef<HTMLInputElement>(null);
     const addCommentFormRef = useRef<HTMLFormElement>(null);
 
-    const postObject = useGetPostsQuery(bedid, {
-        selectFromResult: ({ data }) => ({
-            post: data?.find(post => post?.id === postid)
-        }),
-    });
-    const post = postObject.post as postInterface;
-    const { data: userData } = useGetUserQuery(undefined);
+    const { data: postObject } = useWrapRTKQuery(useGetPostsQuery, bedid);
+    const post = postObject.find(post => post?.id === postid) as postInterface;
+    const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
-    const { data: commentsData, isLoading } = useGetCommentsQuery(post?.id);
+    const { data: commentsData, isLoading } = useWrapRTKQuery(useGetCommentsQuery, post?.id);
     const comments = commentsData as commentTreeInterface[];
 
-    const [ updatePost, { isLoading: updatePostIsLoading } ] = useUpdatePostMutation();
-    const [ updateReactions, { isLoading: updateReactionsIsLoading } ] = useUpdateReactionsMutation();
-    const [ addComment, { isLoading: addCommentIsLoading } ] = useAddCommentMutation();
+    const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
+    const { mutation: updateReactions, isLoading: updateReactionsIsLoading } = useWrapRTKMutation(useUpdateReactionsMutation);
+    const { mutation: addComment, isLoading: addCommentIsLoading } = useWrapRTKMutation(useAddCommentMutation);
 
     function generateComments() {
         let generatedComments = comments?.map(comment => (

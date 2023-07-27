@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
 import EventPreview from "./EventPreview";
@@ -18,18 +19,13 @@ const EventsPage: React.FC = function() {
     let { bedid } = useParams();
     const location = useLocation();
 
-    const userResult = useGetUserQuery(undefined);
-    const user = userResult.data as userInterface;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
+    const user = userResult as userInterface;
+    const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery);
+    const events = eventsResult as eventInterface[];
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
-
-    const eventsResult = useGetEventsQuery(bedid);
-    const events = eventsResult?.data as eventInterface[];
     const prelimEvents = useMemo(() => {
         const filteredEvents = events?.filter(event => {
             // will show event if you are the event creator or if the event is public

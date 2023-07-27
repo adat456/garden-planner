@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
 import { bedDataInterface, eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
@@ -12,18 +13,14 @@ const EventsGroup: React.FC = function() {
     const [ currentEvent, setCurrentEvent ] = useState<eventInterface | null>(null);
 
     const { bedid } = useParams();
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
 
-    const userResult = useGetUserQuery(undefined);
-    const user = userResult.data as userInterface;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
+    const user = userResult as userInterface;
+    const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery);
+    const events = eventsResult as eventInterface[];
 
-    const eventsResult = useGetEventsQuery(bedid);
-    const events = eventsResult?.data as eventInterface[];
     const sortedFilteredEvents = useMemo(() => {
         const filteredEvents = events?.filter(event => {
             // will show event if you are the event creator or if the event is public

@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { commentInterface, userInterface } from "../../app/interfaces";
 import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { validateRequiredInputLength } from "../../app/helpers";
 
 const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
@@ -19,12 +20,12 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     const addCommentInputRef = useRef<HTMLInputElement>(null);
     const addCommentFormRef = useRef<HTMLFormElement>(null);
 
-    const { data } = useGetUserQuery(undefined);
+    const { data } = useWrapRTKQuery(useGetUserQuery);
     const user = data as userInterface;
 
-    const [ addComment, { isLoading: addCommentIsLoading } ] = useAddCommentMutation();
-    const [ updateComment, { isLoading: updateCommentIsLoading } ]  = useUpdateCommentMutation();
-    const [ deleteComment, { isLoading: deleteCommentIsLoading } ]  = useDeleteCommentMutation();
+    const { mutation: addComment, isLoading: addCommentIsLoading } = useWrapRTKMutation(useAddCommentMutation);
+    const { mutation: updateComment, isLoading: updateCommentIsLoading } = useWrapRTKMutation(useUpdateCommentMutation);
+    const { mutation: deleteComment, isLoading: deleteCommentIsLoading } = useWrapRTKMutation(useDeleteCommentMutation);
 
     // opted against making this an rtk mutation in favor of manually sending PATCH requests
     async function handleUpdateReactions(type: string) {

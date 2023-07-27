@@ -1,15 +1,20 @@
-import { useGetUserQuery, useGetBedsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../app/apiSlice";
+import { useState, useEffect } from "react";
+import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../app/apiSlice";
 import { notificationInterface, userInterface } from "../app/interfaces";
 import { Link } from "react-router-dom";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 
 const SingleNotification: React.FC<{notification: notificationInterface}> = function({ notification }) {
-    const { data: userResult } = useGetUserQuery(undefined);
-    const user = userResult as userInterface;
-    const { refetch: refetchBedsData } = useGetBedsQuery(undefined);
+    // const [ currentBedIdForEvents, setCurrentBedIdForEvents ] = useState<number | string | undefined>(undefined);
 
-    const [ addNotification, { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
-    const [ updateNotification, { isLoading: updateNotificationIsLoading } ]  = useUpdateNotificationMutation();
-    const [ deleteNotification, { isLoading: deleteNotificationIsLoading } ]  = useDeleteNotificationMutation();
+    const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
+    const user = userResult as userInterface;
+    const { refetch: refetchBedsData } = useWrapRTKQuery(useGetBedsQuery);
+    // const { refetch: refetchEvents } = useGetEventsQuery(currentBedIdForEvents);
+
+    const { mutation: addNotification, isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
+    const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
+    const { mutation: deleteNotification, isLoading: deleteNotificationIsLoading } = useWrapRTKMutation(useDeleteNotificationMutation);
 
     function generateNotificationMessage() {
         // messages containing links to either the garden bed or the event (event link contains state so that event dialog can be opened up upon navigation)... clicking on this link will mark the notification as read (responded stays the same)
@@ -23,7 +28,7 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
             case "rsvpinvite":
                 return <p>{notification.sendername} has invited you to attend <Link to={`/share/${notification.bedid}/events`} state={{eventid: notification.eventid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>{notification.eventname}</Link> on {notification.eventdate}. Please RSVP by {notification.rsvpdate}.</p>;
             case "rsvpconfirmation":
-                return <p>${notification.sendername} has RSVP'd to your event, <Link to={`/share/${notification.bedid}/events`} state={{eventid: notification.eventid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>${notification.eventname}</Link>.</p>; 
+                return <p>{notification.sendername} has RSVP'd to your event, <Link to={`/share/${notification.bedid}/events`} state={{eventid: notification.eventid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>{notification.eventname}</Link>.</p>; 
         };
     };
 
@@ -95,6 +100,8 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
     async function handleSendRSVP() {
         if (!addNotificationIsLoading && !updateNotificationIsLoading) {
             try {
+                setCurrentBedIdForEvents(notification.bedid);
+
                 await addNotification({
                     senderid: user.id,
                     sendername: `${user.firstname} ${user.lastname}`,
@@ -107,11 +114,17 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
                     eventname: notification.eventname,
                 }).unwrap();
                 await handleReadnRespondStatus(notification.id, true, "confirmation");
+
+                refetchEvents();
             } catch(err) {
                 if (err.message) console.error(err.message);
             };
         };
     };
+
+    // useEffect(() => {
+    //     if (currentBedIdForEvents) refetchEvents();
+    // }, [currentBedIdForEvents]);
 
     return (
         <li key={notification.id}>

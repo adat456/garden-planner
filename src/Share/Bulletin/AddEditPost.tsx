@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation } from "../../app/customHooks";
 import { postInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
 
@@ -24,9 +25,9 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
 
     const navigate = useNavigate();
     const { bedid } = useParams();
-    const [ addPost, { isLoading: addPostIsLoading } ] = useAddPostMutation();
-    const [ updatePost, { isLoading: updatePostIsLoading } ] = useUpdatePostMutation();
-    const [ deletePost, { isLoading: deletePostIsLoading } ] = useDeletePostMutation();
+    const { mutation: addPost, isLoading: addPostIsLoading } = useWrapRTKMutation(useAddPostMutation);
+    const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
+    const { mutation: deletePost, isLoading: deletePostIsLoading } = useWrapRTKMutation(useDeletePostMutation);
 
     async function handleAddNewPost(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();

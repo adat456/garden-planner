@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { rolesInterface } from "../../../app/interfaces";
+import { rolesInterface, bedDataInterface } from "../../../app/interfaces";
 import { useGetBedsQuery, useUpdateRolesMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
 import * as React from "react";
 
 interface addedRoleInterface {
@@ -13,14 +14,11 @@ interface addedRoleInterface {
 const AddedRole: React.FC<addedRoleInterface> = function({ role, bedid, setAddEditRoleVis, setFocusRole }) {
     const [ dutiesVis, setDutiesVis ] = useState(false);
 
-    const [ updateRoles, { isLoading} ] = useUpdateRolesMutation();
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingRoles = bed?.roles;
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const existingRoles = bedObject.bed?.roles as rolesInterface[];
+    const { mutation: updateRoles, isLoading } = useWrapRTKMutation(useUpdateRolesMutation);
 
     function handleEditRole() {
         setFocusRole(role);

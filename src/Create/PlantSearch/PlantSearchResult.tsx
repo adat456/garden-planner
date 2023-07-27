@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation } from "../../app/customHooks";
 import { plantDataInterface, plantPickDataInterface } from "../../app/interfaces";
 import randomColor from "random-color";
 
@@ -12,7 +13,7 @@ interface plantSearchResultsInterface {
 const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ bedid, result, plantPicks }) {
     const [ expanded, setExpanded ] = useState(false);
 
-    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
+    const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function addPlantPick() {
         if (!isLoading) {

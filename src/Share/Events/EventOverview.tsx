@@ -1,5 +1,7 @@
+import { useParams } from "react-router-dom";
 import { eventInterface, notificationInterface, userInterface } from "../../app/interfaces";
-import { useGetUserQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetEventsQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { prepEventDateForDisplay, convert24to12, prepHyphenatedDateForDisplay} from "../../app/helpers";
 
 interface eventOverviewInterface {
@@ -10,13 +12,17 @@ interface eventOverviewInterface {
 };
 
 const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
-    const [ deleteEvent, { isLoading: deleteEventIsLoading } ] = useDeleteEventMutation();
-    const { data: userData } = useGetUserQuery(undefined);
+    const { bedid } = useParams();
+
+    const { refetch: refetchThisBedsEvents } = useWrapRTKQuery(useGetEventsQuery, bedid);
+    const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
-    const { data: notificationsData } = useGetNotificationsQuery(undefined);
+    const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = notificationsData as notificationInterface[];
-    const [ addNotification,  { isLoading: addNotificationIsLoading } ] = useAddNotificationMutation();
-    const [ updateNotification, { isLoading: updateNotificationIsLoading } ] = useUpdateNotificationMutation();
+
+    const { mutation: deleteEvent, isLoading: deleteEventIsLoading } = useWrapRTKMutation(useDeleteEventMutation);
+    const { mutation: addNotification,  isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
+    const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
 
 
     let participantStatement;
@@ -70,10 +76,6 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
     };
 
     async function handleRSVP() {
-        if (currentEvent?.rsvpsreceived.includes(user?.id)) {
-            console.log("You've already RSVP'd.");
-            return;
-        };
         try {
             if (!updateNotificationIsLoading && !addNotificationIsLoading) {
                 // first send an rsvp'd notification to the event creator
@@ -82,10 +84,11 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                     sendername: `${user.firstname} ${user.lastname}`,
                     senderusername: user.username,
                     recipientid: currentEvent?.creatorid,
-                    message: `${user.firstname} ${user.lastname} has RSVP'd to ${currentEvent?.eventname}.`,
                     dispatched: new Date().toISOString().slice(0, 10),
                     type: "rsvpconfirmation",
-                    eventid: currentEvent?.id
+                    bedid: bedid,
+                    eventid: currentEvent?.id,
+                    eventname: currentEvent?.eventname,
                 }).unwrap();
     
                 // then, if the user did receive an rsvpinvite notification for this event, mark that as read and responded
@@ -97,9 +100,11 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                     await updateNotification({ 
                         notifid: matchingNotif?.id, 
                         read: true, 
-                        responded: true 
+                        responded: "confirmation" 
                     }).unwrap();
                 };
+
+                refetchThisBedsEvents();
             };
         } catch(err) {
             console.error("Unable to RSVP to event: ", err.data);
@@ -122,8 +127,14 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             }
             {currentEvent?.rsvpneeded ?
                 <>
-                    <p>{`Please RSVP by ${prepHyphenatedDateForDisplay(currentEvent?.rsvpdate)}.`}</p>
-                    <button type="button" onClick={handleRSVP}>RSVP</button>
+                    <p>{`Please RSVP by ${prepHyphenatedDateForDisplay(currentEvent?.rsvpdate)}.`}</p> 
+                    {currentEvent?.rsvpsreceived.includes(user?.id) ? 
+                        <>
+                            <p>You've RSVP'd.</p>
+                            <button type="button" disabled>RSVP</button>
+                        </> : 
+                        <button type="button" onClick={handleRSVP}>RSVP</button>
+                    }
                 </>
                 : null
             }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGetUserQuery, useGetBedsQuery, useUpdateMembersMutation, useAddNotificationMutation } from "../../app/apiSlice";
-import { bedDataInterface, userInterface } from "../../app/interfaces";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { bedDataInterface, userInterface, membersInterface } from "../../app/interfaces";
 
 interface initialResultInterface {
     id: string,
@@ -14,19 +15,15 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
     const [ searchResults, setSearchResults ] = useState<initialResultInterface[]>([]);
     const [ numExtra, setNumExtra ] = useState(0);
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
-    const existingMembers = bed?.members;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const existingMembers = bed?.members as membersInterface[];
 
-    const userObject = useGetUserQuery(undefined);
-    const user = userObject.data as userInterface;
+    const { data: userObject } = useWrapRTKQuery(useGetUserQuery);
+    const user = userObject as userInterface;
 
-    const [ updateMembers, { isLoading: membersIsLoading } ] = useUpdateMembersMutation();
-    const [ addNotification, { isLoading: notificationIsLoading } ] = useAddNotificationMutation();
+    const { mutation: updateMembers, isLoading: membersIsLoading } = useWrapRTKMutation(useUpdateMembersMutation);
+    const { mutation: addNotification, isLoading: notificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
 
     async function handleSearchMemberChange(e: React.FormEvent<HTMLInputElement>) {
         const input = e.target as HTMLInputElement;
@@ -81,7 +78,7 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
                                 username: member.username,
                                 name: `${member.firstname} ${member.lastname}`,
                                 role: undefined,
-                                invitedate: new Date().toString(),
+                                invitedate: new Date().toISOString().slice(0, 10),
                                 status: "pending",
                                 finaldate: undefined
                             }

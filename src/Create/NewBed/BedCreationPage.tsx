@@ -2,18 +2,21 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { bedDataInterface, gridMapInterface } from "../../app/interfaces";
 import { useGetBedsQuery, useCreateBedMutation, useUpdateBedMutation, useDeleteBedMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 import * as React from "react";
 
 const BedCreationPage: React.FC = function() {
     const { bedid } = useParams();
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
+    // const bedObject = useGetBedsQuery(undefined, {
+    //     selectFromResult: ({ data }) => ({
+    //         bed: data?.find(bed => bed.id === Number(bedid))
+    //     }),
+    // });
+    // const bed = bedObject.bed as bedDataInterface;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
 
     const [name, setName] = useState(bed?.name || "");
     const [length, setLength] = useState(bed?.length || 10);
@@ -25,9 +28,9 @@ const BedCreationPage: React.FC = function() {
     const [soil, setSoil] = useState<string[]>(bed?.soil || []);
     const [publicBoard, setPublicBoard] = useState(bed?.public || false);
 
-    const  [createBed,  { isLoading: createBedIsLoading }] = useCreateBedMutation();
-    const [ updateBed, { isLoading: updateBedIsLoading } ] = useUpdateBedMutation();
-    const [ deleteBed, { isLoading: deleteBedIsLoading } ] = useDeleteBedMutation();
+    const  { mutation: createBed, isLoading: createBedIsLoading } = useWrapRTKMutation(useCreateBedMutation);
+    const { mutation: updateBed, isLoading: updateBedIsLoading } = useWrapRTKMutation(useUpdateBedMutation);
+    const { mutation: deleteBed, isLoading: deleteBedIsLoading } = useWrapRTKMutation(useDeleteBedMutation);
     const navigate = useNavigate();
 
     function generateGridmap() {
@@ -81,13 +84,13 @@ const BedCreationPage: React.FC = function() {
                 await createBed({
                     name, whole, length, width, soil, sunlight, gridmap,
                     public: publicBoard,
-                    created: new Date(), 
+                    created: new Date().toISOString().slice(0, 10), 
                     hardiness: hardiness[1]
                 }).unwrap();
+
+                navigate("/create");
             } catch(err) {
                 console.error("Unable to add bed: ", err.message);
-            } finally {
-                navigate("/create");
             };
         };
     };
@@ -107,10 +110,10 @@ const BedCreationPage: React.FC = function() {
                         hardiness: hardiness[1]
                     }
                 }).unwrap();
+
+                navigate(`/create/${bedid}`);
             } catch(err) {
                 console.error("Unable to update bed: ", err.message);
-            } finally {
-                navigate(`/create/${bedid}`);
             };
         };
     };
@@ -119,10 +122,10 @@ const BedCreationPage: React.FC = function() {
         if (!deleteBedIsLoading) {
             try {
                 await deleteBed(bedid).unwrap();
+
+                navigate("/create");
             } catch(err) {
                 console.error("Unable to delete bed: ", err.message);
-            } finally {
-                navigate("/create");
             };
         };
     };

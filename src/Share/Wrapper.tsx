@@ -1,10 +1,11 @@
 import { Outlet, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../app/apiSlice";
+import { useWrapRTKQuery } from "../app/customHooks";
 import { bedDataInterface } from "../app/interfaces";
 
 const BedSharingPage: React.FC = function() {
-    const bedsResult = useGetBedsQuery();
-    const beds = bedsResult.data as bedDataInterface[];
+    const { data, isLoading, isSuccess, isError } = useWrapRTKQuery(useGetBedsQuery);
+    const beds = data as bedDataInterface[];
 
     let links;
 
@@ -13,11 +14,11 @@ const BedSharingPage: React.FC = function() {
         return bedIdLinks;
     };
 
-    if (bedsResult.isLoading) {
+    if (isLoading) {
         links = <p>Loading links...</p>;
-    } else if (bedsResult.isSuccess) {
+    } else if (isSuccess) {
         links = generateBedLinks();
-    } else if (bedsResult.isError) {
+    } else if (isError) {
         links = <p>Unable to retrieve bed links.</p>
     };
 

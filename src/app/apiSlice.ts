@@ -54,7 +54,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/update-gridmap/${data.bedid}`,
                 method: "PATCH",
-                body: data.gridmap
+                body: {gridmap: data.gridmap}
             }),
             invalidatesTags: [ "beds" ]
         }),
@@ -62,7 +62,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/update-roles/${data.bedid}`,
                 method: "PATCH",
-                body: data.roles
+                body: {roles: data.roles}
             }),
             invalidatesTags: [ "beds" ]
         }),
@@ -70,7 +70,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/update-members/${data.bedid}`,
                 method: "PATCH",
-                body: data.members
+                body: {members: data.members}
             }),
             invalidatesTags: [ "beds" ]
         }),

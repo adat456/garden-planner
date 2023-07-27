@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation } from "../../app/customHooks";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "../../Base/PaginationButtons";
@@ -29,7 +30,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
 
     const navigate = useNavigate();
 
-    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
+    const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;

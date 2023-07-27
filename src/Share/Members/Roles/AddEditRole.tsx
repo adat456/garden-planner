@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { useGetBedsQuery, useUpdateRolesMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
 import { bedDataInterface, rolesInterface } from "../../../app/interfaces";
 import { validateRequiredInputLength } from "../../../app/helpers";
 import Duty from "./DutyInput";
@@ -33,15 +34,11 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
     const titleInputRef = useRef<HTMLInputElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
-    const bedObject = useGetBedsQuery(undefined, {
-        selectFromResult: ({ data }) => ({
-            bed: data?.find(bed => bed.id === Number(bedid))
-        }),
-    });
-    const bed = bedObject.bed as bedDataInterface;
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const existingRoles = bed?.roles;
 
-    const [ updateRoles, { isLoading }] = useUpdateRolesMutation();
+    const { mutation: updateRoles, isLoading } = useWrapRTKMutation(useUpdateRolesMutation);
 
     function generateDutiesInputs() {
         const dutiesInputs = duties.map(duty => (
@@ -103,7 +100,6 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
                     bedid 
                 }).unwrap();
 
-                setSubmitStatus(false);
                 handleCloseForm();
             } catch(err) {
                 console.error("Unable to edit role: ", err.data);
@@ -112,10 +108,10 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
         };
     };
 
-    function displayExpressValidatorErrMsgs(errorArr: {field: string, msg: string}[]) {
+    function displayExpressValidatorErrMsgs(errorArr: {field: string, msg: string, value: string}[]) {
         let serverDutiesErrMsgArr: string[] = [];
         errorArr.forEach(error => {
-            if (error.field === "[0].title") {
+            if (error.value === title) {
                 setTitleErrMsg(error.msg);
                 titleInputRef.current?.setCustomValidity(error.msg);
             };
@@ -157,7 +153,7 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
                         </div>
                         : null
                     }
-                    <input type="text" id="title" ref={titleInputRef} maxLength={25} onChange={(e) => {setTitle(e.target.value.trim()); validateRequiredInputLength(titleInputRef?.current, 25, setTitleErrMsg);}} required />
+                    <input type="text" id="title" ref={titleInputRef} maxLength={25} defaultValue={title} onChange={(e) => {setTitle(e.target.value.trim()); validateRequiredInputLength(titleInputRef?.current, 25, setTitleErrMsg);}} required />
                 </div>
                 <fieldset>
                     <legend>Duties</legend>

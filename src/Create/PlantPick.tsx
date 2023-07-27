@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SliderPicker } from "react-color";
 import { useUpdateSeedBasketMutation } from "../app/apiSlice";
+import { useWrapRTKMutation } from "../app/customHooks";
 import { plantPickDataInterface, colorObjInterface } from "../app/interfaces";
 
 interface plantPickInterface {
@@ -14,7 +15,7 @@ interface plantPickInterface {
 const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPicks, setCurPlantPick, abbreviated }) {
     const [ colorSliderVis, setColorSliderVis ] = useState(false);
     
-    const [ updateSeedBasket, { isLoading }] = useUpdateSeedBasketMutation();
+    const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function changePlantPickColor(color: colorObjInterface) {
         if (!isLoading) {
