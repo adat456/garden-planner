@@ -154,6 +154,13 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "posts" ]
         }),
+        updateSubscribers: builder.mutation({
+            query: data => ({
+                url: `/update-subscribers/${data.postid}/${data.userid}`,
+                method: "PATCH"
+            }),
+            invalidatesTags: [ "posts" ],
+        }),
         deletePost: builder.mutation({
             query: data => ({
                 url: `/delete-post/${data}`,
@@ -224,6 +231,7 @@ export const {
     useGetPostsQuery,
     useAddPostMutation,
     useUpdatePostMutation,
+    useUpdateSubscribersMutation,
     useDeletePostMutation,
     useUpdateReactionsMutation,
 

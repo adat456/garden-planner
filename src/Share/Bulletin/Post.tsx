@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
+import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateSubscribersMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
@@ -20,21 +20,24 @@ const Post: React.FC = function() {
     const addCommentFormRef = useRef<HTMLFormElement>(null);
 
     const { data: postObject } = useWrapRTKQuery(useGetPostsQuery, bedid);
-    const post = postObject.find(post => post?.id === postid) as postInterface;
+    const post = postObject?.find(post => post?.id === postid) as postInterface;
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
     const { data: commentsData, isLoading } = useWrapRTKQuery(useGetCommentsQuery, post?.id);
     const comments = commentsData as commentTreeInterface[];
 
     const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
+    const { mutation: updateSubscribers, isLoading: updateSubscribersIsLoading } = useWrapRTKMutation(useUpdateSubscribersMutation);
     const { mutation: updateReactions, isLoading: updateReactionsIsLoading } = useWrapRTKMutation(useUpdateReactionsMutation);
     const { mutation: addComment, isLoading: addCommentIsLoading } = useWrapRTKMutation(useAddCommentMutation);
+
+    const location = useLocation();
 
     function generateComments() {
         let generatedComments = comments?.map(comment => (
             <div key={comment.id}>
                 <p>{`Level ${comment.level}`}</p>
-                <Comment key={comment.id} comment={comment} />
+                <Comment key={comment.id} comment={comment} toppostid={post?.id} />
                 <hr />
             </div>
         ));
@@ -58,6 +61,19 @@ const Post: React.FC = function() {
         };
     };
 
+    async function handleSubscribe() {
+        if (!updateSubscribersIsLoading) {
+            try {
+                await updateSubscribers({
+                    postid,
+                    userid: user?.id
+                }).unwrap();
+            } catch(err) {
+                console.error("Unable to update subscribers: ", err.message);
+            };
+        };
+    };
+
     async function postComment(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -68,7 +84,7 @@ const Post: React.FC = function() {
             try {
                 await addComment({
                     postid: post.id,
-                    comment: { content, id: nanoid() }
+                    comment: { content, id: nanoid(), toppostid: postid },
                 }).unwrap();
 
                 setContent("");
@@ -134,6 +150,15 @@ const Post: React.FC = function() {
     };
 
     useEffect(() => {
+        if (location.state && post) {
+            const commentid = location.state.commentid;
+            const matchingComment = document.getElementById(`comment-${commentid}`) as HTMLDivElement;
+            console.log(matchingComment);
+            matchingComment?.scrollIntoView({behavior: "smooth"});
+        };
+    }), [post];
+
+    useEffect(() => {
         if (addEditPostVis) {
             const addEditPost: HTMLDialogElement | null = document.querySelector(".add-edit-post-form");
             addEditPost?.showModal();
@@ -144,6 +169,7 @@ const Post: React.FC = function() {
         <>
             <div>
                 <Link to={`/share/${bedid}/bulletin`}>Return to bulletin</Link>
+                <button type="button" onClick={handleSubscribe}>{post?.subscribers?.includes(user?.id) ? "Unsubscribe to this thread" : "Subscribe to this thread"}</button>
                 <h1>{post?.title}</h1>
                 {user?.id === post?.authorid ?
                     <>

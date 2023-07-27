@@ -29,6 +29,8 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
                 return <p>{notification.sendername} has invited you to attend <Link to={`/share/${notification.bedid}/events`} state={{eventid: notification.eventid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>{notification.eventname}</Link> on {notification.eventdate}. Please RSVP by {notification.rsvpdate}.</p>;
             case "rsvpconfirmation":
                 return <p>{notification.sendername} has RSVP'd to your event, <Link to={`/share/${notification.bedid}/events`} state={{eventid: notification.eventid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>{notification.eventname}</Link>.</p>; 
+            case "postupdate": 
+                return <p>{notification.sendername} has posted on the thread, <Link to={`/share/${notification.bedid}/bulletin/${notification.postid}`} state={{commentid: notification.commentid}} onClick={() => handleReadnRespondStatus(notification.id, true, notification.responded)}>{notification.posttitle}</Link>.</p>;
         };
     };
 

@@ -5,7 +5,7 @@ import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, use
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { validateRequiredInputLength } from "../../app/helpers";
 
-const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
+const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function({ comment, toppostid }) {
     const [ likes, setLikes ] = useState(comment.likes);
     const [ dislikes, setDislikes ] = useState(comment.dislikes);
     const [ updateCommentVis, setUpdateCommentVis ] = useState(false);
@@ -61,7 +61,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                     updatedDislikes = [...dislikes, user.id]
                 };
 
-                const reqOptions: RequestInist = {
+                const reqOptions: RequestInit = {
                     method: "PATCH",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ dislikes: updatedDislikes }),
@@ -117,7 +117,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
             try {
                 await addComment({
                     postid: comment.id,
-                    comment: { content: addCommentContent, id: nanoid() }
+                    comment: { content: addCommentContent, id: nanoid(), toppostid }
                 }).unwrap();
 
                 setAddCommentContent("");
@@ -143,7 +143,7 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
     };
 
     return (
-        <div>
+        <div id={`comment-${comment.id}`}>
             {user?.id === comment.authorid ?
                 <button type="button" onClick={() => setUpdateCommentVis(!updateCommentVis)}>Edit comment</button> : 
                 null
@@ -154,9 +154,9 @@ const Comment: React.FC<{comment: commentInterface}> = function({ comment }) {
                     <p>{comment.content}</p>
                     <p>{`Posted on ${comment.posted.toString().slice(0, 10)} by ${comment.authorname}`}</p>
                     <div>
-                        <button type="button" onClick={() => handleUpdateReactions("like")}>{likes.includes(user.id) ? "Unlike this comment" : "Like this comment"}</button>
+                        <button type="button" onClick={() => handleUpdateReactions("like")}>{likes.includes(user?.id) ? "Unlike this comment" : "Like this comment"}</button>
                         <p>{likes.length}</p>
-                        <button type="button" onClick={() => handleUpdateReactions("dislike")}>{dislikes.includes(user.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
+                        <button type="button" onClick={() => handleUpdateReactions("dislike")}>{dislikes.includes(user?.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
                         <p>{dislikes.length}</p>
                     </div>
                     <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>

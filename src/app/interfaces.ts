@@ -107,6 +107,9 @@ export interface notificationInterface {
     eventname?: string,
     eventdate?: Date[],
     rsvpdate?: Date,
+    posttitle?: string,
+    postid?: string,
+    commentid?: string,
 };
 
 export interface eventParticipantInterface {
@@ -153,10 +156,12 @@ export interface postInterface {
     likes: number[],
     dislikes: number[],
     pinned: boolean,
+    subscribers: number[]
 };
 
 export interface commentInterface {
     id: string,
+    toppostid: string,
     postid: string,
     responseorder: number[],
     authorid: number,

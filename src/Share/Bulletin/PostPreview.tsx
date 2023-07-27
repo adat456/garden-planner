@@ -84,9 +84,9 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
             <p>{`Posted on ${post.posted.toString().slice(0, 10)} by ${post.authorname}`}</p>
             <p>{`${post.content.slice(0, 150)}${post.content.length > 150 ? "..." : ""}`}</p>
             <div>
-                <button type="button" onClick={() => updateReaction("like")}>{post.likes.includes(user.id) ? "Unlike this post" : "Like this post"}</button>
+                <button type="button" onClick={() => updateReaction("like")}>{post?.likes.includes(user?.id) ? "Unlike this post" : "Like this post"}</button>
                 <p>{post.likes.length}</p>
-                <button type="button" onClick={() => updateReaction("dislike")}>{post.dislikes.includes(user.id) ? "Un-dislike this post" : "Dislike this post"}</button>
+                <button type="button" onClick={() => updateReaction("dislike")}>{post?.dislikes.includes(user?.id) ? "Un-dislike this post" : "Dislike this post"}</button>
                 <p>{post.dislikes.length}</p>
             </div>
             <Link to={`/share/${bedid}/bulletin/${post.id}`}>See entire post</Link>
