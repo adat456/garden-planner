@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../app/apiSlice";
 import { notificationInterface, userInterface } from "../app/interfaces";
 import { Link } from "react-router-dom";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
+import { useWrapRTKMutation, useWrapRTKQuery, useDynamicEventsQuery } from "../app/customHooks";
 
 const SingleNotification: React.FC<{notification: notificationInterface}> = function({ notification }) {
-    // const [ currentBedIdForEvents, setCurrentBedIdForEvents ] = useState<number | string | undefined>(undefined);
+    const setBedIdForEvents = useDynamicEventsQuery();
 
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
     const { refetch: refetchBedsData } = useWrapRTKQuery(useGetBedsQuery);
-    // const { refetch: refetchEvents } = useGetEventsQuery(currentBedIdForEvents);
 
     const { mutation: addNotification, isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
     const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
@@ -102,8 +101,6 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
     async function handleSendRSVP() {
         if (!addNotificationIsLoading && !updateNotificationIsLoading) {
             try {
-                setCurrentBedIdForEvents(notification.bedid);
-
                 await addNotification({
                     senderid: user.id,
                     sendername: `${user.firstname} ${user.lastname}`,
@@ -117,16 +114,12 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
                 }).unwrap();
                 await handleReadnRespondStatus(notification.id, true, "confirmation");
 
-                refetchEvents();
+                setBedIdForEvents(notification?.bedid);
             } catch(err) {
                 if (err.message) console.error(err.message);
             };
         };
     };
-
-    // useEffect(() => {
-    //     if (currentBedIdForEvents) refetchEvents();
-    // }, [currentBedIdForEvents]);
 
     return (
         <li key={notification.id}>

@@ -13,6 +13,7 @@ import MembersPage from "./Share/Members/MembersPage";
 import ProfilePage from "./Profile/ProfilePage";
 import Bulletin from "./Share/Bulletin/Bulletin";
 import Post from "./Share/Bulletin/Post";
+import PermissionsPage from "./Share/Members/Permissions/PermPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path=":bedid" element={<BedSharingGroup />} />
               <Route path=":bedid/events" element={<EventsPage />} />
               <Route path=":bedid/members" element={<MembersPage />} />
+              <Route path=":bedid/members/permissions" element={<PermissionsPage />} />
               <Route path=":bedid/bulletin" element={<Bulletin />} />
               <Route path=":bedid/bulletin/:postid" element={<Post />} />
             </Route>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetBedsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";
-import { membersInterface } from "../../app/interfaces";
+import { membersInterface, bedDataInterface } from "../../app/interfaces";
 import Member from "./Member";
 import UserSearch from "./UserSearch";
 import RoleGroup from "./Roles/RoleGroup";
@@ -35,6 +35,7 @@ const MembersPage: React.FC = function() {
     return (
         <section>
             <Link to={`/share/${bedid}`}>Return to bed overview</Link>
+            <Link to={`/share/${bedid}/members/permissions`}>Manage permissions</Link>
             <h2>Members</h2>
             <section>
                 <h3>Current</h3>

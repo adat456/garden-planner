@@ -28,6 +28,8 @@ const BedCreationPage: React.FC = function() {
     const [soil, setSoil] = useState<string[]>(bed?.soil || []);
     const [publicBoard, setPublicBoard] = useState(bed?.public || false);
 
+    const [ nameErrMsg, setNameErrMsg ] = useState("");
+
     const  { mutation: createBed, isLoading: createBedIsLoading } = useWrapRTKMutation(useCreateBedMutation);
     const { mutation: updateBed, isLoading: updateBedIsLoading } = useWrapRTKMutation(useUpdateBedMutation);
     const { mutation: deleteBed, isLoading: deleteBedIsLoading } = useWrapRTKMutation(useDeleteBedMutation);
@@ -36,29 +38,6 @@ const BedCreationPage: React.FC = function() {
     function generateGridmap() {
         const allCells = [...document.querySelectorAll(".grid-cell")];
         let gridmap: gridMapInterface[] = [];
-        // if (whole) {
-        //     gridmap = allCells.map(cell => {
-        //         const cellDesc: gridMapInterface = {
-        //             num: cell.getAttribute("id")?.slice(5),
-        //             selected: (!cell.classList.contains("vertical-walkway") && !cell.classList.contains("horizontal-walkway")),
-        //             walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
-        //             plantId: 0,
-        //             plantName: "",
-        //         };
-        //         return cellDesc;
-        //     });
-        // } else if (!whole) {
-            // gridmap = allCells.map(cell => {
-            //     const cellDesc: gridMapInterface = {
-            //         num: cell.getAttribute("id")?.slice(5),
-            //         selected: cell.classList.contains("selected"),
-            //         walkway: (cell.classList.contains("vertical-walkway") || cell.classList.contains("horizontal-walkway") || cell.classList.contains("custom-walkway")),
-            //         plantId: 0,
-            //         plantName: "",
-            //     };
-            //     return cellDesc;
-            // });
-        // };
         gridmap = allCells.map(cell => {
             const cellDesc: gridMapInterface = {
                 num: cell.getAttribute("id")?.slice(5),
@@ -90,7 +69,8 @@ const BedCreationPage: React.FC = function() {
 
                 navigate("/create");
             } catch(err) {
-                console.error("Unable to add bed: ", err.message);
+                console.error("Unable to add bed: ", err.data);
+                if (err.data) setNameErrMsg(err.data[0].msg);
             };
         };
     };

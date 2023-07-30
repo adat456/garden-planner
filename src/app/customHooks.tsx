@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGetEventsQuery } from "./apiSlice";
 import { isJWTInvalid } from "./helpers";
 
 // returns a function that takes in an error object and redirects to /sign-in if error message indicates JWT is invalid
@@ -39,3 +40,15 @@ export function useWrapRTKMutation(useMutation, arg = undefined) {
 
     return { mutation, isLoading, refetch, error };
 };
+
+export function useDynamicEventsQuery() {
+    const [ bedIdForEvents, setBedIdForEvents ] = useState<number | undefined>(undefined);
+    
+    const skip = bedIdForEvents ? false : true;
+    const { data } = useGetEventsQuery(bedIdForEvents, { 
+        skip
+    });
+    console.log(data, bedIdForEvents, "events data refetched");
+
+    return setBedIdForEvents;
+}; 

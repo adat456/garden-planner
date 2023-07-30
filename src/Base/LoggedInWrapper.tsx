@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery } from "../app/apiSlice";
-import { useWrapRTKQuery } from "../app/customHooks";
+import { useWrapRTKQuery, useDynamicEventsQuery } from "../app/customHooks";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";
@@ -13,17 +13,23 @@ const LoggedInWrapper: React.FC = function() {
     const { refetch: refetchNotifications } = useWrapRTKQuery(useGetNotificationsQuery);
     const { refetch: refetchBeds } = useWrapRTKQuery(useGetBedsQuery);
 
+    const setBedIdForEvents = useDynamicEventsQuery();
+
     const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
     const socket = io(URL);
     useEffect(() => {
         socket.on("hello", (arg) => console.log(arg));
 
         // may not need arg
-        async function updateAll(arg: string) {
+        async function updateAll(type?: string, id?: string) {
             refetchNotifications();
             refetchBeds();
+            if (type === "rsvpinvite" || type === "rsvpconfirmation") {
+                setBedIdForEvents(Number(id));
+                console.log("events refetch triggered");
+            };
         };
-        socket.on(`notifications-${user?.id}`, arg => updateAll(arg));
+        socket.on(`notifications-${user?.id}`, (type, id) => updateAll(type, id));
         
         return () => {
             socket.off(`notifications-${user?.id}`, updateAll)

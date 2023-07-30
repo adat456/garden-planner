@@ -10,6 +10,25 @@ export interface gridMapInterface {
     gridColor: string
 };
 
+export interface permissionsInterface {
+    bedid: number,
+    creatorid: number,
+    fullpermissionsmemberids: number[],
+    fullpermissionsroleids: number[],
+    memberspermissionmemberids: number[],
+    memberspermissionroleids: number[],
+    rolespermissionmemberids: number[],
+    rolespermissionroleids: number[],
+    eventspermissionmemberids: number[],
+    eventspermissionroleids: number[],
+    tagspermissionmemberids: number[],
+    tagspermissionroleids: number[],
+    postspermissionmemberids: number[],
+    postspermissionroleids: number[],
+    postinteractionspermissionmemberids: number[],
+    postinteractionspermissionroleids: number[],
+};
+
 // the only interface with a string for an id
 export interface rolesInterface {
     id: string,
@@ -100,7 +119,7 @@ export interface notificationInterface {
     read: boolean,
     // "" empty string for has not responded/pending (false), "confirmation" or "rejection" for responded (true)
     responded: "" | "confirmation" | "rejection",
-    type: "memberinvite" | "memberconfirmation" | "memberrejection" | "rsvpinvite" | "rsvpconfirmation",
+    type: "memberinvite" | "memberconfirmation" | "memberrejection" | "rsvpinvite" | "rsvpconfirmation" | "postupdate",
     bedid?: number,
     bedname?: string,
     eventid?: string,

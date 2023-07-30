@@ -23,7 +23,7 @@ const EventsPage: React.FC = function() {
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
-    const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery);
+    const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const events = eventsResult as eventInterface[];
 
     const prelimEvents = useMemo(() => {
