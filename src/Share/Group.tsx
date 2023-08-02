@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { useGetBedsQuery, useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
@@ -23,7 +22,7 @@ const BedSharingGroup: React.FC = function() {
     const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = notificationsData as notificationInterface[];
 
-    const { mutation: addNotification,  isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
+    const { mutation: addNotification, isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
     const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
 
     useEffect(() => {

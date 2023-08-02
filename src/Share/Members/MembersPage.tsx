@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetBedsQuery } from "../../app/apiSlice";
+import { useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";
 import { membersInterface, bedDataInterface } from "../../app/interfaces";
 import Member from "./Member";
@@ -15,6 +15,9 @@ const MembersPage: React.FC = function() {
     const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const existingMembers = bed?.members as membersInterface[];
+
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     function generateMembers(status: string) {
         let membersArr;
@@ -35,23 +38,31 @@ const MembersPage: React.FC = function() {
     return (
         <section>
             <Link to={`/share/${bedid}`}>Return to bed overview</Link>
-            <Link to={`/share/${bedid}/members/permissions`}>Manage permissions</Link>
-            <h2>Members</h2>
+            {personalPermissions?.includes("fullpermissions") ?
+                <Link to={`/share/${bedid}/members/permissions`}>Manage permissions</Link> : null
+            }
+
             <section>
-                <h3>Current</h3>
+                <h2>Current Members</h2>
                 <ul>
                     {generateMembers("accepted")}
                 </ul>
             </section>
-            <section>
-                <h3>Pending</h3>
-                <ul>
-                    {generateMembers("pending")}
-                </ul>
-            </section>
-            
-            <button type="button" onClick={() => setSearchMembersVis(!searchMembersVis)}>Add member</button>
-            {searchMembersVis ? <UserSearch bedid={bedid} /> :  null }
+
+            {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("memberspermission") ?
+                <>
+                    <section>
+                        <h2>Pending Members</h2>
+                        <ul>
+                            {generateMembers("pending")}
+                        </ul>
+                    </section>
+                    <div>
+                        <button type="button" onClick={() => setSearchMembersVis(!searchMembersVis)}>Add member</button>
+                        {searchMembersVis ? <UserSearch bedid={bedid} /> :  null }
+                    </div>
+                </> : null
+            }
 
             <hr />
             <RoleGroup bedid={bedid} />

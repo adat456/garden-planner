@@ -8,7 +8,7 @@ export const apiSlice = createApi({
         },
         credentials: "include",
     }),
-    tagTypes: ["user", "beds", "notifications", "events", "posts", "comments"],
+    tagTypes: ["user", "beds", "permissions", "notifications", "events", "posts", "comments"],
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data",
@@ -74,7 +74,23 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "beds" ]
         }),
-        // notifications
+        /// PERMISSIONS /////////////////////////
+        getPersonalPermissions: builder.query({
+            query: data => `/pull-personal-permissions/${data}`,
+        }),
+        getPermissionsLog: builder.query({
+            query: data => `/pull-permissions-log/${data}`,
+            providesTags: [ "permissions" ],
+        }),
+        updatePermissions: builder.mutation({
+            query: data => ({
+                url: `/update-permissions-log/${data.bedid}`,
+                method: "PATCH",
+                body: {permissions: data.permissions}
+            }),
+            invalidatesTags: [ "permissions" ],
+        }),
+        /// NOTIFICATIONS //////////////////////////
         getNotifications: builder.query({
             query: () => "/pull-notifications",
             providesTags: [ "notifications" ]
@@ -120,7 +136,7 @@ export const apiSlice = createApi({
         }),
         deleteEvent: builder.mutation({
             query: data => ({
-                url: `/delete-event/${data.eventid}/${data.repeatid}`,
+                url: `/delete-event/${data.bedid}/${data.eventid}/${data.repeatid}`,
                 method: "DELETE",
             }),
             invalidatesTags: [ "events", "beds" ]
@@ -148,7 +164,7 @@ export const apiSlice = createApi({
         }),
         updatePost: builder.mutation({
             query: data => ({
-                url: `/update-post/${data.postid}`,
+                url: `/update-post/${data.bedid}/${data.postid}`,
                 method: "PATCH",
                 body: data.content
             }),
@@ -163,14 +179,14 @@ export const apiSlice = createApi({
         }),
         deletePost: builder.mutation({
             query: data => ({
-                url: `/delete-post/${data}`,
+                url: `/delete-post/${data.bedid}/${data.postid}`,
                 method: "DELETE"
             }),
             invalidatesTags: [ "posts" ]
         }),
         updateReactions: builder.mutation({
             query: data => ({
-                url: `/update-reactions/${data.table}/${data.id}`,
+                url: `/update-reactions/${data.bedid}/${data.table}/${data.id}`,
                 method: "PATCH",
                 body: data.reaction
             }),
@@ -182,7 +198,7 @@ export const apiSlice = createApi({
         }),
         addComment: builder.mutation({
             query: data => ({
-                url:`/add-comment/${data.postid}`,
+                url:`/add-comment/${data.bedid}/${data.postid}`,
                 method: "POST",
                 body: data.comment
             }),
@@ -190,7 +206,7 @@ export const apiSlice = createApi({
         }),
         updateComment: builder.mutation({
             query: data => ({
-                url: `/update-comment/${data.commentid}`,
+                url: `/update-comment/${data.bedid}/${data.commentid}`,
                 method: "PATCH",
                 body: data.content
             }),
@@ -198,7 +214,7 @@ export const apiSlice = createApi({
         }),
         deleteComment: builder.mutation({
             query: data => ({
-                url: `/delete-comment/${data}`,
+                url: `/delete-comment/${data.bedid}/${data.commentid}`,
                 method: "DELETE"
             }),
             invalidatesTags: [ "comments" ]
@@ -217,6 +233,10 @@ export const {
     useUpdateGridMapMutation,
     useUpdateRolesMutation,
     useUpdateMembersMutation,
+
+    useGetPersonalPermissionsQuery,
+    useGetPermissionsLogQuery,
+    useUpdatePermissionsMutation,
 
     useGetNotificationsQuery,
     useAddNotificationMutation,

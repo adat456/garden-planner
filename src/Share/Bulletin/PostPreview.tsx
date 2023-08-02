@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useGetUserQuery, useUpdatePostMutation, useUpdateReactionsMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetPersonalPermissionsQuery, useUpdatePostMutation, useUpdateReactionsMutation } from "../../app/apiSlice";
 import { postInterface, userInterface } from "../../app/interfaces";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 
@@ -12,6 +12,8 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
 
     const { data } = useWrapRTKQuery(useGetUserQuery);
     const user = data as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
     const { mutation: updateReactions, isLoading: updateReactionsIsLoading } = useWrapRTKMutation(useUpdateReactionsMutation);
@@ -20,6 +22,7 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
         if (!updatePostIsLoading) {
             try {
                 await updatePost({
+                    bedid,
                     postid: post?.id,
                     content: {
                         title: post?.title,
@@ -44,6 +47,7 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
                 };
 
                 await updateReactions({
+                    bedid,
                     table: "posts",
                     id: post.id,
                     reaction: {
@@ -65,6 +69,7 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
                 };
 
                 await updateReactions({
+                    bedid,
                     table: "posts",
                     id: post.id,
                     reaction: {
@@ -79,15 +84,26 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
     
     return (
         <li key={post.id}>
-            <button type="button" onClick={togglePinned}>{post?.pinned ? "Unpin" : "Pin"}</button>
+            {personalPermissions?.includes("fullpermissions") ?
+                <button type="button" onClick={togglePinned}>{post?.pinned ? "Unpin" : "Pin"}</button> 
+                : null
+            }
             <h3>{post.title}</h3>
             <p>{`Posted on ${post.posted.toString().slice(0, 10)} by ${post.authorname}`}</p>
             <p>{`${post.content.slice(0, 150)}${post.content.length > 150 ? "..." : ""}`}</p>
             <div>
-                <button type="button" onClick={() => updateReaction("like")}>{post?.likes.includes(user?.id) ? "Unlike this post" : "Like this post"}</button>
-                <p>{post.likes.length}</p>
-                <button type="button" onClick={() => updateReaction("dislike")}>{post?.dislikes.includes(user?.id) ? "Un-dislike this post" : "Dislike this post"}</button>
-                <p>{post.dislikes.length}</p>
+                {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postinteractionspermission") ?
+                    <>
+                        <button type="button" onClick={() => updateReaction("like")}>{post?.likes.includes(user?.id) ? "Unlike this post" : "Like this post"}</button>
+                        <p>{post.likes.length}</p>
+                        <button type="button" onClick={() => updateReaction("dislike")}>{post?.dislikes.includes(user?.id) ? "Un-dislike this post" : "Dislike this post"}</button>
+                        <p>{post.dislikes.length}</p>
+                    </> :
+                    <>
+                        <p>{post.likes.length}</p>
+                        <p>{post.dislikes.length}</p>
+                    </>
+                } 
             </div>
             <Link to={`/share/${bedid}/bulletin/${post.id}`}>See entire post</Link>
         </li>

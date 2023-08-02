@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { bedDataInterface, membersInterface } from "../../app/interfaces";
-import { useUpdateMembersMutation, useGetBedsQuery } from "../../app/apiSlice";
+import { useUpdateMembersMutation, useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 
 interface memberInterface {
@@ -17,6 +17,9 @@ const Member: React.FC<memberInterface> = function({ member }) {
     const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const existingMembers = bed?.members as membersInterface[];
+
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     const { mutation: updateMembers, isLoading } = useWrapRTKMutation(useUpdateMembersMutation);
 
@@ -73,37 +76,25 @@ const Member: React.FC<memberInterface> = function({ member }) {
             {member.status === "pending" ?
                 <p>{`Invite sent ${member.invitedate}`}</p> : null
             }
-            {member.role? 
-                <>  
-                    {assigningRole ?
-                        <>
-                            <label htmlFor="role"></label>
-                            <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                                <option value=""></option>
-                                {generateRoleOptions()}
-                            </select>
-                        </>
-                        : 
-                        findRoleTitle(member.role)
-                    }
+            
+            {assigningRole ?
+                <>
+                    <label htmlFor="role"></label>
+                    <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
+                        <option value=""></option>
+                        {generateRoleOptions()}
+                    </select>
                 </>
                 : 
-                <>  
-                    {assigningRole ?
-                        <>
-                            <label htmlFor="role"></label>
-                            <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                                <option value=""></option>
-                                {generateRoleOptions()}
-                            </select>
-                        </>
-                        : 
-                        null
-                    }
-                </>
+                member.role ? findRoleTitle(member.role) : null
             }
-            <button type="button" onClick={assigningRole ? updateMemberRole : () => setAssigningRole(!assigningRole)}>{!assigningRole ? "Assign role" : "Save"}</button>
-            <button type="button" onClick={removeMember}>Remove member</button>
+
+            {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("memberspermission") ?
+                <div>
+                    <button type="button" onClick={assigningRole ? updateMemberRole : () => setAssigningRole(!assigningRole)}>{!assigningRole ? "Assign role" : "Save"}</button>
+                    <button type="button" onClick={removeMember}>Remove member</button>
+                </div> : null
+            }
         </li>
     )
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery } from "../../app/apiSlice";
+import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
@@ -23,6 +23,8 @@ const EventsPage: React.FC = function() {
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
     const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const events = eventsResult as eventInterface[];
 
@@ -156,10 +158,18 @@ const EventsPage: React.FC = function() {
             <ul>
                 {(timeFilter || tagFilters.length > 0) ? generateEvents(processedEvents) : generateEvents(prelimEvents)}
             </ul>
-            <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button>
+            {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("eventspermission") ?
+                <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button> : 
+                null
+            }
 
             {eventOverviewVis ? <EventOverview setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}
-            {eventFormVis ? <EventForm setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}
+
+            {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("eventspermission") ?
+                eventFormVis ? <EventForm setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null : 
+                null
+            }
+            
         </section>
     );
 };

@@ -3,7 +3,7 @@ import AddEditRole from "./AddEditRole";
 import ExampleRoles from "./ExampleRoles";
 import AddedRole from "./AddedRole";
 import { rolesInterface } from "../../../app/interfaces";
-import { useGetBedsQuery } from "../../../app/apiSlice";
+import { useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../../app/apiSlice";
 import { useWrapRTKQuery } from "../../../app/customHooks";
 
 interface RoleGroupInterface {
@@ -18,6 +18,9 @@ const RoleGroup: React.FC<RoleGroupInterface> = function({ bedid }) {
     const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const existingRoles = bed?.roles;
+
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     function generateExistingRoles() {
         let rolesArr;
@@ -37,16 +40,21 @@ const RoleGroup: React.FC<RoleGroupInterface> = function({ bedid }) {
     }, [addEditRoleVis]);
 
     return (
-        <section>
-            <h3>Roles</h3> 
-            {generateExistingRoles()}
+        <>
+            {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("rolespermission") ?
+                <section>
+                    <h3>Roles</h3> 
+                    {generateExistingRoles()}
 
-            <button type="button" onClick={() => setAddEditRoleVis(true)}>Add a custom role</button>
-            {addEditRoleVis ? <AddEditRole bedid={bedid} setAddEditRoleVis={setAddEditRoleVis} focusRole={focusRole} setFocusRole={setFocusRole} /> : null}
+                    <button type="button" onClick={() => setAddEditRoleVis(true)}>Add a custom role</button>
+                    {addEditRoleVis ? <AddEditRole bedid={bedid} setAddEditRoleVis={setAddEditRoleVis} focusRole={focusRole} setFocusRole={setFocusRole} /> : null}
 
-            <button type="button" onClick={() => setExampleRolesVis(!exampleRolesVis)}>{exampleRolesVis ? "Hide example roles" : "Show example roles"}</button>
-            {exampleRolesVis ? <ExampleRoles /> : null}
-        </section>
+                    <button type="button" onClick={() => setExampleRolesVis(!exampleRolesVis)}>{exampleRolesVis ? "Hide example roles" : "Show example roles"}</button>
+                    {exampleRolesVis ? <ExampleRoles /> : null}
+                </section>
+                : null
+            }
+        </>
     );
 };
 

@@ -138,7 +138,8 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
                 setCurrentEvent(null);
             } catch(err) {
                 if (err.message) console.error("Unable to add event: ", err.message);
-                if (err.data) setErrMsgs(err.data);
+                if (typeof err.data === "string") console.error("Unable to add event:", err.data);
+                if (typeof err.data !== "string") setErrMsgs(err.data);
             };
         };
     };
@@ -225,6 +226,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
 
         try {
             await deleteEvent({
+                bedid,
                 eventid: currentEvent?.id,
             }).unwrap();
         } catch(err) {

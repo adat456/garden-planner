@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useGetUserQuery } from "../../../app/apiSlice";
-import { useWrapRTKQuery } from "../../../app/customHooks";
+import { useGetBedsQuery, useGetUserQuery, useGetPermissionsLogQuery, useUpdatePermissionsMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
 import { bedDataInterface, userInterface, membersInterface, rolesInterface, permissionsInterface } from "../../../app/interfaces";
 
 
 interface permGroupInterface {
     allDetailsVis: boolean,
     label: string,
-    column: string
+    permission: string
 };
 
-const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label, column }) {
+const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label, permission }) {
     const [ detailsVis, setDetailsVis ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState("");
     const [ membersSearchResults, setMembersSearchResults ] = useState<{id: number, name: string}[]>([]);
@@ -27,6 +27,11 @@ const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label,
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
 
+    const { data: permissionsData} = useWrapRTKQuery(useGetPermissionsLogQuery, bedid);
+    const permissionsLog = permissionsData as permissionsInterface;
+
+    const { mutation: updatePermissions, isLoading: updatePermissionsIsLoading } = useWrapRTKMutation(useUpdatePermissionsMutation);
+
     function handleSearchTermChange(e: React.ChangeEvent<HTMLInputElement>) {
         const input = e.target as HTMLInputElement;
         setSearchTerm(input.value);
@@ -38,28 +43,41 @@ const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label,
         } else {
             let updatedMembersSearchResults: {id: number, name: string}[] = [];
             members.forEach(member => {
-                if (member.name.includes(preppedSearchTerm) || member.username.includes(preppedSearchTerm)) updatedMembersSearchResults.push({id: member.id, name: member.name});
+                if (member.name.toLowerCase().includes(preppedSearchTerm) || member.username.toLowerCase().includes(preppedSearchTerm)) updatedMembersSearchResults.push({id: member.id, name: member.name});
             });
             setMembersSearchResults(updatedMembersSearchResults);
 
             let updatedRolesSearchResults: {id: string, name: string}[] = [];
             roles.forEach(role => {
-                if (role.title.includes(preppedSearchTerm)) updatedRolesSearchResults.push({id: role.id, name: role.title});
+                if (role.title.toLowerCase().includes(preppedSearchTerm)) updatedRolesSearchResults.push({id: role.id, name: role.title});
             });
             setRolesSearchResults(updatedRolesSearchResults);
         };
     };
 
+    async function togglePermission(group: string, id: string | number) {
+        if (!updatePermissionsIsLoading) {
+            try {
+                await updatePermissions({
+                    bedid,
+                    permissions: { permission, group, id },
+                }).unwrap();
+            } catch(err) {
+                console.error("Unable to toggle permissions: ", err.message);
+            };
+        };
+    };
+
     function displaySearchResults() {
         const membersSearchResultsArr = membersSearchResults.map(result => (
-            <div key={result.id}>
+            <button key={result.id} onClick={() => togglePermission("member", result.id)}>
                 <p>{result.name}</p>
-            </div>
+            </button>
         ));
         const rolesSearchResultsArr = rolesSearchResults.map(result => (
-            <div key={result.id}>
+            <button key={result.id} onClick={() => togglePermission("role", result.id)}>
                 <p>{result.name}</p>
-            </div>
+            </button>
         ));
 
         return (
@@ -74,12 +92,36 @@ const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label,
         );
     };
 
-    async function addPermission() {
-
-    };
-
-    async function removePermission() {
-
+    function displayAddedMembersRoles() {
+        const addedMembers = permissionsLog?.[`${permission}memberids`].map((id: number) => { 
+            const matchingMember = bed?.members.find(member => member.id === id);
+            const memberName = matchingMember?.name;
+            return (
+                <button key={id} onClick={() => togglePermission("member", id)}>
+                    <p>{memberName}</p>
+                </button>
+            );
+        });
+        const addedRoles = permissionsLog?.[`${permission}roleids`].map((id: string) => {
+            const matchingRole = bed?.roles.find(role => role.id === id);
+            const roleTitle = matchingRole?.title;
+            return (
+                <button key={id} onClick={() => togglePermission("role", id)}>
+                    <p>{roleTitle}</p>
+                </button>
+            );
+        });
+            
+        return (
+            <>
+                <div>
+                    {addedMembers}
+                </div>
+                <div>
+                    {addedRoles}
+                </div>
+            </>
+        );
     };
 
     useEffect(() => {
@@ -92,6 +134,7 @@ const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label,
             <button type="button" onClick={() => setDetailsVis(!detailsVis)}>{detailsVis ? "Collapse" : "Expand"}</button>
             {detailsVis ?
                 <>
+                    {displayAddedMembersRoles()}
                     <div>
                         <label htmlFor="searchTerm">Add a member or role:</label>
                         <input type="text" value={searchTerm} onChange={handleSearchTermChange} />

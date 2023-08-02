@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 import { commentInterface, userInterface } from "../../app/interfaces";
-import { useGetUserQuery, useUpdateReactionsMutation, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetPersonalPermissionsQuery, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { validateRequiredInputLength } from "../../app/helpers";
 
@@ -20,8 +21,12 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
     const addCommentInputRef = useRef<HTMLInputElement>(null);
     const addCommentFormRef = useRef<HTMLFormElement>(null);
 
+    const { bedid } = useParams();
+
     const { data } = useWrapRTKQuery(useGetUserQuery);
     const user = data as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     const { mutation: addComment, isLoading: addCommentIsLoading } = useWrapRTKMutation(useAddCommentMutation);
     const { mutation: updateComment, isLoading: updateCommentIsLoading } = useWrapRTKMutation(useUpdateCommentMutation);
@@ -44,7 +49,7 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
                     body: JSON.stringify({ likes: updatedLikes }),
                     credentials: "include"
                 }
-                const req = await fetch(`http://localhost:3000/update-reactions/comments/${comment.id}`, reqOptions);
+                const req = await fetch(`http://localhost:3000/update-reactions/${bedid}/comments/${comment.id}`, reqOptions);
                 if (req.ok) setLikes(updatedLikes);
 
             } catch(err) {
@@ -67,7 +72,7 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
                     body: JSON.stringify({ dislikes: updatedDislikes }),
                     credentials: "include"
                 }
-                const req = await fetch(`http://localhost:3000/update-reactions/comments/${comment.id}`, reqOptions);
+                const req = await fetch(`http://localhost:3000/update-reactions/${bedid}/comments/${comment.id}`, reqOptions);
                 if (req.ok) setDislikes(updatedDislikes);
             } catch(err) {
                 console.error("Unable to update dislikes: ", err.message);
@@ -84,6 +89,7 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
 
             try {
                 await updateComment({
+                    bedid,
                     commentid: comment.id,
                     content: { content: updateCommentContent }
                 }).unwrap();
@@ -100,7 +106,10 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
     async function handleDeleteComment() {
         if (!deleteCommentIsLoading) {
             try {
-                await deleteComment(comment.id).unwrap();
+                await deleteComment({
+                    bedid,
+                    commentid: comment.id
+                }).unwrap();
             } catch(err) {
                 console.error("Unable to delete comment: ", err.message);
             };
@@ -116,8 +125,9 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
 
             try {
                 await addComment({
+                    bedid,
                     postid: comment.id,
-                    comment: { content: addCommentContent, id: nanoid(), toppostid }
+                    comment: { content: addCommentContent, commentid: nanoid(), toppostid }
                 }).unwrap();
 
                 setAddCommentContent("");
@@ -144,8 +154,8 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
 
     return (
         <div id={`comment-${comment.id}`}>
-            {user?.id === comment.authorid ?
-                <button type="button" onClick={() => setUpdateCommentVis(!updateCommentVis)}>Edit comment</button> : 
+            {(personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postinteractionspermission")) && comment?.authorid === user?.id ?
+                <button type="button" onClick={() => setUpdateCommentVis(!updateCommentVis)}>Edit comment</button>  :
                 null
             }
 
@@ -154,12 +164,22 @@ const Comment: React.FC<{comment: commentInterface, toppostid: text}> = function
                     <p>{comment.content}</p>
                     <p>{`Posted on ${comment.posted.toString().slice(0, 10)} by ${comment.authorname}`}</p>
                     <div>
-                        <button type="button" onClick={() => handleUpdateReactions("like")}>{likes.includes(user?.id) ? "Unlike this comment" : "Like this comment"}</button>
-                        <p>{likes.length}</p>
-                        <button type="button" onClick={() => handleUpdateReactions("dislike")}>{dislikes.includes(user?.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
-                        <p>{dislikes.length}</p>
+                        {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postinteractionspermission") ?
+                            <>
+                                <button type="button" onClick={() => handleUpdateReactions("like")}>{likes.includes(user?.id) ? "Unlike this comment" : "Like this comment"}</button>
+                                <p>{likes.length}</p>
+                                <button type="button" onClick={() => handleUpdateReactions("dislike")}>{dislikes.includes(user?.id) ? "Un-dislike this comment" : "Dislike this comment"}</button>
+                                <p>{dislikes.length}</p>
+                            </> : 
+                            <>  
+                                <p>{likes.length}</p>
+                                <p>{dislikes.length}</p>
+                            </>
+                        }
                     </div>
-                    <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>
+                    {personalPermissions?.includes("postinteractionspermission") ?
+                        <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button> : null
+                    }
 
                     {addCommentVis ?
                         <form method="POST" ref={addCommentFormRef} onSubmit={handleAddComment} noValidate>

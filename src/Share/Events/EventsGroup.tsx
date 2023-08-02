@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery } from "../../app/apiSlice";
+import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";
 import { bedDataInterface, eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
@@ -18,6 +18,8 @@ const EventsGroup: React.FC = function() {
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
     const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const events = eventsResult as eventInterface[];
 
@@ -74,7 +76,6 @@ const EventsGroup: React.FC = function() {
             <ul>
                 {generateEvents()}
             </ul>
-            <button type="button" onClick={() => setEventFormVis(true)}>Add new event</button>
             <Link to={`/share/${bedid}/events`}>See all events</Link>
 
             {eventOverviewVis ? <EventOverview setEventFormVis={setEventFormVis} currentEvent={currentEvent} setCurrentEvent={setCurrentEvent} setEventOverviewVis={setEventOverviewVis} /> : null}

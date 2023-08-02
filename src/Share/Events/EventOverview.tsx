@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { eventInterface, notificationInterface, userInterface } from "../../app/interfaces";
-import { useGetUserQuery, useGetEventsQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetPersonalPermissionsQuery, useGetEventsQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { prepEventDateForDisplay, convert24to12, prepHyphenatedDateForDisplay} from "../../app/helpers";
 
@@ -17,13 +17,14 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
     const { refetch: refetchThisBedsEvents } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
     const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = notificationsData as notificationInterface[];
 
     const { mutation: deleteEvent, isLoading: deleteEventIsLoading } = useWrapRTKMutation(useDeleteEventMutation);
     const { mutation: addNotification,  isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
     const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
-
 
     let participantStatement;
     if (currentEvent?.eventpublic === "public") {
@@ -56,6 +57,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             try {
                 if (repeatid) {
                     await deleteEvent({
+                        bedid,
                         eventid: currentEvent.id,
                         repeatid: currentEvent.repeatid
                     }).unwrap();
@@ -63,6 +65,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
 
                 if (!repeatid) {
                     await deleteEvent({
+                        bedid,
                         eventid: currentEvent.id,
                     }).unwrap();
                 };
@@ -142,9 +145,15 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
 
             <div>
                 <button type="button" onClick={() => {handleCloseEventOverview(); setCurrentEvent(null)}}>Close</button>
-                <button type="button" onClick={handleOpenEventForm}>Edit</button>
-                <button type="button" onClick={() => handleDeleteEvent(null)}>Delete</button>
-                {currentEvent?.repeating ? <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button> : null}
+
+                {(personalPermissions.includes("fullpermissions") || (personalPermissions.includes("eventspermission")) && currentEvent?.creatorid === user?.id) ?
+                    <>
+                        <button type="button" onClick={handleOpenEventForm}>Edit</button>
+                        <button type="button" onClick={() => handleDeleteEvent(null)}>Delete</button>
+                        {currentEvent?.repeating ? <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button> : null}
+                    </>
+                    : null
+                }
             </div>
         </dialog>
     )

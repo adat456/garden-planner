@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useGetPostsQuery } from "../../app/apiSlice";
+import { useGetPostsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface } from "../../app/interfaces";
 import PostPreview from "./PostPreview";
@@ -13,6 +13,8 @@ const Bulletin: React.FC = function() {
 
     const { data } = useWrapRTKQuery(useGetPostsQuery, bedid);
     const posts = data as postInterface[];
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
 
     function generatePosts() {
         const postsList = posts?.map(post => <PostPreview key={post.id} post={post} />);
@@ -34,7 +36,9 @@ const Bulletin: React.FC = function() {
                 <ul>
                     {generatePosts()}
                 </ul>
-                <button type="button" onClick={() => setAddEditPostVis(true)}>Add new post</button>
+                {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postspermission") ?
+                    <button type="button" onClick={() => setAddEditPostVis(true)}>Add new post</button> : null
+                }
             </div>
             {AddEditPostVis ? <AddEditPost setAddEditPostVis={setAddEditPostVis} /> : null}
         </>

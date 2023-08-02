@@ -39,14 +39,14 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
             // if anything in the form is invalid, exit this function
             if (!formRef?.current?.checkValidity()) return;
 
-            const id = nanoid();
+            const postid = nanoid();
             try {
                 await addPost({
                     bedid,
-                    post: { title, content, pinned, id }
+                    post: { title, content, pinned, postid }
                 }).unwrap();
 
-                navigate(`/share/${bedid}/bulletin/${id}`);
+                navigate(`/share/${bedid}/bulletin/${postid}`);
                 handleClose();
             } catch(err) {
                 console.error("Unable to add post: ", err.data);
@@ -65,6 +65,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
 
             try {
                 await updatePost({
+                    bedid,
                     postid: post?.id,
                     content: { title, content, pinned }
                 }).unwrap();
@@ -93,7 +94,10 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
     async function handleDeletePost() {
         if (!deletePostIsLoading) {
             try {
-                await deletePost(post?.id).unwrap();
+                await deletePost({
+                    bedid,
+                    postid: post?.id
+                }).unwrap();
 
                 navigate(`/share/${bedid}/bulletin`)
                 handleClose();

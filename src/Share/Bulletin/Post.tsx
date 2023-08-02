@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetPostsQuery, useGetUserQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateSubscribersMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
+import { useGetPostsQuery, useGetUserQuery, useGetPersonalPermissionsQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateSubscribersMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
@@ -23,6 +23,8 @@ const Post: React.FC = function() {
     const post = postObject?.find(post => post?.id === postid) as postInterface;
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
     const { data: commentsData, isLoading } = useWrapRTKQuery(useGetCommentsQuery, post?.id);
     const comments = commentsData as commentTreeInterface[];
 
@@ -48,6 +50,7 @@ const Post: React.FC = function() {
         if (!updatePostIsLoading) {
             try {
                 await updatePost({
+                    bedid,
                     postid: post?.id,
                     content: {
                         title: post?.title,
@@ -83,8 +86,9 @@ const Post: React.FC = function() {
 
             try {
                 await addComment({
+                    bedid,
                     postid: post.id,
-                    comment: { content, id: nanoid(), toppostid: postid },
+                    comment: { content, commentid: nanoid(), toppostid: postid },
                 }).unwrap();
 
                 setContent("");
@@ -116,6 +120,7 @@ const Post: React.FC = function() {
                 };
 
                 await updateReactions({
+                    bedid,
                     table: "posts",
                     id: post.id,
                     reaction: {
@@ -137,6 +142,7 @@ const Post: React.FC = function() {
                 };
 
                 await updateReactions({
+                    bedid,
                     table: "posts",
                     id: post.id,
                     reaction: {
@@ -171,20 +177,27 @@ const Post: React.FC = function() {
                 <Link to={`/share/${bedid}/bulletin`}>Return to bulletin</Link>
                 <button type="button" onClick={handleSubscribe}>{post?.subscribers?.includes(user?.id) ? "Unsubscribe to this thread" : "Subscribe to this thread"}</button>
                 <h1>{post?.title}</h1>
-                {user?.id === post?.authorid ?
-                    <>
-                        <button type="button" onClick={() => setAddEditPostVis(true)}>Edit post</button>
-                        <button type="button" onClick={togglePinned}>{post?.pinned ? "Unpin" : "Pin"}</button>
-                    </>
-                    : null
+                {personalPermissions?.includes("fullpermissions") ?
+                    <button type="button" onClick={togglePinned}>{post?.pinned ? "Unpin" : "Pin"}</button> : null
                 }
+                {(personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postspermission")) && post?.authorid === user?.id ?
+                    <button type="button" onClick={() => setAddEditPostVis(true)}>Edit post</button> : null
+                }     
                 <p>{`Posted on ${post?.posted.toString().slice(0, 10)} by ${post?.authorname}`}</p>
                 <p>{`${post?.content}`}</p>
                 <div>
-                    <button type="button" onClick={() => updateReaction("like")}>{post?.likes.includes(user?.id) ? "Unlike this post" : "Like this post"}</button>
-                    <p>{post?.likes.length}</p>
-                    <button type="button" onClick={() => updateReaction("dislike")}>{post?.dislikes.includes(user?.id) ? "Un-dislike this post" : "Dislike this post"}</button>
-                    <p>{post?.dislikes.length}</p>
+                    {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postinteractionspermission") ?
+                        <>
+                            <button type="button" onClick={() => updateReaction("like")}>{post?.likes.includes(user?.id) ? "Unlike this post" : "Like this post"}</button>
+                            <p>{post?.likes.length}</p>
+                            <button type="button" onClick={() => updateReaction("dislike")}>{post?.dislikes.includes(user?.id) ? "Un-dislike this post" : "Dislike this post"}</button>
+                            <p>{post?.dislikes.length}</p>
+                        </> :
+                        <>
+                            <p>{post?.likes.length}</p>
+                            <p>{post?.dislikes.length}</p>
+                        </>
+                    } 
                 </div>
                 <hr />
                 <section>
@@ -194,7 +207,10 @@ const Post: React.FC = function() {
                         generateComments()
                     }
                 </section>
-                <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button>
+
+                {personalPermissions?.includes("fullpermissions") || personalPermissions?.includes("postinteractionspermission") ?
+                    <button type="button" onClick={() => setAddCommentVis(!addCommentVis)}>Add comment</button> : null
+                }
 
                 {addCommentVis ?
                     <form method="POST" ref={addCommentFormRef} onSubmit={postComment} noValidate>
