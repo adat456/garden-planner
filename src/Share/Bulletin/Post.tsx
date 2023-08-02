@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetPostsQuery, useGetUserQuery, useGetPersonalPermissionsQuery, useGetCommentsQuery, useUpdatePostMutation, useUpdateSubscribersMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
+import { useGetPostsQuery, useGetUserQuery, useGetPersonalPermissionsQuery, useGetCommentsQuery, useUpdatePostPinMutation, useUpdateSubscribersMutation, useUpdateReactionsMutation, useAddCommentMutation } from "../../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface, commentInterface, commentTreeInterface, userInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
@@ -28,7 +28,7 @@ const Post: React.FC = function() {
     const { data: commentsData, isLoading } = useWrapRTKQuery(useGetCommentsQuery, post?.id);
     const comments = commentsData as commentTreeInterface[];
 
-    const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
+    const { mutation: updatePostPin, isLoading: updatePostPinIsLoading } = useWrapRTKMutation(useUpdatePostPinMutation);
     const { mutation: updateSubscribers, isLoading: updateSubscribersIsLoading } = useWrapRTKMutation(useUpdateSubscribersMutation);
     const { mutation: updateReactions, isLoading: updateReactionsIsLoading } = useWrapRTKMutation(useUpdateReactionsMutation);
     const { mutation: addComment, isLoading: addCommentIsLoading } = useWrapRTKMutation(useAddCommentMutation);
@@ -47,16 +47,11 @@ const Post: React.FC = function() {
     };
 
     async function togglePinned() {
-        if (!updatePostIsLoading) {
+        if (!updatePostPinIsLoading) {
             try {
-                await updatePost({
+                await updatePostPin({
                     bedid,
                     postid: post?.id,
-                    content: {
-                        title: post?.title,
-                        content: post?.content,
-                        pinned: !post?.pinned
-                    },
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to toggle pinning of this post: ", err.data);

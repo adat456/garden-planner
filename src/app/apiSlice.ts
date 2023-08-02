@@ -162,6 +162,13 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [ "posts" ]
         }),
+        updatePostPin: builder.mutation({
+            query: data => ({
+                url: `/toggle-post-pin/${data.bedid}/${data.postid}`,
+                method: "PATCH"
+            }),
+            invalidatesTags: [ "posts" ]
+        }),
         updatePost: builder.mutation({
             query: data => ({
                 url: `/update-post/${data.bedid}/${data.postid}`,
@@ -250,6 +257,7 @@ export const {
 
     useGetPostsQuery,
     useAddPostMutation,
+    useUpdatePostPinMutation,
     useUpdatePostMutation,
     useUpdateSubscribersMutation,
     useDeletePostMutation,

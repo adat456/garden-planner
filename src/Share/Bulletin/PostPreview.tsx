@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useGetUserQuery, useGetPersonalPermissionsQuery, useUpdatePostMutation, useUpdateReactionsMutation } from "../../app/apiSlice";
+import { useGetUserQuery, useGetPersonalPermissionsQuery, useUpdatePostPinMutation, useUpdateReactionsMutation } from "../../app/apiSlice";
 import { postInterface, userInterface } from "../../app/interfaces";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 
@@ -15,20 +15,15 @@ const PostPreview: React.FC<individualPostInterface> = function({ post }) {
     const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
     const personalPermissions = permissionsData as string[];
 
-    const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
+    const { mutation: updatePostPin, isLoading: updatePostPinIsLoading } = useWrapRTKMutation(useUpdatePostPinMutation);
     const { mutation: updateReactions, isLoading: updateReactionsIsLoading } = useWrapRTKMutation(useUpdateReactionsMutation);
 
     async function togglePinned() {
-        if (!updatePostIsLoading) {
+        if (!updatePostPinIsLoading) {
             try {
-                await updatePost({
+                await updatePostPin({
                     bedid,
                     postid: post?.id,
-                    content: {
-                        title: post?.title,
-                        content: post?.content,
-                        pinned: !post?.pinned
-                    },
                 }).unwrap();
             } catch(err) {
                 console.error("Unable to toggle pinning of this post: ", err.message);

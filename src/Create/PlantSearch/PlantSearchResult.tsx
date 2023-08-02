@@ -1,23 +1,28 @@
 import { useState } from "react";
-import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation } from "../../app/customHooks";
-import { plantDataInterface, plantPickDataInterface } from "../../app/interfaces";
+import { useParams } from "react-router-dom";
+import { useGetBedsQuery, useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
+import { bedDataInterface, plantDataInterface, plantPickDataInterface } from "../../app/interfaces";
 import randomColor from "random-color";
 
 interface plantSearchResultsInterface {
-    bedid: string | undefined,
-    result: plantDataInterface,
-    plantPicks: plantPickDataInterface[]
+    result: plantDataInterface
 };
 
-const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ bedid, result, plantPicks }) {
+const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ result }) {
     const [ expanded, setExpanded ] = useState(false);
+
+    const { bedid } = useParams();
+
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function addPlantPick() {
         if (!isLoading) {
-            const updatedseedbasket = [...plantPicks, {
+            const updatedseedbasket = [...seedbasket, {
                 ...result,
                 gridcolor: randomColor().hexString()
             }];
@@ -40,7 +45,7 @@ const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ bedi
                 <h4>{result.contributor ? `${result.name} - Contributed by user ${result.contributor}` : `${result.name}`}</h4>
                 <div className="button-cluster">
                     <button type="button" onClick={() => setExpanded(!expanded)}>{expanded ? "Collapse" : "Expand"}</button>
-                    {plantPicks.find(plant => plant.id === result.id) ?
+                    {seedbasket?.find(plant => plant.id === result.id) ?
                         <button type="button" disabled>Add to basket</button> :
                         <button type="button" onClick={addPlantPick}>Add to basket</button>
                     }  

@@ -4,10 +4,7 @@ export interface gridMapInterface {
     horizontalwalkway: boolean,
     verticalwalkway: boolean,
     customwalkway: boolean,
-    // walkway: boolean,
     plantId: number,
-    plantName: string,
-    gridColor: string
 };
 
 export interface permissionsInterface {

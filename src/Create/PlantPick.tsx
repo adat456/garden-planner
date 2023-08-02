@@ -1,25 +1,30 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { SliderPicker } from "react-color";
-import { useUpdateSeedBasketMutation } from "../app/apiSlice";
-import { useWrapRTKMutation } from "../app/customHooks";
+import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 import { plantPickDataInterface, colorObjInterface } from "../app/interfaces";
 
 interface plantPickInterface {
-    bedid: string | undefined,
     plant: plantPickDataInterface,
-    plantPicks: plantPickDataInterface[],
     setCurPlantPick: React.Dispatch<React.SetStateAction<plantPickDataInterface | null>>,
     abbreviated: boolean,
 };
 
-const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPicks, setCurPlantPick, abbreviated }) {
+const PlantPick: React.FC<plantPickInterface> = function({ plant, setCurPlantPick, abbreviated }) {
     const [ colorSliderVis, setColorSliderVis ] = useState(false);
+
+    const { bedid } = useParams();
     
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const seedbasket = bed?.seedbasket as plantPickDataInterface[];
+
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function changePlantPickColor(color: colorObjInterface) {
         if (!isLoading) {
-            const updatedseedbasket = plantPicks.map(pick => {
+            const updatedseedbasket = seedbasket.map(pick => {
                 if (pick.id === plant.id) {
                     let plantCopy = {
                         ...plant,
@@ -46,7 +51,7 @@ const PlantPick: React.FC<plantPickInterface> = function({ bedid, plant, plantPi
 
     async function removePlantPick(id: number) {
         if (!isLoading) {
-            const updatedseedbasket = plantPicks?.filter(plant => plant.id !== id);
+            const updatedseedbasket = seedbasket?.filter(plant => plant.id !== id);
 
             try {
                 await updateSeedBasket(

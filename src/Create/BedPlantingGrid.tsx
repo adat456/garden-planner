@@ -14,6 +14,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
 
     const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateGridMap, isLoading } = useWrapRTKMutation(useUpdateGridMapMutation);
 
@@ -32,9 +33,20 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                     if (gridData.selected) classes += "selected ";
                     if (gridData.horizontalwalkway || gridData.verticalwalkway || gridData.customwalkway) classes += "walkway ";
                     if (!gridData.selected && !gridData.horizontalwalkway && !gridData.verticalwalkway && !gridData.customwalkway) classes += "away";
-                    if (gridData.plantId) classes += "planted";
+
+                    let gridPlantColor = "";
+                    let gridPlantName = "";
+                    if (gridData.plantId) {
+                        classes += "planted";
+
+                        const seedbasketMatch = seedbasket.find(plant => plant.id === gridData.plantId);
+                        if (seedbasketMatch) {
+                            gridPlantColor = seedbasketMatch.gridcolor;
+                            gridPlantName = seedbasketMatch.name;
+                        };
+                    };
                     
-                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridData.plantName} style={{backgroundColor: gridData.gridColor}} onClick={togglePlant} />);       
+                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridPlantName} style={{backgroundColor: gridPlantColor}} onClick={togglePlant} />);       
                     counter++;
                 };
                 bedInnards.push(
@@ -80,8 +92,6 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             selected: cellCopy.selected,
                             walkway: cellCopy.walkway,
                             plantId: 0,
-                            plantName: "",
-                            gridColor: "",
                         });
                         if (gridMapCopy && bed?.id) {
                             updateBedData(gridMapCopy, bed.id)
@@ -99,8 +109,6 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                             selected: cellCopy.selected,
                             walkway: cellCopy.walkway,
                             plantId: curPlantPick.id,
-                            plantName: curPlantPick.name,
-                            gridColor: curPlantPick.gridcolor,
                         });
                         if (gridMapCopy && bed?.id) {
                             updateBedData(gridMapCopy, bed.id)
@@ -120,8 +128,6 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                         selected: cellCopy.selected,
                         walkway: cellCopy.walkway,
                         plantId: curPlantPick.id,
-                        plantName: curPlantPick.name,
-                        gridColor: curPlantPick.gridcolor
                     });
                     if (gridMapCopy && bed?.id) {
                         updateBedData(gridMapCopy, bed.id)
@@ -160,8 +166,6 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
                 verticalwalkway: grid.verticalwalkway,
                 customwalkway: grid.customwalkway,
                 plantId: 0,
-                plantName: "",
-                gridColor: ""
             });
         });
         if (clearedGridMap && bed?.id) {

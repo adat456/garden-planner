@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
-import { useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation } from "../../app/customHooks";
+import { useGetPersonalPermissionsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
 import { postInterface } from "../../app/interfaces";
 import { validateRequiredInputLength } from "../../app/helpers";
 
@@ -25,6 +25,9 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
 
     const navigate = useNavigate();
     const { bedid } = useParams();
+
+    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
+    const personalPermissions = permissionsData as string[];
     const { mutation: addPost, isLoading: addPostIsLoading } = useWrapRTKMutation(useAddPostMutation);
     const { mutation: updatePost, isLoading: updatePostIsLoading } = useWrapRTKMutation(useUpdatePostMutation);
     const { mutation: deletePost, isLoading: deletePostIsLoading } = useWrapRTKMutation(useDeletePostMutation);
@@ -67,7 +70,7 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                 await updatePost({
                     bedid,
                     postid: post?.id,
-                    content: { title, content, pinned }
+                    content: { title, content }
                 }).unwrap();
 
                 handleClose();
@@ -136,10 +139,12 @@ const NewPost: React.FC<newPostInterface> = function({ setAddEditPostVis, post }
                     }
                     <textarea name="content" id="content" maxLength={500} cols={30} rows={10} ref={contentRef} value={content} onChange={(e) => {setContent(e.target.value); validateRequiredInputLength(contentRef?.current, 500, setContentErrMsg);}} required></textarea>
                 </div>
-                <div>
-                    <input type="checkbox" name="pinned" id="pinned" checked={pinned} onChange={() => setPinned(!pinned)} />
-                    <label htmlFor="pinned">Pin this post to top of bulletin</label>
-                </div>
+                {personalPermissions?.includes("fullpermissions") && !post ?
+                    <div>
+                        <input type="checkbox" name="pinned" id="pinned" checked={pinned} onChange={() => setPinned(!pinned)} />
+                        <label htmlFor="pinned">Pin this post to top of bulletin</label>
+                    </div> : null
+                }
                 <button type="button" onClick={handleClose}>Close</button>
                 {!post ?
                     <button type="submit">Post to bulletin</button> :

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation } from "../../app/customHooks";
+import { useNavigate, useParams } from "react-router-dom";
+import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "../../Base/PaginationButtons";
@@ -9,12 +9,7 @@ import { plantDataInterface, plantPickDataInterface } from "../../app/interfaces
 import { isJWTInvalid } from "../../app/helpers";
 import randomColor from "random-color";
 
-interface plantSearchInterface {
-    plantPicks: plantPickDataInterface[],
-    bedid: string | undefined
-};
-
-const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid }) {
+const PlantSearch: React.FC = function() {
     const [ searchTerm, setSearchTerm ] = useState("");
 
     const [ liveSearchResults, setLiveSearchResults ] = useState<plantDataInterface[] | string>([]);
@@ -30,12 +25,17 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
 
     const navigate = useNavigate();
 
+    const { bedid } = useParams();
+
+    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
+    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const seedbasket = bed?.seedbasket as plantPickDataInterface[];
+
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 
     async function handleSearchTermChange(e: React.FormEvent) {
         const input = e.target as HTMLInputElement;
         setSearchTerm(input.value);
-        setAddVegVis(false);
         
         if (input.value === "") {
             setLiveSearchResults([]);
@@ -77,7 +77,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
             liveResultsArr = liveSearchResults.map(result => {
                 return (
                     <li key={result.id}>
-                        {plantPicks?.find(plant => plant.id === result.id) ?
+                        {seedbasket?.find(plant => plant.id === result.id) ?
                             <button type="button" disabled>
                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 4C12.5523 4 13 4.44772 13 5V11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H13V19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19V13H5C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11H11V5C11 4.44772 11.4477 4 12 4Z" /></svg>
                             </button> :
@@ -128,7 +128,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
 
     async function addPlantPick(result: plantDataInterface) {
         if (!isLoading) {
-            const updatedseedbasket = [...plantPicks, {
+            const updatedseedbasket = [...seedbasket, {
                 ...result,
                 gridcolor: randomColor().hexString()
             }];
@@ -188,7 +188,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
     function generateFinalResultsArr(arr: plantDataInterface[]) {
         // if there are 10 or fewer results in the array (final search or sorted and filtered), just map through them
         if (totalPages === 1) {
-            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} bedid={bedid} result={result} plantPicks={plantPicks} />);
+            let resultsArr = arr.map(result => <PlantSearchResult key={result.id} result={result} />);
             return resultsArr;
         } else {
             // but if there are more than 10 results in the provided array, filter out a subset of that array where the indices belong on the current page
@@ -199,7 +199,7 @@ const PlantSearch: React.FC<plantSearchInterface> = function({ plantPicks, bedid
                 };
             });
             // then generate elements from that array subset
-            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} bedid={bedid} result={result} plantPicks={plantPicks} />);
+            let resultsArr = resultsPageArr.map(result => <PlantSearchResult key={result.id} result={result} />);
             return resultsArr;
         };
     };
