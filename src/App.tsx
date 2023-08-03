@@ -1,19 +1,26 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LogIn from "./SignUp/LogIn";
 import CreateAccount from "./SignUp/CreateAccount";
+
 import LoggedInWrapper from "./Base/LoggedInWrapper";
+
 import BedCreationPage from './Create/NewBed/BedCreationPage';
 import BedPlantingPage from './Create/BedPlantingPage';
 import BedPlantingGroup from "./Create/BedPlantingGroup";
+
 import BedSharingPage from "./Share/Wrapper";
 import BedSharingGroup from "./Share/Group";
 import EventsPage from "./Share/Events/EventsPage";
-import BedExplorationPage from "./Explore/BedExplorationPage";
 import MembersPage from "./Share/Members/MembersPage";
 import ProfilePage from "./Profile/ProfilePage";
 import Bulletin from "./Share/Bulletin/Bulletin";
 import Post from "./Share/Bulletin/Post";
 import PermissionsPage from "./Share/Members/Permissions/PermPage";
+
+import BedExplorationWrapper from "./Explore/Wrapper";
+import BedExplorationPage from "./Explore/AllResults/BedExplorationPage";
+import BedResultPage from "./Explore/SingleResult/BedResultPage";
+
 
 function App() {
   return (
@@ -38,7 +45,10 @@ function App() {
               <Route path=":bedid/bulletin" element={<Bulletin />} />
               <Route path=":bedid/bulletin/:postid" element={<Post />} />
             </Route>
-            <Route path="explore" element={<BedExplorationPage />} />
+            <Route path="explore" element={<BedExplorationWrapper />}>
+              <Route index element={<BedExplorationPage />} />
+              <Route path=":bedid" element={<BedResultPage />} />
+            </Route>
             <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Routes>

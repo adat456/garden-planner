@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useGetUserQuery, useGetBedsQuery } from "../app/apiSlice";
-import { useWrapRTKQuery } from "../app/customHooks";
-import { isJWTInvalid } from "../app/helpers";
-import { bedDataInterface, userInterface } from "../app/interfaces";
+import { useNavigate, Link } from "react-router-dom";
+import { useGetUserQuery, useGetBedsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery } from "../../app/customHooks";
+import { isJWTInvalid } from "../../app/helpers";
+import { bedDataInterface, userInterface } from "../../app/interfaces";
+import Grid from "../../Base/Grid";
 
 interface bedResultPreviewInterface {
     bed: bedDataInterface,
@@ -18,32 +19,6 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
     const { data } = useWrapRTKQuery(useGetUserQuery);
     const user = data as userInterface;
     const { refetch: refetchUsersBeds } = useWrapRTKQuery(useGetBedsQuery);
-
-    function createBedGrid() {
-        let bedInnards = [];
-        let counter = 1;
-        if (bed) {
-            for (let j = 0; j < bed.length; j++) {
-                let row = []
-                for (let i = 0; i < bed.width; i++) {
-                    let classes = "grid-cell ";
-                    const gridData = bed?.gridmap[counter - 1];
-                    if (gridData.selected) classes += "selected ";
-                    if (gridData.walkway) classes += "walkway ";
-                    if (!gridData.selected && !gridData.walkway) classes += "away";
-                    
-                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} style={{backgroundColor: gridData.gridColor}} />);       
-                    counter++;
-                };
-                bedInnards.push(
-                    <div key={`row-${j}`} className="row">
-                        {row}
-                    </div>
-                );
-            };
-        }
-        return bedInnards;
-    };
 
     async function handleToggleFavorite() {
         const reqOptions: RequestInit = {
@@ -96,19 +71,14 @@ const BedResultPreview: React.FC<bedResultPreviewInterface> = function({ bed }) 
         };
     };
 
-    return (
+    return (    
         <div className="bed-result-preview">
             <div className="bed">
-                {createBedGrid()}
-                <div className="bed-overlay">
-                    <p>{`${bed.length}' x ${bed.width}'`}</p>
-                    <p>{`${bed.seedbasket.length} plant varieties`}</p>
-                    <button type="button">Expand</button>
-                </div>
+                <Grid bedData={bed} interactive="inactive" />
             </div>
             <div className="info">
                 <div>
-                    <h3>{bed.name}</h3>
+                    <Link to={`/explore/${bed?.id}`}>{bed.name}</Link>
                     <p>{`by ${bed.username}`}</p>
                 </div>
                 <div className="favorite">

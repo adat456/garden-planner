@@ -4,6 +4,7 @@ import cloneDeep from "lodash/fp/cloneDeep";
 import { useGetBedsQuery, useUpdateGridMapMutation } from "../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 import { plantPickDataInterface, gridMapInterface, bedDataInterface } from "../app/interfaces";
+import Grid from "../Base/Grid";
 
 interface bedPlantingGridInterface {
     curPlantPick: plantPickDataInterface | null,
@@ -20,44 +21,6 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
 
     const [ lastTen, setLastTen ] = useState<gridMapInterface[]>([]);
     const [ counter, setCounter ] = useState(0);
-
-    function createBedGrid() {
-        let bedInnards = [];
-        let counter = 1;
-        if (bed) {
-            for (let j = 0; j < bed.length; j++) {
-                let row = []
-                for (let i = 0; i < bed.width; i++) {
-                    let classes = "grid-cell ";
-                    const gridData = bed?.gridmap[counter - 1];
-                    if (gridData.selected) classes += "selected ";
-                    if (gridData.horizontalwalkway || gridData.verticalwalkway || gridData.customwalkway) classes += "walkway ";
-                    if (!gridData.selected && !gridData.horizontalwalkway && !gridData.verticalwalkway && !gridData.customwalkway) classes += "away";
-
-                    let gridPlantColor = "";
-                    let gridPlantName = "";
-                    if (gridData.plantId) {
-                        classes += "planted";
-
-                        const seedbasketMatch = seedbasket.find(plant => plant.id === gridData.plantId);
-                        if (seedbasketMatch) {
-                            gridPlantColor = seedbasketMatch.gridcolor;
-                            gridPlantName = seedbasketMatch.name;
-                        };
-                    };
-                    
-                    row.push(<div key={`${j}${i}`} className={classes} id={`cell-${counter}`} data-plant-id={gridData.plantId} data-plant-name={gridPlantName} style={{backgroundColor: gridPlantColor}} onClick={togglePlant} />);       
-                    counter++;
-                };
-                bedInnards.push(
-                    <div key={`row-${j}`} className="row">
-                        {row}
-                    </div>
-                );
-            };
-        };
-        return bedInnards;
-    };
 
     function updateLastTen() {
         if (lastTen.length < 10) {
@@ -189,7 +152,7 @@ const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantP
     return (
         <div className="bed-planting-grid">
             <div className="bed planting-bed">
-                {createBedGrid()}
+                <Grid bedData={bed} interactive="active" handleCellClick={togglePlant} />
             </div>
             <div className="button-cluster">
                 <button type="button" onClick={handleUndo}>Undo</button>

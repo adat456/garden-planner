@@ -4,7 +4,7 @@ import { useGetBedsQuery, useGetUserQuery, useGetNotificationsQuery, useAddNotif
 import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
 
-import Grid from "./Grid";
+import Grid from "../Base/Grid";
 import EventsGroup from "./Events/EventsGroup";
 import MemberGroup from "./Members/MemberGroup";
 import BulletinLatest from "./Bulletin/BulletinLatest";
@@ -117,7 +117,7 @@ const BedSharingGroup: React.FC = function() {
                 <>
                     <h1>{bed?.name}</h1>
                     <EventsGroup />
-                    <Grid bedData={bed} />
+                    <Grid bedData={bed} interactive="inactive" />
                     <MemberGroup />
                     <BulletinLatest />
                 </> : null
@@ -130,7 +130,7 @@ const BedSharingGroup: React.FC = function() {
                         <button type="button" onClick={handleRejectInvite}>Dismiss invite</button>
                     </div>
                     <h1>{bed?.name}</h1>
-                    <Grid bedData={bed} />
+                    <Grid bedData={bed} interactive="inactive" />
                 </> : null
             }
             {memberStatus === "nonmember" ?

@@ -1,30 +1,24 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { eventInterface, notificationInterface, userInterface } from "../../app/interfaces";
-import { useGetUserQuery, useGetPersonalPermissionsQuery, useGetEventsQuery, useDeleteEventMutation, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { useGetUserQuery, useAddNotificationMutation } from "../../app/apiSlice";
+import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
+import { eventInterface, userInterface } from "../../app/interfaces";
 import { prepEventDateForDisplay, convert24to12, prepHyphenatedDateForDisplay} from "../../app/helpers";
 
 interface eventOverviewInterface {
-    setEventFormVis: React.Dispatch<React.SetStateAction<boolean>>,
     setEventOverviewVis: React.Dispatch<React.SetStateAction<boolean>>,
     currentEvent?: eventInterface | null,
     setCurrentEvent: React.Dispatch<React.SetStateAction<eventInterface | null>>,
+    fetchEvents: (bedid: string) => Promise<void>,
 };
 
-const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
+const ModifiedEventOverview: React.FC<eventOverviewInterface> = function({ currentEvent, setCurrentEvent, setEventOverviewVis, fetchEvents }) {
+    const [ rsvpReceived, setRsvpReceived ] = useState(false);
     const { bedid } = useParams();
 
-    const { refetch: refetchThisBedsEvents } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
-    const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);
-    const personalPermissions = permissionsData as string[];
-    const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
-    const notifications = notificationsData as notificationInterface[];
-
-    const { mutation: deleteEvent, isLoading: deleteEventIsLoading } = useWrapRTKMutation(useDeleteEventMutation);
-    const { mutation: addNotification,  isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
-    const { mutation: updateNotification, isLoading: updateNotificationIsLoading } = useWrapRTKMutation(useUpdateNotificationMutation);
+    const { mutation: addNotification, isLoading: addNotificationIsLoading } = useWrapRTKMutation(useAddNotificationMutation);
 
     let participantStatement;
     if (currentEvent?.eventpublic === "public") {
@@ -47,40 +41,10 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
         eventOverview?.close();
         setEventOverviewVis(false);
     };
-    function handleOpenEventForm() {
-        handleCloseEventOverview();
-        setEventFormVis(true);
-    };
-
-    async function handleDeleteEvent(repeatid: string | null = null) {
-        if (currentEvent && !deleteEventIsLoading) {
-            try {
-                if (repeatid) {
-                    await deleteEvent({
-                        bedid,
-                        eventid: currentEvent.id,
-                        repeatid: currentEvent.repeatid
-                    }).unwrap();
-                };
-
-                if (!repeatid) {
-                    await deleteEvent({
-                        bedid,
-                        eventid: currentEvent.id,
-                    }).unwrap();
-                };
-            } catch(err) {
-                console.error("Unable to delete event(s): ", err.data);
-            };
-        };
-
-        handleCloseEventOverview();
-        setCurrentEvent(null);
-    };
 
     async function handleRSVP() {
         try {
-            if (!updateNotificationIsLoading && !addNotificationIsLoading) {
+            if (!addNotificationIsLoading) {
                 // first send an rsvp'd notification to the event creator
                 await addNotification({
                     senderid: user.id,
@@ -93,21 +57,11 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
                     eventid: currentEvent?.id,
                     eventname: currentEvent?.eventname,
                 }).unwrap();
-    
-                // then, if the user did receive an rsvpinvite notification for this event, mark that as read and responded
-                let matchingNotif: notificationInterface | null = null;
-                notifications?.forEach(notif => {
-                    if (notif.eventid === currentEvent?.id && notif.type === "rsvpinvite") matchingNotif = notif;
-                });
-                if (matchingNotif) {
-                    await updateNotification({ 
-                        notifid: matchingNotif?.id, 
-                        read: true, 
-                        responded: "confirmation" 
-                    }).unwrap();
-                };
 
-                refetchThisBedsEvents();
+                fetchEvents(bedid);
+
+                // this is not derived from the state change, yet. above function call will fetch the updated rsvpsreceived to be correctly displayed when the dialog is NEXT opened, but not right now. so for now, as long as the added notification/event update and refetch were successful, user will see confirmation that their RSVP went through
+                setRsvpReceived(true);
             };
         } catch(err) {
             console.error("Unable to RSVP to event: ", err.data);
@@ -131,7 +85,7 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
             {currentEvent?.rsvpneeded ?
                 <>
                     <p>{`Please RSVP by ${prepHyphenatedDateForDisplay(currentEvent?.rsvpdate)}.`}</p> 
-                    {currentEvent?.rsvpsreceived.includes(user?.id) ? 
+                    {currentEvent?.rsvpsreceived.includes(user?.id) || rsvpReceived ? 
                         <>
                             <p>You've RSVP'd.</p>
                             <button type="button" disabled>RSVP</button>
@@ -145,18 +99,9 @@ const EventOverview: React.FC<eventOverviewInterface> = function({ setEventFormV
 
             <div>
                 <button type="button" onClick={() => {handleCloseEventOverview(); setCurrentEvent(null)}}>Close</button>
-
-                {(personalPermissions?.includes("fullpermissions") || (personalPermissions?.includes("eventspermission")) && currentEvent?.creatorid === user?.id) ?
-                    <>
-                        <button type="button" onClick={handleOpenEventForm}>Edit</button>
-                        <button type="button" onClick={() => handleDeleteEvent(null)}>Delete</button>
-                        {currentEvent?.repeating ? <button type="button" onClick={() => handleDeleteEvent(currentEvent?.repeatid)}>Delete this event and all repeating events</button> : null}
-                    </>
-                    : null
-                }
             </div>
         </dialog>
     )
 };
 
-export default EventOverview;
+export default ModifiedEventOverview;

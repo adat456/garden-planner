@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import BedResultPreview from "./BedResultPreview";
-import { bedDataInterface, userInterface } from "../app/interfaces";
+import { bedDataInterface, userInterface } from "../../app/interfaces";
 
 interface BedResultsContainerInterface {
     bedResults: bedDataInterface[],
