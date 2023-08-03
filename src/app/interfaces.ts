@@ -59,6 +59,8 @@ export interface bedDataInterface {
     seedbasket: plantPickDataInterface[],
     name: string,
     public: boolean,
+    address: string,
+    coordinates: { latitude: string, longitude: string} | null,
     created: string,
     username: string,
     // an array of user IDs because user should be able to see if they liked it, and can only like once

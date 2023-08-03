@@ -2,11 +2,11 @@ import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { prepEventDateForDisplay, prepHyphenatedDateForDisplay } from "../../../app/helpers";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
-import { userInterface, eventInterface, bedDataInterface, membersInterface } from "../../../app/interfaces";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetAutocompletedAddress } from "../../../app/customHooks";
+import { userInterface, eventInterface, bedDataInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
 import EventTags from "./EventTags";
@@ -27,7 +27,8 @@ interface eventFormInterface {
 const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, currentEvent, setCurrentEvent, setEventOverviewVis }) {
     const [ eventName, setEventName ] = useState(currentEvent?.eventname || "");
     const [ eventDesc, setEventDesc ] = useState(currentEvent?.eventdesc || "");
-    const [ eventLocation, setEventLocation ] = useState(currentEvent?.eventlocation || "");
+    // const [ eventLocation, setEventLocation ] = useState(currentEvent?.eventlocation || "");
+    const { address: eventLocation, setAddress: setEventLocation, pullAutocompletedAddresses, generateAutocompletedAddresses } = useGetAutocompletedAddress(currentEvent?.eventlocation || "");
     const [ eventPublic, setEventPublic ] = useState<string>(currentEvent?.eventpublic || "allmembers");
     const [ rsvpNeeded, setRsvpNeeded ] = useState(currentEvent?.rsvpneeded || false);
     const [ rsvpDate, setRsvpDate ] = useState<Date | null>(currentEvent?.rsvpdate || "");
@@ -281,7 +282,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
             <button type="button" onClick={handleBackToOverview}>Back to overview</button>
             <form method="POST" ref={formRef} onSubmit={!currentEvent ? handleCreateEvent : undefined} noValidate>
                 <h3>Create new event</h3>
-                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} eventPublic={eventPublic} setEventPublic={setEventPublic} rsvpNeeded={rsvpNeeded} setRsvpNeeded={setRsvpNeeded} rsvpDate={rsvpDate} setRsvpDate={setRsvpDate}participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} eventDate={eventDate} submitTrigger={submitTrigger} errMsgs={errMsgs} />
+                <EventDetailsFieldset eventName={eventName} setEventName={setEventName} eventDesc={eventDesc} setEventDesc={setEventDesc} eventLocation={eventLocation} setEventLocation={setEventLocation} pullAutocompletedAddresses={pullAutocompletedAddresses} generateAutocompletedAddresses={generateAutocompletedAddresses} eventPublic={eventPublic} setEventPublic={setEventPublic} rsvpNeeded={rsvpNeeded} setRsvpNeeded={setRsvpNeeded} rsvpDate={rsvpDate} setRsvpDate={setRsvpDate}participantSearch={participantSearch} setParticipantSearch={setParticipantSearch} participantSearchResults={participantSearchResults} setParticipantSearchResults={setParticipantSearchResults} eventParticipants={eventParticipants} setEventParticipants={setEventParticipants} eventDate={eventDate} submitTrigger={submitTrigger} errMsgs={errMsgs} />
                 <EventTimingFieldset eventDate={eventDate} setEventDate={setEventDate} eventStartTime={eventStartTime} setEventStartTime={setEventStartTime} eventEndTime={eventEndTime} setEventEndTime={setEventEndTime} repeating={repeating} setRepeating={setRepeating} repeatTill={repeatTill} setRepeatTill={setRepeatTill} repeatEvery={repeatEvery} setRepeatEvery={setRepeatEvery} submitTrigger={submitTrigger} errMsgs={errMsgs} /> 
                 <EventTags tags={tags} setTags={setTags} currentEvent={currentEvent} submitTrigger={submitTrigger} errMsgs={errMsgs} />
                 <button type="button" onClick={() => {handleCloseEventForm(); setCurrentEvent(null)}}>Close</button>

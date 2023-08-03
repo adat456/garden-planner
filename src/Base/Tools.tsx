@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useGetCoordinates } from "../app/customHooks";
 
 interface frostDates {
     ten: string,
@@ -17,10 +18,6 @@ interface weatherData {
 };
 
 const Tools: React.FC = function() {
-    const [ coords, setCoords ] = useState<{
-        latitude: number,
-        longitude: number
-    } | null>(null);
     // frost is 36 degrees (ignoring freeze is 32, and hard freeze is 28)
     const [ threshold, setThreshold ] = useState("");
     const [ springDates, setSpringDates ] = useState<frostDates | null>(null);
@@ -29,23 +26,13 @@ const Tools: React.FC = function() {
     const [ weatherLastUpdated, setWeatherLastUpdated ] = useState("");
     const [ tempConversion, setTempConversion ] = useState("F");
 
-    function pullCoords() {
-        function handleSuccess(position) {
-            setCoords({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            });
-        };
-        const handleError = () => console.log("Unable to pull coordinates.");
-
-        navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
-    };
+    const { coordinates, pullCoordinates } = useGetCoordinates();
 
     async function findClosestStation() {
         let closestStation: string = "";
-        if (coords) {
+        if (coordinates) {
             try {
-                const req = await fetch(`https://api.farmsense.net/v1/frostdates/stations/?lat=${coords.latitude}&lon=${coords.longitude}`);
+                const req = await fetch(`https://api.farmsense.net/v1/frostdates/stations/?lat=${coordinates.latitude}&lon=${coordinates.longitude}`);
                 const res = await req.json();
                 if (req.ok && !res.Error) {
                     closestStation = res[0].id;
@@ -95,9 +82,9 @@ const Tools: React.FC = function() {
     };
 
     async function pullCurrentWeather() {
-        if (coords) {
+        if (coordinates) {
             try {
-                const req = await fetch(`http://localhost:3000/pull-weather/${coords.latitude}/${coords.longitude}`, { credentials: "include" });
+                const req = await fetch(`http://localhost:3000/pull-weather/${coordinates.latitude}/${coordinates.longitude}`, { credentials: "include" });
                 const res = await req.json();
                 setWeather(res);
             } catch(err) {
@@ -116,9 +103,9 @@ const Tools: React.FC = function() {
     };
 
     useEffect(() => {
-        if (coords) return;
-        pullCoords();
-    }, [])
+        if (coordinates) return;
+        pullCoordinates();
+    }, []);
 
     // const TEN_MIN_MS = 600000;
     // useEffect(() => {
@@ -143,8 +130,8 @@ const Tools: React.FC = function() {
         <section>
             <h2>Garden Tools</h2>
 
-            <p>{`Latitude: ${coords?.latitude}`}</p>
-            <p>{`Longitude: ${coords?.longitude}`}</p>
+            <p>{`Latitude: ${coordinates?.latitude}`}</p>
+            <p>{`Longitude: ${coordinates?.longitude}`}</p>
 
             
             <section>

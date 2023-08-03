@@ -46,7 +46,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/update-seed-basket/${data.bedid}`,
                 method: "PATCH",
-                body: data.seedbasket
+                body: {seedbasket: data.seedbasket}
             }),
             invalidatesTags: [ "beds" ]
         }),

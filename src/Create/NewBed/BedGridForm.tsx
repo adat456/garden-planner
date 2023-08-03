@@ -11,12 +11,20 @@ interface BedGridFormInterface {
     name: string,
     setName: React.Dispatch<React.SetStateAction<string>>,
     publicBoard: boolean,
-    setPublicBoard: React.Dispatch<React.SetStateAction<boolean>>
+    setPublicBoard: React.Dispatch<React.SetStateAction<boolean>>,
+    address: string,
+    setAddress: React.Dispatch<React.SetStateAction<string>>,
+    pullAutocompletedAddresses: (value: string) => Promise<void>,
+    generateAutocompletedAddresses: () => JSX.Element[] | undefined,
+    coordinates: {latitude: number, longitude: number} | null,
+    pullCoordinates: () => Promise<void>,
+    resetCoordinates: () => void,
 };
 
-const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength, width, setWidth, whole, setWhole, name, setName, publicBoard, setPublicBoard }) {
+const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength, width, setWidth, whole, setWhole, name, setName, publicBoard, setPublicBoard, address, setAddress, pullAutocompletedAddresses, generateAutocompletedAddresses, coordinates, pullCoordinates, resetCoordinates }) {
     const [maintainSquare, setMaintainSquare] = useState(false);
 
+    // HANDLING GRID DIMENSIONS
     function handleDimChange(e: React.ChangeEvent) {
         const input = e.target as HTMLInputElement;
         const id = input.getAttribute("id");
@@ -60,6 +68,26 @@ const BedGridForm: React.FC<BedGridFormInterface> = function({ length, setLength
                     <input type="checkbox" name="public" id="public" checked={publicBoard} onChange={() => setPublicBoard(!publicBoard)} />
                     <label htmlFor="public">Make board public (allow other users to view, favorite, and make copies of this board)</label>
                 </div>
+                {publicBoard ?
+                    <div>
+                        <p>Adding a location allows others users in your area to discover your garden bed more quickly.</p>
+                        <label htmlFor="location">Specify an address</label>
+                        <input type="text" id="location" value={address} onChange={(e) => {setAddress(e.target.value); pullAutocompletedAddresses(e.target.value);}} />
+                        <ul>
+                            {generateAutocompletedAddresses()}
+                        </ul>
+                        <button type="button" onClick={() => setAddress("")}>Clear</button>
+
+                        <button type="button" onClick={pullCoordinates}>Or use your current coordinates</button>
+                        {coordinates ?
+                            <div>
+                                <p>{`Latitude: ${coordinates?.latitude}`}</p>
+                                <p>{`Longitude: ${coordinates?.longitude}`}</p>
+                            </div> : null
+                        }
+                        <button type="button" onClick={resetCoordinates}>Clear</button>
+                    </div> : null
+                }
             </div>
             <section className="dimensions-section">
                 <h2>DIMENSIONS</h2>

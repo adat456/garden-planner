@@ -2,19 +2,13 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { bedDataInterface, gridMapInterface } from "../../app/interfaces";
 import { useGetBedsQuery, useCreateBedMutation, useUpdateBedMutation, useDeleteBedMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetCoordinates, useGetAutocompletedAddress } from "../../app/customHooks";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 import * as React from "react";
 
 const BedCreationPage: React.FC = function() {
     const { bedid } = useParams();
-    // const bedObject = useGetBedsQuery(undefined, {
-    //     selectFromResult: ({ data }) => ({
-    //         bed: data?.find(bed => bed.id === Number(bedid))
-    //     }),
-    // });
-    // const bed = bedObject.bed as bedDataInterface;
     const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
     const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
 
@@ -27,6 +21,9 @@ const BedCreationPage: React.FC = function() {
     const [sunlight, setSunlight] = useState(bed?.sunlight || "");
     const [soil, setSoil] = useState<string[]>(bed?.soil || []);
     const [publicBoard, setPublicBoard] = useState(bed?.public || false);
+
+    const { coordinates, pullCoordinates, resetCoordinates } = useGetCoordinates(bed?.coordinates || null);
+    const { address, setAddress, pullAutocompletedAddresses, generateAutocompletedAddresses } = useGetAutocompletedAddress(bed?.address || "");
 
     const [ nameErrMsg, setNameErrMsg ] = useState("");
 
@@ -62,7 +59,7 @@ const BedCreationPage: React.FC = function() {
             try {
                 await createBed({
                     name, whole, length, width, soil, sunlight, gridmap,
-                    public: publicBoard,
+                    public: publicBoard, address, coordinates,
                     created: new Date().toISOString().slice(0, 10), 
                     hardiness: hardiness[1]
                 }).unwrap();
@@ -86,7 +83,7 @@ const BedCreationPage: React.FC = function() {
                     bedid,
                     bed: {
                         name, whole, length, width, soil, sunlight, gridmap,
-                        public: publicBoard,
+                        public: publicBoard, address, coordinates,
                         hardiness: hardiness[1]
                     }
                 }).unwrap();
@@ -112,7 +109,7 @@ const BedCreationPage: React.FC = function() {
     
     return (
         <form method="post" className="bed-creation-form" onSubmit={bed ? handleEdit : handleSubmit}>
-            <BedGridForm name={name} setName={setName} length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} publicBoard={publicBoard} setPublicBoard={setPublicBoard} />
+            <BedGridForm name={name} setName={setName} length={length} setLength={setLength} width={width} setWidth={setWidth} whole={whole} setWhole={setWhole} publicBoard={publicBoard} setPublicBoard={setPublicBoard} address={address} setAddress={setAddress} pullAutocompletedAddresses={pullAutocompletedAddresses} generateAutocompletedAddresses={generateAutocompletedAddresses} coordinates={coordinates} pullCoordinates={pullCoordinates} resetCoordinates={resetCoordinates} />
             <BedSpecsForm hardiness={hardiness} setHardiness={setHardiness} sunlight={sunlight} setSunlight={setSunlight} soil={soil} setSoil={setSoil}  />
             {bed ?
                 <div>

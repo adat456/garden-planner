@@ -73,10 +73,6 @@ export const validateRequiredInputLength: (input: HTMLInputElement | null, lengt
 
 
 
-
-
-
-
 export function handleVisToggle(e) {
     const fieldId = e.currentTarget.getAttribute("data-id");
     const field = document.querySelector(`#${fieldId}`);

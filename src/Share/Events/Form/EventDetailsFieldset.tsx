@@ -13,6 +13,8 @@ interface eventDetailsFieldsetInterface {
     setEventDesc: React.Dispatch<React.SetStateAction<string>>,
     eventLocation: string,
     setEventLocation: React.Dispatch<React.SetStateAction<string>>,
+    pullAutocompletedAddresses: (value: string) => Promise<void>,
+    generateAutocompletedAddresses: () => JSX.Element[] | undefined,
     eventPublic: string,
     setEventPublic: React.Dispatch<React.SetStateAction<string>>,
     rsvpNeeded: boolean,
@@ -30,7 +32,7 @@ interface eventDetailsFieldsetInterface {
     errMsgs: {field: string, msg: string}[],
 };
 
-const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({ eventName, setEventName, eventDesc, setEventDesc, eventLocation, setEventLocation, eventPublic, setEventPublic, rsvpNeeded, setRsvpNeeded, rsvpDate, setRsvpDate, participantSearch, setParticipantSearch, participantSearchResults, setParticipantSearchResults, eventParticipants, setEventParticipants, eventDate, submitTrigger, errMsgs}) {
+const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({ eventName, setEventName, eventDesc, setEventDesc, eventLocation, setEventLocation, pullAutocompletedAddresses, generateAutocompletedAddresses, eventPublic, setEventPublic, rsvpNeeded, setRsvpNeeded, rsvpDate, setRsvpDate, participantSearch, setParticipantSearch, participantSearchResults, setParticipantSearchResults, eventParticipants, setEventParticipants, eventDate, submitTrigger, errMsgs}) {
     const [ eventNameErrMsg, setEventNameErrMsg ] = useState("");
     const [ eventDescErrMsg, setEventDescErrMsg ] = useState("");
     const [ eventLocationErrMsg, setEventLocationErrMsg ] = useState("");
@@ -209,7 +211,11 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
                     </div>
                     : null
                 }
-                <input type="text" id="eventLocation" maxLength={250} ref={eventLocationRef} value={eventLocation} onChange={(e) => {setEventLocation(e.target.value); validateRequiredInputLength(eventLocationRef?.current, 250, setEventLocationErrMsg)}} required />
+                <input type="text" id="eventLocation" maxLength={250} ref={eventLocationRef} value={eventLocation} onChange={(e) => {setEventLocation(e.target.value); pullAutocompletedAddresses(e.target.value); validateRequiredInputLength(eventLocationRef?.current, 250, setEventLocationErrMsg);}} required />
+                <ul>
+                    {generateAutocompletedAddresses()}
+                </ul>
+                <button type="button" onClick={() => setEventLocation("")}>Clear</button>
             </div>
             <div>
                 <p>Event is open to*:</p>
