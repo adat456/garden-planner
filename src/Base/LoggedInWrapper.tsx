@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery } from "../app/apiSlice";
-import { useWrapRTKQuery, useDynamicEventsQuery } from "../app/customHooks";
+import { useWrapRTKQuery, useDynamicEventsQuery, useDynamicPermissionsQuery } from "../app/customHooks";
 import { userInterface } from "../app/interfaces";
 import Notifications from "./Notifications";
 import Tools from "./Tools";
@@ -14,6 +14,7 @@ const LoggedInWrapper: React.FC = function() {
     const { refetch: refetchBeds } = useWrapRTKQuery(useGetBedsQuery);
 
     const setBedIdForEvents = useDynamicEventsQuery();
+    const setBedIdForPermissions = useDynamicPermissionsQuery();
 
     const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
     const socket = io(URL);
@@ -22,11 +23,16 @@ const LoggedInWrapper: React.FC = function() {
 
         // may not need arg
         async function updateAll(type?: string, id?: string) {
-            refetchNotifications();
-            refetchBeds();
+            // refetchNotifications();
+            // refetchBeds();
             if (type === "rsvpinvite" || type === "rsvpconfirmation") {
-                setBedIdForEvents(Number(id));
-                console.log("events refetch triggered");
+                refetchNotifications();
+                setBedIdForEvents(id?.toString());
+            } else if (type === "memberinvite" || type === "memberconfirmation" || type === "memberrejection") {
+                refetchNotifications();
+                refetchBeds();
+            } else if (type === "permissionsupdate") {
+                setBedIdForPermissions(id?.toString());
             };
         };
         socket.on(`notifications-${user?.id}`, (type, id) => updateAll(type, id));

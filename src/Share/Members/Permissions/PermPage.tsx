@@ -11,7 +11,7 @@ const permissionsArr = [
     {id: 3, label: "Can add add, edit, and delete roles", permission: "rolespermission"},
     {id: 4, label: "Can add, edit, and delete one's own events", permission: "eventspermission"},
     {id: 5, label: "Can add and delete event tags", permission: "tagspermission"},
-    {id: 6, label: "Can add users, edit, and delete one's own posts", permission: "postspermission"},
+    {id: 6, label: "Can add, edit, and delete one's own posts", permission: "postspermission"},
     {id: 7, label: "Can interact (liking, disliking, and commenting) with posts", permission: "postinteractionspermission"},
 ];
 

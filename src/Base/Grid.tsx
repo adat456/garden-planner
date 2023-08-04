@@ -27,7 +27,7 @@ const Grid: React.FC<bedPlantingGridInterface> = function({ bedData, interactive
                     if (gridData.plantId) {
                         classes += "planted";
 
-                        const seedbasketMatch = bedData.seedbasket.find(plant => plant.id === gridData.plantId);
+                        const seedbasketMatch = bedData?.seedbasket?.find(plant => plant.id === gridData.plantId);
                         if (seedbasketMatch) {
                             gridPlantColor = seedbasketMatch.gridcolor;
                             gridPlantName = seedbasketMatch.name;

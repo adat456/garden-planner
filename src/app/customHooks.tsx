@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetEventsQuery } from "./apiSlice";
+import { useGetEventsQuery, useGetPersonalPermissionsQuery } from "./apiSlice";
 import { isJWTInvalid } from "./helpers";
 
+/// RTK QUERY HOOKS //////////////////////////////////////////
 // returns a function that takes in an error object and redirects to /sign-in if error message indicates JWT is invalid
 export function useRedirectOnAuthError() {
     const navigate = useNavigate();
 
     function redirectOnAuthError(error) {
-        console.log(error);
+        if (error) console.log(error);
         if (error?.data) {
             if (typeof error.data === "string" && isJWTInvalid(error.data)) navigate("/sign-in");
         };
@@ -42,17 +43,44 @@ export function useWrapRTKMutation(useMutation, arg = undefined) {
 };
 
 export function useDynamicEventsQuery() {
-    const [ bedIdForEvents, setBedIdForEvents ] = useState<number | undefined>(undefined);
-    
-    const skip = bedIdForEvents ? false : true;
-    const { data } = useGetEventsQuery(bedIdForEvents, { 
-        skip
+    // although bedid is stored in the database as a number, it is fetched from the URL params as a string and is typically a string when entered as a parameter for useGetEventsQuery
+    // to ensure that the same cache key is being used, then, bedIdForEvents should always be a string (can observe the bedid being converted into a string whenever this custom hook is used)
+    const [ bedIdForEvents, setBedIdForEvents ] = useState<string | undefined>(undefined);
+
+    const { data, refetch } = useGetEventsQuery(bedIdForEvents, {
+        skip: !bedIdForEvents
     });
-    console.log(data, bedIdForEvents, "events data refetched");
+
+    useEffect(() => {
+        if (bedIdForEvents) {
+            refetch();
+            console.log(data, bedIdForEvents, "events data refetched");
+            setBedIdForEvents(undefined);
+        };
+    }, [bedIdForEvents]);
 
     return setBedIdForEvents;
 }; 
 
+export function useDynamicPermissionsQuery() {
+    const [ bedIdForPermissions, setBedIdForPermissions ] = useState<string | undefined>(undefined);
+
+    const { data, refetch } = useGetPersonalPermissionsQuery(bedIdForPermissions, {
+        skip: !bedIdForPermissions
+    });
+
+    useEffect(() => {
+        if (bedIdForPermissions) {
+            refetch();
+            console.log(data, bedIdForPermissions, "permissions refetched");
+            setBedIdForPermissions(undefined);
+        };
+    }, [bedIdForPermissions]);
+
+    return setBedIdForPermissions;
+};
+
+/// MISC HOOKS ////////////////////////////////////////////////
 export function useGetCoordinates(initialCoordinates?: {latitude: number, longitude: number}) {
     const [ coordinates, setCoordinates ] = useState<{latitude: number, longitude: number} | null>(initialCoordinates || null);
 

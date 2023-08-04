@@ -118,7 +118,7 @@ export interface notificationInterface {
     read: boolean,
     // "" empty string for has not responded/pending (false), "confirmation" or "rejection" for responded (true)
     responded: "" | "confirmation" | "rejection",
-    type: "memberinvite" | "memberconfirmation" | "memberrejection" | "rsvpinvite" | "rsvpconfirmation" | "postupdate",
+    type: "memberinvite" | "memberconfirmation" | "memberrejection" | "rsvpinvite" | "rsvpconfirmation" | "permissionsupdate" | "postupdate",
     bedid?: number,
     bedname?: string,
     eventid?: string,

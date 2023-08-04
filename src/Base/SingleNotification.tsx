@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../app/apiSlice";
 import { notificationInterface, userInterface } from "../app/interfaces";
 import { Link } from "react-router-dom";
@@ -114,7 +113,7 @@ const SingleNotification: React.FC<{notification: notificationInterface}> = func
                 }).unwrap();
                 await handleReadnRespondStatus(notification.id, true, "confirmation");
 
-                setBedIdForEvents(notification?.bedid);
+                setBedIdForEvents(notification?.bedid?.toString());
             } catch(err) {
                 if (err.message) console.error(err.message);
             };
