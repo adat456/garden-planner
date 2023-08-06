@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import AddEditRole from "./AddEditRole";
 import ExampleRoles from "./ExampleRoles";
 import AddedRole from "./AddedRole";
-import { rolesInterface } from "../../../app/interfaces";
-import { useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../../app/apiSlice";
-import { useWrapRTKQuery } from "../../../app/customHooks";
+import { rolesInterface, bedDataInterface } from "../../../app/interfaces";
+import { useGetPersonalPermissionsQuery } from "../../../app/apiSlice";
+import { useWrapRTKQuery, useGetBedData } from "../../../app/customHooks";
 
 interface RoleGroupInterface {
     bedid: string | undefined,
@@ -15,8 +15,7 @@ const RoleGroup: React.FC<RoleGroupInterface> = function({ bedid }) {
     const [ exampleRolesVis, setExampleRolesVis ] = useState(false);
     const [ focusRole, setFocusRole ] = useState<rolesInterface | null>(null);
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const existingRoles = bed?.roles;
 
     const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);

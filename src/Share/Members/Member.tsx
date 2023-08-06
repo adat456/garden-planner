@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { bedDataInterface, membersInterface } from "../../app/interfaces";
-import { useUpdateMembersMutation, useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { useUpdateMembersMutation, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetBedData } from "../../app/customHooks";
 
 interface memberInterface {
     member: membersInterface
@@ -14,8 +14,7 @@ const Member: React.FC<memberInterface> = function({ member }) {
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const existingMembers = bed?.members as membersInterface[];
 
     const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Link, useParams} from "react-router-dom";
 import { useGetPostsQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery } from "../../app/customHooks";

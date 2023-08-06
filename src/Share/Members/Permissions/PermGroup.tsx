@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useGetUserQuery, useGetPermissionsLogQuery, useUpdatePermissionsMutation } from "../../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
-import { bedDataInterface, userInterface, membersInterface, rolesInterface, permissionsInterface } from "../../../app/interfaces";
+import { useGetUserQuery, useGetPermissionsLogQuery, useUpdatePermissionsMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../../../app/customHooks";
+import { bedDataInterface, userInterface, permissionsInterface } from "../../../app/interfaces";
 
 
 interface permGroupInterface {
@@ -19,10 +19,9 @@ const PermGroup: React.FC<permGroupInterface> = function({ allDetailsVis, label,
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
-    const members = bed?.members as membersInterface[];
-    const roles = bed?.roles as rolesInterface[];
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
+    const members = bed?.members;
+    const roles = bed?.roles;
 
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;

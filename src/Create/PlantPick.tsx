@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { SliderPicker } from "react-color";
-import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
+import { useUpdateSeedBasketMutation } from "../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../app/customHooks";
 import { plantPickDataInterface, colorObjInterface } from "../app/interfaces";
 
 interface plantPickInterface {
@@ -16,8 +16,7 @@ const PlantPick: React.FC<plantPickInterface> = function({ plant, setCurPlantPic
 
     const { bedid } = useParams();
     
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);

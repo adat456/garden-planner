@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, useLocation, Outlet } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { bedDataInterface } from "../../app/interfaces";
 import { isJWTInvalid } from "../../app/helpers";
 import BedResultsContainer from "./BedResultsContainer";

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import cloneDeep from "lodash/fp/cloneDeep";
-import { useGetBedsQuery, useUpdateGridMapMutation } from "../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
+import { useUpdateGridMapMutation } from "../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../app/customHooks";
 import { plantPickDataInterface, gridMapInterface, bedDataInterface } from "../app/interfaces";
 import Grid from "../Base/Grid";
 
@@ -13,8 +13,7 @@ interface bedPlantingGridInterface {
 const BedPlantingGrid: React.FC<bedPlantingGridInterface> = function({ curPlantPick }) {
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateGridMap, isLoading } = useWrapRTKMutation(useUpdateGridMapMutation);

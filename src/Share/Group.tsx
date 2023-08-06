@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../app/customHooks";
+import { useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetBedData } from "../app/customHooks";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
 
 import Grid from "../Base/Grid";
@@ -15,8 +15,7 @@ const BedSharingGroup: React.FC = function() {
     const [ memberStatus, setMemberStatus ] = useState("");
 
     const { bedid } = useParams();
-    const { data: bedObject, refetch: refetchBedData } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
     const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);

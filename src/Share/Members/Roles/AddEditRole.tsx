@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { nanoid } from "@reduxjs/toolkit";
-import { useGetBedsQuery, useUpdateRolesMutation } from "../../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
+import { useUpdateRolesMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../../../app/customHooks";
 import { bedDataInterface, rolesInterface } from "../../../app/interfaces";
 import { validateRequiredInputLength } from "../../../app/helpers";
 import Duty from "./DutyInput";
@@ -34,8 +34,7 @@ const AddEditRole: React.FC<AddRoleInterface> = function({ bedid, focusRole, set
     const titleInputRef = useRef<HTMLInputElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const existingRoles = bed?.roles;
 
     const { mutation: updateRoles, isLoading } = useWrapRTKMutation(useUpdateRolesMutation);

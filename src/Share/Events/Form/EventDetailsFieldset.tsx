@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format, formatISO } from "date-fns";
-import { useGetBedsQuery } from "../../../app/apiSlice";
-import { useWrapRTKQuery } from "../../../app/customHooks";
+import { useGetBedData } from "../../../app/customHooks";
 import { bedDataInterface, eventParticipantInterface } from "../../../app/interfaces";
 import { validateRequiredInputLength } from "../../../app/helpers";
 
@@ -50,8 +49,7 @@ const EventDetailsFieldset: React.FC<eventDetailsFieldsetInterface> = function({
     const previousTriggerValue = useRef(submitTrigger);
 
     const { bedid } = useParams();
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
 
     function handleEventPublic(value: string) {
         if (value === "public" || value === "allmembers") {

@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import { useGetUserQuery, useGetNotificationsQuery, useGetBedsQuery, useGetEventsQuery } from "../app/apiSlice";
 import { useWrapRTKQuery, useDynamicEventsQuery, useDynamicPermissionsQuery } from "../app/customHooks";
 import { userInterface } from "../app/interfaces";
-import Notifications from "./Notifications";
+import Notifications from "./Notifications/Notifications";
 import Tools from "./Tools";
 
 const LoggedInWrapper: React.FC = function() {
@@ -19,12 +19,7 @@ const LoggedInWrapper: React.FC = function() {
     const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
     const socket = io(URL);
     useEffect(() => {
-        socket.on("hello", (arg) => console.log(arg));
-
-        // may not need arg
         async function updateAll(type?: string, id?: string) {
-            // refetchNotifications();
-            // refetchBeds();
             if (type === "rsvpinvite" || type === "rsvpconfirmation") {
                 refetchNotifications();
                 setBedIdForEvents(id?.toString());

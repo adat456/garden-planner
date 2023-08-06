@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useUpdateSeedBasketMutation } from "../../app/apiSlice";
-import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
+import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../../app/customHooks";
 import { bedDataInterface, plantDataInterface, plantPickDataInterface } from "../../app/interfaces";
 import randomColor from "random-color";
 
@@ -14,8 +14,7 @@ const PlantSearchResult: React.FC<plantSearchResultsInterface> = function({ resu
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);

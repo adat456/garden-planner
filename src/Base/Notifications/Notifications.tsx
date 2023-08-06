@@ -1,10 +1,12 @@
-import { useEffect } from "react";
-import {  useGetNotificationsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../app/apiSlice";
-import { notificationInterface } from "../app/interfaces";
-import { useWrapRTKQuery, useWrapRTKMutation } from "../app/customHooks";
+import { useState } from "react";
+import {  useGetNotificationsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation } from "../../app/apiSlice";
+import { notificationInterface } from "../../app/interfaces";
+import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
 import SingleNotification from "./SingleNotification";
 
 const Notifications: React.FC = function() {
+    const [ sort, setSort ] = useState("Most recent");
+
     const { data } = useWrapRTKQuery(useGetNotificationsQuery);
     const notifications = data as notificationInterface[];
 
@@ -32,12 +34,28 @@ const Notifications: React.FC = function() {
         return text;
     };
 
-    function generateNotifications() {
-        let notificationsArr;
-        if (notifications) {
-            notificationsArr = notifications?.map(notification => <SingleNotification key={notification.id} notification={notification} />);
+    function sortNotifications(sort: string) {
+        if (sort === "Least recent") {
+            const sortedNotifications = notifications?.slice();
+            sortedNotifications?.sort((a, b) => {
+                return new Date(a.dispatched) - new Date(b.dispatched);
+            });
+            return sortedNotifications;
+        } else if (sort === "Most recent") {
+            const sortedNotifications = notifications?.slice();
+            sortedNotifications?.sort((a, b) => {
+                return new Date(b.dispatched) - new Date(a.dispatched);
+            });
+            return sortedNotifications;
         };
-        return notificationsArr;
+    };
+
+    function generateNotifications() {
+        if (notifications) {
+            const sortedNotifications = sortNotifications(sort);
+            const notificationsArr = sortedNotifications?.map(notification => <SingleNotification key={notification.id} notification={notification} />);
+            return notificationsArr;
+        };
     };
 
     function handleReadAll() {
@@ -70,7 +88,7 @@ const Notifications: React.FC = function() {
     return (
         <div>
             <p>{unreadNotificationsText()}</p>
-            <button type="button" onClick={handleReadAll}>Mark all as read</button>
+            <button type="button" onClick={() => {sort === "Most recent" ? setSort("Least recent") : setSort("Most recent");}}>{sort}</button>
             <button type="button" onClick={handleDeleteAll}>Delete all</button>
             <ul>
                 {generateNotifications()}

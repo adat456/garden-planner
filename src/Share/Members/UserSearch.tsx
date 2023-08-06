@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useGetUserQuery, useGetBedsQuery, useUpdateMembersMutation, useAddNotificationMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { useGetUserQuery, useUpdateMembersMutation, useAddNotificationMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetBedData } from "../../app/customHooks";
 import { bedDataInterface, userInterface, membersInterface } from "../../app/interfaces";
 
 interface initialResultInterface {
@@ -15,8 +15,7 @@ const UserSearch: React.FC<{bedid: string | undefined}> = function({ bedid }) {
     const [ searchResults, setSearchResults ] = useState<initialResultInterface[]>([]);
     const [ numExtra, setNumExtra ] = useState(0);
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const existingMembers = bed?.members as membersInterface[];
 
     const { data: userObject } = useWrapRTKQuery(useGetUserQuery);

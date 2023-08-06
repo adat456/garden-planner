@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
-import { useWrapRTKQuery } from "../../app/customHooks";
+import { useGetUserQuery, useGetEventsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery, useGetBedData } from "../../app/customHooks";
 import { eventInterface, userInterface, bedDataInterface } from "../../app/interfaces";
 import cloneDeep from "lodash/fp/cloneDeep";
 import EventPreview from "./EventPreview";
@@ -19,8 +19,7 @@ const EventsPage: React.FC = function() {
     let { bedid } = useParams();
     const location = useLocation();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
     const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);

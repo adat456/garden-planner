@@ -1,7 +1,7 @@
-import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../app/apiSlice";
-import { notificationInterface, userInterface } from "../app/interfaces";
+import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation, useAddNotificationMutation } from "../../app/apiSlice";
+import { notificationInterface, userInterface } from "../../app/interfaces";
 import { Link } from "react-router-dom";
-import { useWrapRTKMutation, useWrapRTKQuery, useDynamicEventsQuery } from "../app/customHooks";
+import { useWrapRTKMutation, useWrapRTKQuery, useDynamicEventsQuery } from "../../app/customHooks";
 
 const SingleNotification: React.FC<{notification: notificationInterface}> = function({ notification }) {
     const setBedIdForEvents = useDynamicEventsQuery();

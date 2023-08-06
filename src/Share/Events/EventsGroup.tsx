@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetUserQuery, useGetEventsQuery, useGetBedsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
-import { useWrapRTKQuery } from "../../app/customHooks";
+import { useGetUserQuery, useGetEventsQuery, useGetPersonalPermissionsQuery } from "../../app/apiSlice";
+import { useWrapRTKQuery, useGetBedData } from "../../app/customHooks";
 import { bedDataInterface, eventInterface, userInterface } from "../../app/interfaces";
 import EventOverview from "./EventOverview";
 import EventForm from "./Form/EventForm";
@@ -14,8 +14,7 @@ const EventsGroup: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const { data: userResult } = useWrapRTKQuery(useGetUserQuery);
     const user = userResult as userInterface;
     const { data: permissionsData } = useWrapRTKQuery(useGetPersonalPermissionsQuery, bedid);

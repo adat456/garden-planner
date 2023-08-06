@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../../app/apiSlice";
-import { useWrapRTKQuery, useWrapRTKMutation } from "../../app/customHooks";
+import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useGetBedData, useWrapRTKMutation } from "../../app/customHooks";
 import PlantSortFilter from "./PlantSortFilter";
 import PlantSearchResult from "./PlantSearchResult";
 import PaginationButtons from "../../Base/PaginationButtons";
@@ -27,8 +27,7 @@ const PlantSearch: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);

@@ -4,8 +4,8 @@ import cloneDeep from "lodash/fp/cloneDeep";
 import { nanoid } from "@reduxjs/toolkit";
 import { differenceInDays } from "date-fns";
 import { prepEventDateForDisplay, prepHyphenatedDateForDisplay } from "../../../app/helpers";
-import { useGetUserQuery, useGetBedsQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery, useGetAutocompletedAddress } from "../../../app/customHooks";
+import { useGetUserQuery, useGetEventsQuery, useAddEventMutation, useDeleteEventMutation, useAddNotificationMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useWrapRTKQuery, useGetAutocompletedAddress, useGetBedData } from "../../../app/customHooks";
 import { userInterface, eventInterface, bedDataInterface } from "../../../app/interfaces";
 import EventDetailsFieldset from "./EventDetailsFieldset";
 import EventTimingFieldset from "./EventTimingFieldset";
@@ -57,8 +57,7 @@ const EventForm: React.FC<eventFormInterface> = function({ setEventFormVis, curr
     const user = userResult as userInterface;
     const { data: eventsResult } = useWrapRTKQuery(useGetEventsQuery, bedid);
     const events = eventsResult as eventInterface[];
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
 
     const { mutation: addEvent, isLoading: addEventIsLoading } = useWrapRTKMutation(useAddEventMutation);
     const { mutation: deleteEvent, isLoading: deleteEventIsLoading } = useWrapRTKMutation(useDeleteEventMutation);

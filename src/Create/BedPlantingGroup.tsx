@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetBedsQuery } from "../app/apiSlice";
-import { useWrapRTKQuery } from "../app/customHooks";
+import { useGetBedData } from "../app/customHooks";
 import { plantPickDataInterface, bedDataInterface } from "../app/interfaces";
 import BedPlantingGrid from './BedPlantingGrid';
 import PlantPick from "./PlantPick";
@@ -15,8 +14,7 @@ const BedPlantingGroup: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
     const seedbasket = bed?.seedbasket as plantPickDataInterface[];
 
     function generatePlantPicks(abbreviated: boolean) {

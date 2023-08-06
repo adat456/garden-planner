@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useDeleteTagMutation } from "../../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../../app/customHooks";
+import { useDeleteTagMutation } from "../../../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../../../app/customHooks";
 import { bedDataInterface, eventInterface } from "../../../app/interfaces";
 
 interface eventTagsInterface {
@@ -15,8 +15,7 @@ const EventTags: React.FC<eventTagsInterface> = function({ tags, setTags, curren
     const [ errMessage, setErrMessage ] = useState("");
 
     const { bedid } = useParams();
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
 
     const { mutation: deleteTag, isLoading } = useWrapRTKMutation(useDeleteTagMutation);
 

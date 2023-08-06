@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { bedDataInterface, plantDataInterface } from "../../app/interfaces";
-import { useUpdateSeedBasketMutation, useGetBedsQuery } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery } from "../../app/customHooks";
+import { useUpdateSeedBasketMutation } from "../../app/apiSlice";
+import { useWrapRTKMutation, useGetBedData } from "../../app/customHooks";
 import randomColor from "random-color";
 import IntroFieldset from "./IntroFieldset";
 import RequirementsFieldset from "./RequirementsFieldset";
@@ -44,8 +44,8 @@ const CreateVeg: React.FC<CreateVegInterface> = function({ setCreateVegVis, focu
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const plantPicks = bedObject?.seedbasket;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
+    const plantPicks = bed?.seedbasket;
     
     const { mutation: updateSeedBasket, isLoading } = useWrapRTKMutation(useUpdateSeedBasketMutation);
 

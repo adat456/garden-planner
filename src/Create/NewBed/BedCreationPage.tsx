@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { bedDataInterface, gridMapInterface } from "../../app/interfaces";
-import { useGetBedsQuery, useCreateBedMutation, useUpdateBedMutation, useDeleteBedMutation } from "../../app/apiSlice";
-import { useWrapRTKMutation, useWrapRTKQuery, useGetCoordinates, useGetAutocompletedAddress } from "../../app/customHooks";
+import { useCreateBedMutation, useUpdateBedMutation, useDeleteBedMutation } from "../../app/apiSlice";
+import { useGetBedData, useWrapRTKMutation, useGetCoordinates, useGetAutocompletedAddress } from "../../app/customHooks";
 import BedGridForm from './BedGridForm';
 import BedSpecsForm from './BedSpecsForm';
 import * as React from "react";
 
 const BedCreationPage: React.FC = function() {
     const { bedid } = useParams();
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
 
     const [name, setName] = useState(bed?.name || "");
     const [length, setLength] = useState(bed?.length || 10);

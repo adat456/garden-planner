@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetBedsQuery, useGetUserQuery, useGetPersonalPermissionsQuery } from "../../../app/apiSlice";
-import { useWrapRTKQuery } from "../../../app/customHooks";
-import { bedDataInterface, membersInterface, rolesInterface, userInterface } from "../../../app/interfaces";
+import { useGetUserQuery, useGetPersonalPermissionsQuery } from "../../../app/apiSlice";
+import { useWrapRTKQuery, useGetBedData } from "../../../app/customHooks";
+import { bedDataInterface, userInterface } from "../../../app/interfaces";
 import PermGroup from "./PermGroup";
 
 const permissionsArr = [
@@ -20,10 +20,9 @@ const PermissionsPage: React.FC = function() {
 
     const { bedid } = useParams();
 
-    const { data: bedObject } = useWrapRTKQuery(useGetBedsQuery);
-    const bed = bedObject?.find(bed => bed.id === Number(bedid)) as bedDataInterface;
-    const members = bed?.members as membersInterface[];
-    const roles = bed?.roles as rolesInterface[];
+    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
+    const members = bed?.members;
+    const roles = bed?.roles;
 
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;

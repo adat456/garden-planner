@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGetBedsQuery } from "./apiSlice";
 import { useGetEventsQuery, useGetPersonalPermissionsQuery } from "./apiSlice";
 import { isJWTInvalid } from "./helpers";
 
@@ -29,6 +30,23 @@ export function useWrapRTKQuery(useQuery, arg = undefined) {
     }, [error]);
 
     return { data, refetch, isLoading, isSuccess, isError, error };
+};
+
+// pulls data for one bed only to prevent unnecessary re-rendering
+export function useGetBedData(bedid: number) {
+    const redirectOnAuthError = useRedirectOnAuthError();
+    const { bed, error } = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data, error }) => ({
+            bed: data?.find((bed) => bed.id === bedid),
+            error
+        }),
+    });
+
+    useEffect(() => {
+        redirectOnAuthError(error);
+    }, [error]);
+
+    return bed;
 };
 
 export function useWrapRTKMutation(useMutation, arg = undefined) {
