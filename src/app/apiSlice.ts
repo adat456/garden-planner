@@ -8,7 +8,7 @@ export const apiSlice = createApi({
         },
         credentials: "include",
     }),
-    tagTypes: ["user", "beds", "permissions", "notifications", "events", "posts", "comments"],
+    tagTypes: ["user", "beds", "permissions", "notifications", "tasks", "events", "posts", "comments"],
     endpoints: builder => ({
         getUser: builder.query({
             query: () => "/pull-user-data",
@@ -120,6 +120,19 @@ export const apiSlice = createApi({
                 method: "DELETE"
             }),
             invalidatesTags: [ "notifications" ]
+        }),
+        //////// TASKS //////////////////
+        getTasks: builder.query({
+            query: data => `/pull-tasks/${data}`,
+            providesTags: [ "tasks" ],
+        }),
+        addTask: builder.mutation({
+            query: data => ({
+                url: `/add-task/${data.bedid}`,
+                method: "POST",
+                body: {task: data.task},
+            }),
+            invalidatesTags: [ "tasks" ]
         }),
         /////// EVENTS ////////////////
         getEvents: builder.query({
@@ -249,6 +262,9 @@ export const {
     useAddNotificationMutation,
     useUpdateNotificationMutation,
     useDeleteNotificationMutation,
+
+    useGetTasksQuery,
+    useAddTaskMutation,
 
     useGetEventsQuery,
     useAddEventMutation,

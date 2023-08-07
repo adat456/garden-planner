@@ -159,3 +159,12 @@ export function useGetAutocompletedAddress(initialAddress?: string) {
 
     return { address, setAddress, pullAutocompletedAddresses, generateAutocompletedAddresses };
 };
+
+// export function useStateWithErrMsg(existingValue) {
+//     const [ state, setState ] = useState(existingValue || "");
+//     const [ errMsg, setErrMsg ] = useState("");
+
+//     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+//         setState(e.target.value);
+//     };
+// }

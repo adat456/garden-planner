@@ -196,6 +196,21 @@ export interface commentTreeInterface extends commentInterface {
     level: number;
 };
 
+export interface taskInterface {
+    id: string,
+    bedid: number,
+    name: string,
+    description: string,
+    duedate: string,
+    completeddates: string[],
+    startdate: string,
+    enddate: string,
+    repeatsevery: string[],
+    assignedto: number[],
+    assignedby: number,
+    datecreated: string,
+};
+
 export interface colorObjInterface {
     hex: string,
     hsl: {
