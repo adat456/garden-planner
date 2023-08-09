@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cloneDeep } from "lodash";
-import { parseISO, startOfWeek, addDays, eachDayOfInterval } from "date-fns";
+import { parseISO, startOfWeek, addDays, subDays, eachDayOfInterval, nextDay, getDay } from "date-fns";
 import { useGetUserQuery, useGetTasksQuery } from "../../app/apiSlice";
 import { useWrapRTKQuery, useGetBedData } from "../../app/customHooks";
 import { bedDataInterface, taskInterface, userInterface } from "../../app/interfaces";
@@ -11,8 +11,10 @@ interface repeatingTaskTableInterface {
 };
 
 const RepeatingTaskTable: React.FC<repeatingTaskTableInterface> = function({ filterUserTasks }) {
-    // ISO-formatted, e.g., YYYY-MM-DD
+    // ISO-formatted, e.g., YYYY-MM-DD, starts from Monday
     const [ weekDates, setWeekDates ] = useState<string[]>([]);
+
+    const weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
     const { bedid } = useParams();
 
@@ -24,22 +26,35 @@ const RepeatingTaskTable: React.FC<repeatingTaskTableInterface> = function({ fil
     const { data: taskObj } = useWrapRTKQuery(useGetTasksQuery, bedid);
     const tasks = taskObj as taskInterface[];
 
-    const weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-
-    useEffect(() => {
-        function pullWeekDates() {
-            const mondayDate = startOfWeek(new Date(), { weekStartsOn: 1 });
-            const sundayDate = addDays(cloneDeep(mondayDate), 6);
-            let datesFromMondayToSunday = eachDayOfInterval({
-                start: mondayDate,
-                end: sundayDate
-            });
-            const ISOdatesFromMondayToSunday = datesFromMondayToSunday.map(date => date.toISOString().slice(0, 10));
-            setWeekDates(ISOdatesFromMondayToSunday);
-        };
-        pullWeekDates();
+    function pullWeekDates(mondayDate: Date, sundayDate: Date) {
+        let datesFromMondayToSunday = eachDayOfInterval({
+            start: mondayDate,
+            end: sundayDate
+        });
+        const ISOdatesFromMondayToSunday = datesFromMondayToSunday.map(date => date.toISOString().slice(0, 10));
+        setWeekDates(ISOdatesFromMondayToSunday);
+    };
+    useEffect(() => { 
+        if (weekDates.length === 0) {
+            const currentMondayDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+            const currentSundayDate = addDays(cloneDeep(currentMondayDate), 6);
+        
+            pullWeekDates(currentMondayDate, currentSundayDate);
+        };        
     }, []);
+    function pullPreviousWeekDates() {
+        const previousMondayDate = subDays(parseISO(weekDates[0]), 7);
+        const previousSundayDate = subDays(parseISO(weekDates[6]), 7);
+        console.log(previousMondayDate, previousSundayDate);
+        
+        pullWeekDates(previousMondayDate, previousSundayDate);
+    };
+    function pullNextWeekDates() {
+        const nextMondayDate = addDays(parseISO(weekDates[0]), 7);
+        const nextSundayDate = addDays(parseISO(weekDates[6]), 7);
 
+        pullWeekDates(nextMondayDate, nextSundayDate);
+    };
     function generateTableHeader() {
         if (weekDates.length > 0) {
             const tableHeader = weekDates.map((date, index) => (
@@ -56,52 +71,9 @@ const RepeatingTaskTable: React.FC<repeatingTaskTableInterface> = function({ fil
         return filteredTasks;
     };
 
-    function taskRequiresCompletionOnThisDate(task: taskInterface, weekday: string, index: number) {
-        // all of these are Date objects
-        const currentDate = new Date(weekDates[index]);
-        // start and end dates are stored in ISO formatted strings, so if you just call new Date() on them to create a date object, it may actually generate the date object of the previous day! so use parseISO from date-fns instead, with parses ISO strings into date objects
-        const taskStartDate = parseISO(task.startdate);
-        const taskEndDate = parseISO(task.enddate);
-
-        {/* only generates the checkbox/requires completion IF
-            (1) the task repeats on that day
-            (2) the date is on or after the start date
-            (3) the date is before the end date
-            (4) needs to be every, every other, every first/second/third/fourth...
-        */}
-
-        let dateMatchesRepeatInterval: boolean = false;
-        switch (task.repeatsevery[0]) {
-            case "every":
-                dateMatchesRepeatInterval = true;
-                break;
-            case "every other":
-                const everyOtherWeekdayFromStartToEndDate = eachDayOfInterval({
-                    start: taskStartDate,
-                    end: taskEndDate,
-                }, { step: 14 });
-                const ISOeveryOtherWeekdayFromStartToEndDate = everyOtherWeekdayFromStartToEndDate.map(date => date.toISOString().slice(0, 10));
-                console.log(ISOeveryOtherWeekdayFromStartToEndDate);
-                if (ISOeveryOtherWeekdayFromStartToEndDate.includes(weekday[index])) {
-                    dateMatchesRepeatInterval = true;
-                };
-                break;
-            case "every first":
-                break;
-            case "every second":
-                break;
-            case "every third":
-                break;
-            case "every fourth":
-                break;
-        };
-
-        if (
-            task.repeatsevery.includes(weekday) &&
-            currentDate >= taskStartDate &&
-            currentDate < taskEndDate &&
-            dateMatchesRepeatInterval
-        ) {
+    function taskRequiresCompletionOnThisDate(task: taskInterface, index: number) {
+        // only requires completion if due date (non-repeating) matches the current date or if the due dates (repeating) include the current date
+        if (task.duedate === weekDates[index] || task.repeatingduedates.includes(weekDates[index])) {
             return true;
         } else {
             return false;
@@ -119,7 +91,7 @@ const RepeatingTaskTable: React.FC<repeatingTaskTableInterface> = function({ fil
                     <td>{task.name}</td>
                     {weekdays.map((weekday, index) => (
                         <td key={weekday}>
-                            {taskRequiresCompletionOnThisDate(task, weekday, index) ? 
+                            {taskRequiresCompletionOnThisDate(task, index) ? 
                                 <>
                                     <input type="checkbox" name="" id="" />
                                     <label htmlFor=""></label>
@@ -135,17 +107,23 @@ const RepeatingTaskTable: React.FC<repeatingTaskTableInterface> = function({ fil
     };
 
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th />
-                    {generateTableHeader()}
-                </tr>
-            </thead>
-            <tbody>
-                {generateRepeatingTasks()}
-            </tbody>
-        </table>
+        <div>
+            <div>
+                <button type="button" onClick={pullPreviousWeekDates}>Previous week</button>
+                <button type="button" onClick={pullNextWeekDates}>Next week</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th />
+                        {generateTableHeader()}
+                    </tr>
+                </thead>
+                <tbody>
+                    {generateRepeatingTasks()}
+                </tbody>
+            </table>
+        </div>
     );
 };
 
