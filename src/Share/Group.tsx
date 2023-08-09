@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useGetUserQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
+import { useGetUserQuery, useGetBedsQuery, useGetNotificationsQuery, useAddNotificationMutation, useUpdateNotificationMutation } from "../app/apiSlice";
 import { useWrapRTKMutation, useWrapRTKQuery, useGetBedData } from "../app/customHooks";
 import { bedDataInterface, notificationInterface, userInterface } from "../app/interfaces";
-
 import Grid from "../Base/Grid";
 import EventsGroup from "./Events/EventsGroup";
 import MemberGroup from "./Members/MemberGroup";
 import BulletinLatest from "./Bulletin/BulletinLatest";
+import TasksGroup from "./Tasks/TasksGroup";
 
 const BedSharingGroup: React.FC = function() {
     // "member", "pending", "nonmember" 
@@ -15,7 +15,13 @@ const BedSharingGroup: React.FC = function() {
     const [ memberStatus, setMemberStatus ] = useState("");
 
     const { bedid } = useParams();
-    const bed = useGetBedData(Number(bedid)) as bedDataInterface;
+    const { bed: bedObject, refetch: refetchBedData } = useGetBedsQuery(undefined, {
+        selectFromResult: ({ data, refetch }) => ({
+            bed: data?.find((bed) => bed.id === Number(bedid)),
+            refetch
+        }),
+    });
+    const bed = bedObject as bedDataInterface;
     const { data: userData } = useWrapRTKQuery(useGetUserQuery);
     const user = userData as userInterface;
     const { data: notificationsData } = useWrapRTKQuery(useGetNotificationsQuery);
@@ -119,6 +125,7 @@ const BedSharingGroup: React.FC = function() {
                     <Grid bedData={bed} interactive="inactive" />
                     <MemberGroup />
                     <BulletinLatest />
+                    <TasksGroup />
                 </> : null
             }
             {memberStatus === "pending" ?
@@ -137,6 +144,7 @@ const BedSharingGroup: React.FC = function() {
                     <p>You do not have permission to view this garden.</p>
                 </div> : null
             }
+            
         </div>
     );
 };

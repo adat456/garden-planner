@@ -20,6 +20,7 @@ import PermissionsPage from "./Share/Members/Permissions/PermPage";
 import BedExplorationWrapper from "./Explore/Wrapper";
 import BedExplorationPage from "./Explore/AllResults/BedExplorationPage";
 import BedResultPage from "./Explore/SingleResult/BedResultPage";
+import TasksPage from "./Share/Tasks/TasksPage";
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
               <Route path=":bedid/members/permissions" element={<PermissionsPage />} />
               <Route path=":bedid/bulletin" element={<Bulletin />} />
               <Route path=":bedid/bulletin/:postid" element={<Post />} />
+              <Route path=":bedid/tasks" element={<TasksPage />} />
             </Route>
             <Route path="explore" element={<BedExplorationWrapper />}>
               <Route index element={<BedExplorationPage />} />

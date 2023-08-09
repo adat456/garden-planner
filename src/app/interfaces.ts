@@ -105,7 +105,6 @@ export interface userInterface {
     lastname: string,
     email: string,
     username: string,
-    board_ids: number[],
 };
 
 export interface notificationInterface {
@@ -206,9 +205,11 @@ export interface taskInterface {
     startdate: string,
     enddate: string,
     repeatsevery: string[],
-    assignedto: number[],
+    assignedtomembers: number[],
+    assignedtoroles: string[],
     assignedby: number,
     datecreated: string,
+    private: boolean,
 };
 
 export interface colorObjInterface {

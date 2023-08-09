@@ -130,7 +130,7 @@ export const apiSlice = createApi({
             query: data => ({
                 url: `/add-task/${data.bedid}`,
                 method: "POST",
-                body: {task: data.task},
+                body: data.task,
             }),
             invalidatesTags: [ "tasks" ]
         }),
